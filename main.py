@@ -308,7 +308,7 @@ def login():
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('login'))
         if check_password_hash(user.password, password):
-            flash("Login Successful")
+            # flash("Login Successful")
             login_user(user)
             return redirect(url_for('user_home'))
         flash("Sorry, the password is incorrect. Please try again.")

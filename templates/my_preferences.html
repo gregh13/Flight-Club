@@ -4,28 +4,35 @@
 {% include "header.html" %}
 
 <div class="container">
-
-  <li><strong>Home Airport:</strong> {{ prefs.home_airport }}</li>
-  <li><strong>Min Nights:</strong> {{ prefs.min_nights }}</li>
-  <li><strong>Max Nights:</strong> {{ prefs.max_nights }}</li>
-  <li><strong>Currency: </strong>{{ prefs.currency }}</li>
-  <li><strong>Cabin Class:</strong> {{ prefs.cabin_class }}</li>
-  <li><strong>Mix Class?:</strong> {{ prefs.mix_class }}</li>
-  <li><strong>Exclude Airlines?:</strong> {{ prefs.exclude_airlines }}</li>
-  <li><strong>Flight Type:</strong> {{ prefs.flight_type }}</li>
-  <li><strong>Max Stops:</strong> {{ prefs.max_stops }}</li>
-  <li><strong>Max Flight Time:</strong> {{ prefs.max_flight_time }}</li>
-  <li><strong>Num Adults:</strong> {{ prefs.num_adults }}</li>
-  <li><strong>Num Children:</strong> {{ prefs.num_children }}</li>
-  <li><strong>Num Infants:</strong> {{ prefs.num_infants }}</li>
-  <li><strong>Search Start Date:</strong> {{ prefs.search_start_date }}</li>
-  {% if prefs.specific_search_start_date: %}
-  <li><strong>Specific Search Start Date:</strong> {{ prefs.specific_search_start_date }}</li>
-  {% endif %}
-  <li><strong>Search Length:</strong> {{ prefs.search_length }}</li>
-  <li><strong>Specific Search End Date:</strong> {{ prefs.specific_search_end_date }}</li>
-
-<div>
+  <div class="row">
+      <div class="col-lg-6 col-md-8 mx-auto form-container">
+        <div class="left-padded">
+          <li><strong>Home Airport:</strong> {{ prefs.home_airport }}</li>
+          <li><strong>Min Nights:</strong> {{ prefs.min_nights }}</li>
+          <li><strong>Max Nights:</strong> {{ prefs.max_nights }}</li>
+          <li><strong>Currency: </strong>{{ prefs.currency }}</li>
+          <li><strong>Cabin Class:</strong> {{ prefs.cabin_class }}</li>
+          <li><strong>Mix Class?:</strong> {{ prefs.mix_class }}</li>
+          <li><strong>Exclude Airlines?:</strong> {{ prefs.exclude_airlines }}</li>
+          <li><strong>Flight Type:</strong> {{ prefs.flight_type }}</li>
+          <li><strong>Max Stops:</strong> {{ prefs.max_stops }}</li>
+          <li><strong>Max Flight Time:</strong> {{ prefs.max_flight_time }}</li>
+          <li><strong>Num Adults:</strong> {{ prefs.num_adults }}</li>
+          <li><strong>Num Children:</strong> {{ prefs.num_children }}</li>
+          <li><strong>Num Infants:</strong> {{ prefs.num_infants }}</li>
+          <li><strong>Search Start Date:</strong> {{ prefs.search_start_date }}</li>
+          {% if prefs.specific_search_start_date: %}
+          <li><strong>Specific Search Start Date:</strong> {{ prefs.specific_search_start_date }}</li>
+          {% endif %}
+          <li><strong>Search Length:</strong> {{ prefs.search_length }}</li>
+          <li><strong>Specific Search End Date:</strong> {{ prefs.specific_search_end_date }}</li>
+        </div>
+        <br>
+        <a type="button" href="{{ url_for('update_preferences') }}" class="w-33 btn btn-md btn-custom">Update Preferences</a>
+      </div>
+    </div>
+    <br><br>
+</div>
 
 {% include "footer.html" %}
 {% endblock %}

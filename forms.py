@@ -19,7 +19,7 @@ class LoginForm(FlaskForm):
 
 class CityPriceForm(Form):
     city = StringField("City Name", validators=[DataRequired()])
-    price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired(), NumberRange(min=1)])
+    price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
 
 
 class DestinationForm(FlaskForm):
@@ -55,7 +55,7 @@ class PreferenceForm(FlaskForm):
                                 description="Note: This is also rolling date range, meaning it will move as time passes. For example, if it begins looking for flights 'One month' out and has a date range of '3 months', then if it searched on June 10th, it would look for all flights between July 10th and October 10th.")
     specific_search_end_date = DateField('Alternatively, choose a specific End Date',
                                            validators=[Optional()], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
-    submit = SubmitField("Update Preferences")
+    submit = SubmitField("Save Changes")
 
 
 #

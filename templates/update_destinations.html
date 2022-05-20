@@ -23,9 +23,10 @@
                 </tr>
                  {% for destination in form.destinations: %}
                 <tr>
-                    <td style="padding-right: 22px;">{{ destination.city}}</td>
+                    <td style="padding-right: 22px;">{{ destination.city() }}</td>
                   <td>$</td>
-                    <td>{{ destination.price_ceiling}}</td>
+                    <td>{{ destination.price_ceiling() }}</td>
+
                 </tr>
                 {% endfor %}
             </table>
@@ -34,7 +35,7 @@
             <span>---</span>
         <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">Remove Last Destination</button>
         <br><br><br>
-        <button class="w-100 btn btn-lg btn-custom" type="submit">Update Destinations</button>
+        <button class="w-100 btn btn-lg btn-custom" type="submit">Save Changes</button>
 
         </form>
         </div>

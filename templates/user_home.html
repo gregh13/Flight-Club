@@ -4,13 +4,20 @@
 {% include "header.html" %}
 
 <div class="container form-padding">
-<h3>This is the homepage for a user after they have successfully logged-in.</h3>
+<h3>Welcome to Flight Club!</h3><br>
+    <h5>Go ahead and update your destinations</h5>
+    <h5>so that you can start getting awesome</h5>
+    <h5>personalized weekly flight deals :D</h5>
 <br>
     {% if current_user.id == 1: %}
     <a href="{{ url_for('secret') }}">The Seeks</a>
     <br>
     {% endif %}
 </div>
-
-{% include "footer.html" %}
+<div class="container center-item">
+<a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">View My Destinations</a>
+    <br><br><br><br><br>
+<!--    <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-sm btn-custom">Preferences</a><br><br><br>-->
+</div>
+    {% include "footer.html" %}
 {% endblock %}

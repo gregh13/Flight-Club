@@ -2,13 +2,13 @@
 
 {% block content %}
 {% include "header.html" %}
-<br><br>
+
 <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
+      <div class="col-lg-8 col-md-10 mx-auto form-container">
 
        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-
+<!--        <button class="w-100 btn btn-lg btn-custom" type="submit">Save Changes</button>-->
       </div>
     </div>
   </div>
