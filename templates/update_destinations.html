@@ -1,0 +1,71 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+<div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <form method="POST" action="">
+        {{ form.csrf_token }}
+        <h4>{{form.home_airport.label}}</h4>
+        {{ form.home_airport(value="WER") }} <br>
+          <p>(ex: SFO, PHX, SIN, BKK)<br>
+          {{form.home_airport.description}}</p>
+          <br>
+        <h4>Your Travel Destinations</h4>
+        <div id="destinations">
+             <table>
+                        <tr>
+                            <th style="text-align: left;"> City </th>
+                          <th> </th>
+                            <th> Price Ceiling </th>
+                        </tr>
+                         {% for destination in form.destinations: %}
+                        <tr>
+                            <td style="padding-right: 22px;">{{ destination.city}}</td>
+                          <td>$</td>
+                            <td>{{ destination.price_ceiling}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+        </div>
+
+        <button id="add-destination-field" class="btn btn-lg btn-custom-outline" type="button">Add Another Destination</button>
+        <br><br>
+        <button class="w-100 btn btn-lg btn-custom" type="submit">Update Destinations</button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+<br><br><br>
+<script>
+    window.onload = function() {
+        let addDestinationFieldBtn = document.getElementById('add-destination-field');
+        addDestinationFieldBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            let allDestinationsFieldWrapper = document.getElementById('destinations');
+            let allDestinationsField = allDestinationsFieldWrapper.getElementsByTagName('input');
+            if(allDestinationsField.length >= 20) {
+                alert('10 Destinations is the maximum amount');
+                return;
+            }
+            let destinationInputIds = []
+            for(let i = 0; i < allDestinationsField.length; i++) {
+                destinationInputIds.push(parseInt(allDestinationsField[i].name.split('-')[1]));
+            }
+            let newFieldId = `destinations-${Math.max(...destinationInputIds) + 1}`;
+            let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
+            let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
+            allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<table id="${newFieldId}"><tbody>
+            <tr><th><label for="${newCityFieldName}">City Name</label></th><td><input id="${newCityFieldName}" name="${newCityFieldName}" required="" type="text" value=""></td></tr>
+            <tr><th><label for="${newPriceCeilingFieldName}">Price Ceiling</label></th><td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td></tr>
+            </tbody></table>
+            `);
+        });
+    }
+</script>
+
+{% include "footer.html" %}
+{% endblock %}

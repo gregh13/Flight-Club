@@ -1,0 +1,16 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+
+<div class="container form-padding">
+<h3>This is the homepage for a user after they have successfully logged-in.</h3>
+<br>
+    {% if current_user.id == 1: %}
+    <a href="{{ url_for('secret') }}">The Seeks</a>
+    <br>
+    {% endif %}
+</div>
+
+{% include "footer.html" %}
+{% endblock %}

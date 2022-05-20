@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>✈️ Flight Club</title>
+
+    <!-- CSS Stylesheets (order matters! ) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+          integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+    <link href="{{ url_for('static', filename='css/styles.css')}}" rel="stylesheet">
+
+    <!-- Bootstrap Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+            crossorigin="anonymous"></script>
+
+    <!-- Font Awesome Icons -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;600;700;900&family=Ubuntu:wght@100;300;400;700&display=swap"
+          rel="stylesheet">
+
+</head>
+<body>
+<section id="title">
+    <div class="container-fluid" style="height: 102px;">
+        <!-- Nav Bar -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <a class="navbar-brand" href="{{ url_for('landing_page') }}">Flight Club <img src={{ url_for('static',
+                filename="images/plane-icon3.png") }} alt="logo"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    {% if not current_user.is_authenticated %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('landing_page') }}">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-toggle="dropdown" aria-expanded="false">
+                            Navigation
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#features">Features</a>
+                            <a class="dropdown-item" href="#testimonials">Testimonials</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#pricing">Plans</a>
+                        </div>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('register') }}">Join</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('user_home') }}">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item dropdown active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-toggle="dropdown" aria-expanded="false">
+                            Navigation
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{url_for('my_destinations')}}">My Destinations</a>
+                            <a class="dropdown-item" href="{{url_for('update_destinations')}}">Update Destinations</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{url_for('my_preferences')}}">My Preferences</a>
+                            <a class="dropdown-item" href="{{url_for('update_preferences')}}">Update Preferences</a>
+                        </div>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% endif %}
+                    </ul>
+              </div>
+        </nav>
+    </div>
+</section>
+
+<div class="container page-title">
+                <h2><span style="font-weight: 500; text-align: center;">{{ page_title }}</span></h2>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <br>
+<div class=flashes>
+    {% for message in messages %}
+    <p><em>{{ message }}</em></p>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+</div>

@@ -1,0 +1,40 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+
+<div class="container">
+
+    <h4>Home Airport: {{des.home_airport}}</h4>
+    <br>
+<h3> MY DESTINATIONS</h3>
+  {% if des.destinations_0_city: %}
+  <li><strong>City 1:</strong> {{ des.destinations_0_city }}</li>
+  <li><strong>Price :</strong> {{ des.destinations_0_price_ceiling }}</li>
+    <br>
+  {% endif %}
+    {% if des.destinations_1_city: %}
+  <li><strong>City 2:</strong> {{ des.destinations_1_city }}</li>
+  <li><strong>Price :</strong> {{ des.destinations_1_price_ceiling }}</li>
+    <br>
+  {% endif %}
+      {% if des.destinations_2_city: %}
+  <li><strong>City 3:</strong> {{ des.destinations_2_city }}</li>
+  <li><strong>Price :</strong> {{ des.destinations_2_price_ceiling }}</li>
+    <br>
+  {% endif %}
+      {% if des.destinations_3_city: %}
+  <li><strong>City 4:</strong> {{ des.destinations_3_city }}</li>
+  <li><strong>Price :</strong> {{ des.destinations_3_price_ceiling }}</li>
+    <br>
+  {% endif %}
+    {% if des.destinations_4_city: %}
+  <li><strong>City 5:</strong> {{ des.destinations_4_city }}</li>
+  <li><strong>Price :</strong> {{ des.destinations_4_price_ceiling }}</li>
+    <br>
+  {% endif %}
+
+</div>
+
+{% include "footer.html" %}
+{% endblock %}
