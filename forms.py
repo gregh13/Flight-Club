@@ -17,12 +17,6 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-# class DestinationForm(FlaskForm):
-#     destinations = FieldList(StringField("Destinations", min_entries=3, max_entries=10, validators=[DataRequired()]))
-#     price_ceiling = FieldList(IntegerField("Price Ceilings", min_entries=3, max_entries=10, validators=[NumberRange(min=1), DataRequired()]))
-#     submit = SubmitField("Update Destinations")
-
-
 class CityPriceForm(Form):
     city = StringField("City Name", validators=[DataRequired()])
     price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired(), NumberRange(min=1)])
@@ -30,10 +24,7 @@ class CityPriceForm(Form):
 
 class DestinationForm(FlaskForm):
     home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
-    # city1 = StringField("City_One", validators=[DataRequired()])
-    # price1 = StringField("price1", validators=[DataRequired()])
-    destinations = FieldList(FormField(CityPriceForm, separator="_"), min_entries=3, max_entries=10, separator="_")
-    # destinations = FieldList(StringField("City Name", validators=[DataRequired()]), min_entries=3, max_entries=10)
+    destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
 
 
 class PreferenceForm(FlaskForm):

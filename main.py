@@ -1,19 +1,14 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort, request
+from flask import Flask, render_template, redirect, url_for, flash, abort
 from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm
-from wtforms import *
-from wtforms.validators import *
-from datetime import date, datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm
-# from flask_gravatar import Gravatar
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
 from functools import wraps
-from wtforms.widgets import Input, NumberInput, TextInput, ListWidget
-from werkzeug.datastructures import MultiDict
+# from flask_gravatar import Gravatar
+from datetime import date, datetime
 import os
 
 app = Flask(__name__)
@@ -79,27 +74,6 @@ class Destinations(db.Model, Base):
     destinations = []
 
 
-
-
-
-    # --------
-    # # Put all together into one string separated by 'city/city/city' and 'price$price$price'
-    # all_places = db.Column(db.String(500))
-    # all_prices = db.Column(db.String(200))
-    # ---------
-    # # Each place is a string with the city and price together ('city$price')
-    # place1 = db.Column(db.String(200))
-    # place2 = db.Column(db.String(200))
-    # place3 = db.Column(db.String(200))
-    # place4 = db.Column(db.String(200))
-    # place5 = db.Column(db.String(200))
-    # place6 = db.Column(db.String(200))
-    # place7 = db.Column(db.String(200))
-    # place8 = db.Column(db.String(200))
-    # place9 = db.Column(db.String(200))
-    # place10 = db.Column(db.String(200))
-
-
 class Preferences(db.Model, Base):
     __tablename__ = 'preferences'
     id = db.Column(db.Integer, primary_key=True)
@@ -124,17 +98,8 @@ class Preferences(db.Model, Base):
     specific_search_end_date = db.Column(db.Date)
 
 
-db.create_all()
+# db.create_all()
 
-
-class CityPriceForm(Form):
-    city = StringField("City Name", validators=[DataRequired()])
-    price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired(), NumberRange(min=1)])
-
-
-class DestinationForm(FlaskForm):
-    home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
-    destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
 
 
 def admin_only(function):
