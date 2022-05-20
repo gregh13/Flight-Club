@@ -1,0 +1,294 @@
+/* Plane Logo */
+
+/* Color1: #287AD7 */
+/* Color2: #1C16BD */
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* MULTIPLE Selectors */
+h1, h2, h3, h4, h5 {
+  /* can use this to do all at once */
+}
+
+/* HEIRARCHICAL Selectors */
+#title h2 {
+  /* Do this to target specific h2 in title section */
+  /* This would read: Any h2 inside the ID: title, change to blah */
+  /* This is when there is a Parent/Child relationship */
+}
+
+/* COMBINED Selectors */
+.container.nav-item.btn-primary {
+  /* This would call things that are all in the same element */
+  /* For example, this specific button in the navbar */
+}
+
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 3rem;
+  line-height: 1.5;
+
+}
+
+h2 {
+  font-size: 2.7rem;
+  font-weight: 400;
+}
+
+
+/* Title */
+
+#title {
+  color: #fff;
+}
+
+.container-fluid {
+  padding: 2.2% 10%;
+  background-image: url("../images/flipflops_horizontal.jpg");
+  background-size: cover;
+}
+
+
+.title-catchphrase {
+  padding-bottom: 444px;
+}
+/* Navigation Bar */
+
+.navbar {
+  padding: 0;
+}
+
+.navbar-brand {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 1.8rem;
+}
+
+.nav-item {
+  padding: 0 5px;
+}
+
+.nav-link {
+  font-size:
+}
+
+
+/* Features */
+
+#features {
+  padding: 13% 10%;
+  /* padding-bottom: 222px; */
+  text-align: center;
+}
+
+.feature-text {
+  padding: 0 13%;
+  color: #8f8f8f;
+}
+
+.icon {
+  /* padding-top: 100px; */
+  padding-bottom: 22px;
+}
+
+
+.icon-text:hover {
+  color: #8f8f8f;
+}
+
+/* Testimonials */
+
+#testimonials {
+  text-align: center;
+  background-color: #0BAAB0;
+  color: #fff
+}
+
+.carousel-item {
+    padding: 7% 15%;
+}
+
+.testimonials-image {
+  width: 10%;
+  border-radius: 100%;
+  margin: 20px;
+}
+
+#testimonials h2 {
+  font-weight: 300;
+}
+/* Press */
+
+#press {
+  background-color: #0BAAB0;
+  text-align: center;
+  padding-bottom: 3%;
+}
+
+.press-image {
+  width: 17%;
+  padding: 1.5% 2.2% 5%;
+}
+
+.make-smaller {
+  width: 15%;
+}
+.make-bigger {
+  width: 21%;
+}
+
+/* How It Works */
+
+#how-it-works {
+  font-family: 'Montserrat', sans-serif;
+  padding: 5% 10% 5%;
+  text-align: center;
+  color: #1C16BD;
+}
+
+.instructions {
+  text-align: left;
+  padding-left: 15%;
+  font-weight: 400;
+}
+
+/* Pricing */
+
+#pricing {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.pricing-container {
+  text-align: center;
+  padding: 10% 2% 10%;
+}
+
+.price-box {
+  padding: 0 7% 0;
+}
+
+.btn-custom {
+    @include button-variant(pink, red, red, #444, #333, red);
+    color: #fff;
+    background-color: #1C16BD;
+}
+
+.btn-custom:hover {
+  color: #fff;
+  background-color: #261EFF
+}
+
+.btn-custom-outline {
+    @include button-variant(pink, red, red, #444, #333, red);
+    color: #1C16BD;
+    background-color: #fff;
+    border-color: #1C16BD;
+}
+
+.btn-custom-outline:hover {
+  color: #fff;
+  background-color: #1C16BD;
+}
+
+.card-body h2 {
+  padding: 2.2% 0;
+}
+
+/* Call to Action CTA */
+
+#cta {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #0BAAB0;
+  text-align: center;
+
+  padding: 5% 0 5%;
+  color: #fff
+}
+
+.cta-text {
+  padding: 4% 0 1%;
+  font-weight: 300;
+}
+
+.btn-mega {
+  padding: 6%;
+  font-family: "Ubuntu", sans-serif;
+}
+
+.text-mega {
+  font-size: 2.5rem;
+}
+
+.text-mega-small {
+  font-size: .85rem;
+}
+
+#cta h2 {
+  font-size: 2.8rem;
+}
+
+#cta p {
+  font-size: 2rem;
+}
+
+/* Footer */
+#footer {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #0BAAB0;
+  text-align: center;
+  padding-bottom: 1%;
+  font-size: .75rem
+}
+
+
+
+@media (max-width: 800px) and (min-width: 561px) {
+  .container-fluid {
+    background-image: url("../images/flipflops_horizontal_mid.jpg");
+    background-size: cover;
+  }
+  h1 {
+    font-size: 2.3rem;
+  }
+  h2 {
+    font-size: 2 rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .container-fluid {
+    background-image: url("../images/flipflops_horizontal_small.jpg");
+    background-size: cover;
+  }
+  h1 {
+    font-size: 2rem;
+  }
+  h2 {
+    font-size: 1.8rem;
+  }
+}
+
+.header-title {
+    text-align: center;
+    padding-left: 15%;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.page-title {
+text-align: center;
+padding: 2% 1%;
+}
+
+.form-padding {
+padding: 14% 1%;
+text-align: center;
+}
+
+
+.control-label {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
