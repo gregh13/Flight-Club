@@ -186,55 +186,27 @@ def my_destinations():
 @login_required
 def update_destinations():
     page_title = "Update Destinations"
+    # Grabs the current user object which contains their data
     user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
-    print(user_des.destinations)
+    # Form obj below doesn't populate fields contained within the FieldList/FormField.
+    # instead, need to manually add the data from the user object and pass it as a list of dictionaries
+    # to the SQL table varable that matches the name of the FieldList variable in the form (ex: 'destinations)
     user_des.destinations = [{'city': user_des.city1, 'price_ceiling': user_des.price1},
                              {'city': user_des.city2, 'price_ceiling': user_des.price2},
                              {'city': user_des.city3, 'price_ceiling': user_des.price3},
                              {'city': user_des.city4, 'price_ceiling': user_des.price4},
                              {'city': user_des.city5, 'price_ceiling': user_des.price5},
                              {'city': user_des.city6, 'price_ceiling': user_des.price6}]
-    print(user_des.destinations)
+    # # This shows all the column names and their corresponding data.
+    # print(user_des.__dict__)
+    # # Same thing, but keys are in the same order as designated in the table
+    # # NOTE: no 'destinations' field
+    # destination_dict = dict((col, getattr(user_des, col)) for col in Destinations.__table__.columns.keys())
+    # print(destination_dict)
+
+    # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
-    # print(form.destinations.object_data)
-    print(form.home_airport.object_data)
 
-
-    # Gets rid of blank entries in FieldList destinations
-    # while len(form.destinations) > 0:
-    #     form.destinations.pop_entry()
-    user1 = db.session.query(Destinations).first()
-    print(user1.__dict__)
-    print("\nSQL table column dict")
-
-
-
-    print("\n\n others")
-
-    for column in Destinations.__table__.columns:
-        print(column)
-    for key in Destinations.__table__.foreign_keys:
-        print(key)
-    print("\n\n----------------\n\n")
-    destination_dict = dict((col, getattr(user_des, col)) for col in Destinations.__table__.columns.keys())
-    print(destination_dict)
-
-    # First remap your list of tuples to a list of dicts
-    student_info = [("123", "Bob Jones"), ("234", "Peter Johnson"), ("345", "Carly Everett"),
-                    ("456", "Josephine Edgewood")]
-
-    # print("\nStudent example dictionary")
-    # students = [dict(zip(["price_ceiling", "city"], student)) for student in student_info]
-    # print(students)
-    # print("\nEntry to add to FieldList Form:")
-    # for student in students:
-    #     # Tell the form to add a new entry with the data we supply
-    #     print(student)
-    #     form.destinations.append_entry(student)
-    print("\nDestinations Data")
-    for item in form.destinations.entries:
-        print(item.data)
-    print("\nFinished")
     if form.validate_on_submit():
         # destination entries are dynamic, meaning user chooses how many to enter (between 3 and 10)
         # Since updating a row in SQLAlchemy requires a BaseQuery object, and it is unscriptable,
@@ -243,27 +215,23 @@ def update_destinations():
         # Below is my very unelegant solution: Create a list of values equal to the total number of columns to update
         # cycle through the entries and replace the default values, then update the list.
         # need a step in the loop ('z') since entry has 2 nested values
-        destinations = form.destinations.entries
-        for item in form.destinations.entries:
-            print(item.data)
         update_list = [None for x in range(0, 20)]
-        print(update_list)
         z = 0
+        destinations = form.destinations.entries
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
+            # This is the submitted data: a dictionary with the city and price
             print(dest_dict)
             update_list[z] = dest_dict['city']
             z += 1
             update_list[z] = dest_dict['price_ceiling']
             z += 1
-        print(update_list)
 
+        # Again, very lengthy since each update must be done manually.
+        # All this work so that users can dynamically choose number of destinations AND so when they go to update
+        # it will pre-populate the form so they see their older values while updating/editing.
+        # Small feature, big headache!
 
-
-        # # Again, very lengthy since each update must be done manually.
-        # # All this work so that users can dynamically choose number of destinations AND so when they go to update
-        # # it will pre-populate the form for them (see /my_destinations) and see their older values.
-        # # Small feature, big headache!
         user_des.home_airport = form.home_airport.data
         user_des.city1 = update_list[0]
         user_des.price1 = update_list[1]
@@ -285,7 +253,6 @@ def update_destinations():
         user_des.price9 = update_list[17]
         user_des.city10 = update_list[18]
         user_des.price10 = update_list[19]
-
 
         db.session.commit()
 
