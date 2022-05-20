@@ -29,9 +29,11 @@
                 </tr>
                 {% endfor %}
             </table>
-
-        <button id="add-destination-field" class="btn btn-lg btn-custom-outline" type="button">Add Another Destination</button>
-        <br><br>
+        <br>
+        <button id="add-destination-field" class="btn btn-sm btn-custom-outline" type="button">Add Another Destination</button>
+            <span>---</span>
+        <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">Remove Last Destination</button>
+        <br><br><br>
         <button class="w-100 btn btn-lg btn-custom" type="submit">Update Destinations</button>
 
         </form>
@@ -47,7 +49,7 @@
             let allDestinationsFieldWrapper = document.getElementById('destinations');
             let allDestinationsField = allDestinationsFieldWrapper.getElementsByTagName('input');
             if(allDestinationsField.length >= 20) {
-                alert('10 Destinations is the maximum amount');
+                alert('Sorry, you can\'t have more than 10 destinations.');
                 return;
             }
             let destinationInputIds = []
@@ -63,6 +65,19 @@
             <td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td>
             </tr>
             `);
+        });
+
+        let removeDestinationFieldBtn = document.getElementById('remove-destination-field');
+        removeDestinationFieldBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            let allDestinationsFieldWrapper = document.getElementById('destinations');
+            let allDestinationsField = allDestinationsFieldWrapper.getElementsByTagName('tr');
+            if(allDestinationsField.length <= 4) {
+                alert('Sorry, you can\'t have fewer than 3 destinations.');
+                return;
+            }
+            let lastItem = allDestinationsField[allDestinationsField.length -1];
+            lastItem.remove();
         });
     }
 </script>

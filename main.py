@@ -97,9 +97,7 @@ class Preferences(db.Model, Base):
     search_length = db.Column(db.String(200))
     specific_search_end_date = db.Column(db.Date)
 
-
 # db.create_all()
-
 
 
 def admin_only(function):
@@ -161,7 +159,25 @@ def update_destinations():
                              {'city': user_des.city3, 'price_ceiling': user_des.price3},
                              {'city': user_des.city4, 'price_ceiling': user_des.price4},
                              {'city': user_des.city5, 'price_ceiling': user_des.price5},
-                             {'city': user_des.city6, 'price_ceiling': user_des.price6}]
+                             {'city': user_des.city6, 'price_ceiling': user_des.price6},
+                             {'city': user_des.city7, 'price_ceiling': user_des.price7},
+                             {'city': user_des.city8, 'price_ceiling': user_des.price8},
+                             {'city': user_des.city9, 'price_ceiling': user_des.price9},
+                             {'city': user_des.city10, 'price_ceiling': user_des.price10}]
+    # Get rid of empty destination so it doesn't show up on the form:
+    # iterating through a list while deleting items from the list causes weird behavior
+    # Used proxy method with removal count
+    removal = 0
+    for dict in user_des.destinations:
+        print(dict)
+        if dict['city']:
+            print("filled")
+        else:
+            removal += 1
+            print("empty")
+    for step in range(0, removal):
+        user_des.destinations.remove({'city': None, 'price_ceiling': None})
+
     # # This shows all the column names and their corresponding data.
     # print(user_des.__dict__)
     # # Same thing, but keys are in the same order as designated in the table
