@@ -4,20 +4,20 @@
 {% include "header.html" %}
 <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-
+      <div class="col-lg-6 col-md-8 mx-auto" style="">
+        <div class="form-container">
         <form method="POST" action="">
         {{ form.csrf_token }}
 
         <h4>{{form.home_airport.label}}</h4>
-        {{ form.home_airport() }} <br>
-          <p>(ex: SFO, PHX, SIN, BKK)<br>
+        {{ form.home_airport() }} <br><br>
+          <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
           {{form.home_airport.description}}</p>
           <br>
-        <h4>Your Travel Destinations</h4>
-             <table id="destinations">
+        <h4>Your Travel Destinations</h4><br>
+             <table id="destinations" style="margin: 0 auto;">
                 <tr>
-                    <th style="text-align: left;"> City </th>
+                    <th> City Name </th>
                   <th> </th>
                     <th> Price Ceiling </th>
                 </tr>
@@ -37,6 +37,7 @@
         <button class="w-100 btn btn-lg btn-custom" type="submit">Update Destinations</button>
 
         </form>
+        </div>
       </div>
     </div>
   </div>
