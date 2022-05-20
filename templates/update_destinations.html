@@ -8,28 +8,27 @@
 
         <form method="POST" action="">
         {{ form.csrf_token }}
+
         <h4>{{form.home_airport.label}}</h4>
-        {{ form.home_airport(value="WER") }} <br>
+        {{ form.home_airport() }} <br>
           <p>(ex: SFO, PHX, SIN, BKK)<br>
           {{form.home_airport.description}}</p>
           <br>
         <h4>Your Travel Destinations</h4>
-        <div id="destinations">
-             <table>
-                        <tr>
-                            <th style="text-align: left;"> City </th>
-                          <th> </th>
-                            <th> Price Ceiling </th>
-                        </tr>
-                         {% for destination in form.destinations: %}
-                        <tr>
-                            <td style="padding-right: 22px;">{{ destination.city}}</td>
-                          <td>$</td>
-                            <td>{{ destination.price_ceiling}}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-        </div>
+             <table id="destinations">
+                <tr>
+                    <th style="text-align: left;"> City </th>
+                  <th> </th>
+                    <th> Price Ceiling </th>
+                </tr>
+                 {% for destination in form.destinations: %}
+                <tr>
+                    <td style="padding-right: 22px;">{{ destination.city}}</td>
+                  <td>$</td>
+                    <td>{{ destination.price_ceiling}}</td>
+                </tr>
+                {% endfor %}
+            </table>
 
         <button id="add-destination-field" class="btn btn-lg btn-custom-outline" type="button">Add Another Destination</button>
         <br><br>
@@ -58,10 +57,11 @@
             let newFieldId = `destinations-${Math.max(...destinationInputIds) + 1}`;
             let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
             let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
-            allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<table id="${newFieldId}"><tbody>
-            <tr><th><label for="${newCityFieldName}">City Name</label></th><td><input id="${newCityFieldName}" name="${newCityFieldName}" required="" type="text" value=""></td></tr>
-            <tr><th><label for="${newPriceCeilingFieldName}">Price Ceiling</label></th><td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td></tr>
-            </tbody></table>
+            allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<tr>
+            <td style="padding-right: 22px;"><input id="${newCityFieldName}" name="${newCityFieldName}" required="" type="text" value=""></td>
+            <td>$</td>
+            <td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td>
+            </tr>
             `);
         });
     }

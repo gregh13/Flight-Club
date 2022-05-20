@@ -12,6 +12,8 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from forms import RegisterForm, LoginForm, PreferenceForm
 # from flask_gravatar import Gravatar
 from functools import wraps
+from wtforms.widgets import Input, NumberInput, TextInput, ListWidget
+from werkzeug.datastructures import MultiDict
 import os
 
 app = Flask(__name__)
@@ -54,26 +56,27 @@ class Destinations(db.Model, Base):
     # back_populates to whatever you named the relationship in the parent/child
     user_dest = relationship("User", back_populates="destinations")
     home_airport = db.Column(db.String(50))
-    destinations_0_city = db.Column(db.String(100))
-    destinations_0_price_ceiling = db.Column(db.Integer)
-    destinations_1_city = db.Column(db.String(100))
-    destinations_1_price_ceiling = db.Column(db.Integer)
-    destinations_2_city = db.Column(db.String(100))
-    destinations_2_price_ceiling = db.Column(db.Integer)
-    destinations_3_city = db.Column(db.String(100))
-    destinations_3_price_ceiling = db.Column(db.Integer)
-    destinations_4_city = db.Column(db.String(100))
-    destinations_4_price_ceiling = db.Column(db.Integer)
-    destinations_5_city = db.Column(db.String(100))
-    destinations_5_price_ceiling = db.Column(db.Integer)
-    destinations_6_city = db.Column(db.String(100))
-    destinations_6_price_ceiling = db.Column(db.Integer)
-    destinations_7_city = db.Column(db.String(100))
-    destinations_7_price_ceiling = db.Column(db.Integer)
-    destinations_8_city = db.Column(db.String(100))
-    destinations_8_price_ceiling = db.Column(db.Integer)
-    destinations_9_city = db.Column(db.String(100))
-    destinations_9_price_ceiling = db.Column(db.Integer)
+    city1 = db.Column(db.String(100))
+    price1 = db.Column(db.Integer)
+    city2 = db.Column(db.String(100))
+    price2 = db.Column(db.Integer)
+    city3 = db.Column(db.String(100))
+    price3 = db.Column(db.Integer)
+    city4 = db.Column(db.String(100))
+    price4 = db.Column(db.Integer)
+    city5 = db.Column(db.String(100))
+    price5 = db.Column(db.Integer)
+    city6 = db.Column(db.String(100))
+    price6 = db.Column(db.Integer)
+    city7 = db.Column(db.String(100))
+    price7 = db.Column(db.Integer)
+    city8 = db.Column(db.String(100))
+    price8 = db.Column(db.Integer)
+    city9 = db.Column(db.String(100))
+    price9 = db.Column(db.Integer)
+    city10 = db.Column(db.String(100))
+    price10 = db.Column(db.Integer)
+    destinations = []
 
 
 
@@ -131,7 +134,7 @@ class CityPriceForm(Form):
 
 class DestinationForm(FlaskForm):
     home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
-    destinations = FieldList(FormField(CityPriceForm, separator="_"), min_entries=3, max_entries=10, separator="_")
+    destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
 
 
 def admin_only(function):
@@ -184,38 +187,53 @@ def my_destinations():
 def update_destinations():
     page_title = "Update Destinations"
     user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
+    print(user_des.destinations)
+    user_des.destinations = [{'city': user_des.city1, 'price_ceiling': user_des.price1},
+                             {'city': user_des.city2, 'price_ceiling': user_des.price2},
+                             {'city': user_des.city3, 'price_ceiling': user_des.price3},
+                             {'city': user_des.city4, 'price_ceiling': user_des.price4},
+                             {'city': user_des.city5, 'price_ceiling': user_des.price5},
+                             {'city': user_des.city6, 'price_ceiling': user_des.price6}]
+    print(user_des.destinations)
     form = DestinationForm(obj=user_des)
-    desties = form.destinations
-    print("Home Airport")
-    print(form.home_airport.widget)
-    print("\nDestinations")
-    print(form.destinations.widget.html_tag)
-    print(form.destinations.widget.prefix_label)
-    for d in desties:
-        # print(d)
-        print(d.widget)
+    # print(form.destinations.object_data)
+    print(form.home_airport.object_data)
 
-    # Gets rid of entries
-    while len(form.destinations) > 0:
-        form.destinations.pop_entry()
 
+    # Gets rid of blank entries in FieldList destinations
+    # while len(form.destinations) > 0:
+    #     form.destinations.pop_entry()
+    user1 = db.session.query(Destinations).first()
+    print(user1.__dict__)
     print("\nSQL table column dict")
+
+
+
+    print("\n\n others")
+
+    for column in Destinations.__table__.columns:
+        print(column)
+    for key in Destinations.__table__.foreign_keys:
+        print(key)
+    print("\n\n----------------\n\n")
     destination_dict = dict((col, getattr(user_des, col)) for col in Destinations.__table__.columns.keys())
     print(destination_dict)
+
     # First remap your list of tuples to a list of dicts
     student_info = [("123", "Bob Jones"), ("234", "Peter Johnson"), ("345", "Carly Everett"),
                     ("456", "Josephine Edgewood")]
 
-    print("\nStudent example dictionary")
-    students = [dict(zip(["price_ceiling", "city"], student)) for student in student_info]
-    print(students)
-    print("\nEntry to add to FieldList Form:")
-    for student in students:
-        # Tell the form to add a new entry with the data we supply
-        print(student)
-        form.destinations.append_entry(student)
-    print("\nDestinations New")
-    print(form.destinations.entries)
+    # print("\nStudent example dictionary")
+    # students = [dict(zip(["price_ceiling", "city"], student)) for student in student_info]
+    # print(students)
+    # print("\nEntry to add to FieldList Form:")
+    # for student in students:
+    #     # Tell the form to add a new entry with the data we supply
+    #     print(student)
+    #     form.destinations.append_entry(student)
+    print("\nDestinations Data")
+    for item in form.destinations.entries:
+        print(item.data)
     print("\nFinished")
     if form.validate_on_submit():
         # destination entries are dynamic, meaning user chooses how many to enter (between 3 and 10)
@@ -226,6 +244,8 @@ def update_destinations():
         # cycle through the entries and replace the default values, then update the list.
         # need a step in the loop ('z') since entry has 2 nested values
         destinations = form.destinations.entries
+        for item in form.destinations.entries:
+            print(item.data)
         update_list = [None for x in range(0, 20)]
         print(update_list)
         z = 0
@@ -238,31 +258,34 @@ def update_destinations():
             z += 1
         print(update_list)
 
-        # Again, very lengthy since each update must be done manually.
-        # All this work so that users can dynamically choose number of destinations AND so when they go to update
-        # it will pre-populate the form for them (see /my_destinations) and see their older values.
-        # Small feature, big headache!
+
+
+        # # Again, very lengthy since each update must be done manually.
+        # # All this work so that users can dynamically choose number of destinations AND so when they go to update
+        # # it will pre-populate the form for them (see /my_destinations) and see their older values.
+        # # Small feature, big headache!
         user_des.home_airport = form.home_airport.data
-        user_des.destinations_0_city = update_list[0]
-        user_des.destinations_0_price_ceiling = update_list[1]
-        user_des.destinations_1_city = update_list[2]
-        user_des.destinations_1_price_ceiling = update_list[3]
-        user_des.destinations_2_city = update_list[4]
-        user_des.destinations_2_price_ceiling = update_list[5]
-        user_des.destinations_3_city = update_list[6]
-        user_des.destinations_3_price_ceiling = update_list[7]
-        user_des.destinations_4_city = update_list[8]
-        user_des.destinations_4_price_ceiling = update_list[9]
-        user_des.destinations_5_city = update_list[10]
-        user_des.destinations_5_price_ceiling = update_list[11]
-        user_des.destinations_6_city = update_list[12]
-        user_des.destinations_6_price_ceiling = update_list[13]
-        user_des.destinations_7_city = update_list[14]
-        user_des.destinations_7_price_ceiling = update_list[15]
-        user_des.destinations_8_city = update_list[16]
-        user_des.destinations_8_price_ceiling = update_list[17]
-        user_des.destinations_9_city = update_list[18]
-        user_des.destinations_9_price_ceiling = update_list[19]
+        user_des.city1 = update_list[0]
+        user_des.price1 = update_list[1]
+        user_des.city2 = update_list[2]
+        user_des.price2 = update_list[3]
+        user_des.city3 = update_list[4]
+        user_des.price3 = update_list[5]
+        user_des.city4 = update_list[6]
+        user_des.price4 = update_list[7]
+        user_des.city5 = update_list[8]
+        user_des.price5 = update_list[9]
+        user_des.city6 = update_list[10]
+        user_des.price6 = update_list[11]
+        user_des.city7 = update_list[12]
+        user_des.price7 = update_list[13]
+        user_des.city8 = update_list[14]
+        user_des.price8 = update_list[15]
+        user_des.city9 = update_list[16]
+        user_des.price9 = update_list[17]
+        user_des.city10 = update_list[18]
+        user_des.price10 = update_list[19]
+
 
         db.session.commit()
 
@@ -291,7 +314,7 @@ def update_preferences():
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
     # Pass prefs as obj into form: prepopulates the form with the current user's preferences
     form = PreferenceForm(obj=prefs)
-
+    print(form.max_nights.object_data)
     if form.validate_on_submit():
 
         # POSSIBLE CLEAN SOLUTION TO UPDATING USER PREFERENCES!!
@@ -389,17 +412,6 @@ def register():
         destinations = Destinations(
             user_dest=current_user,
             home_airport="")
-        # # place1="",
-        # # place2="",
-        # # place3="",
-        # # place4="",
-        # # place5="",
-        # # place6="",
-        # # place7="",
-        # # place8="",
-        # # place9="",
-        # # place10="",
-        # # )
         db.session.add(destinations)
         db.session.commit()
         flash("Account created successfully. Please update your destinations.")
