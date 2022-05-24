@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort, request
+from flask import Flask, render_template, redirect, url_for, flash, abort
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -7,11 +7,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
 from functools import wraps
-from datetime import date, datetime
-import os
+# from datetime import date, datetime
+# import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'SECRET_KEY'
+app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
 Bootstrap(app)
 
 # LATER, during Heroku stage
