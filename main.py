@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask import Flask, render_template, redirect, url_for, flash, abort, request
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
 from functools import wraps
-# from flask_gravatar import Gravatar
 from datetime import date, datetime
 import os
 
@@ -39,6 +38,7 @@ class User(UserMixin, db.Model, Base):
     name = db.Column(db.String(100))
     preferences = relationship('Preferences', back_populates="user_pref")
     destinations = relationship('Destinations', back_populates="user_dest")
+    flight_deals = relationship('FlightDeals', back_populates="user_deals")
 
 
 class Destinations(db.Model, Base):
@@ -79,7 +79,7 @@ class Preferences(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     user_pref_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user_pref = relationship("User", back_populates="preferences")
-    home_airport = db.Column(db.String(50), nullable=False)
+    email_frequency = db.Column(db.Integer)
     min_nights = db.Column(db.Integer, nullable=False)
     max_nights = db.Column(db.Integer, nullable=False)
     currency = db.Column(db.String(50), nullable=False)
@@ -96,6 +96,33 @@ class Preferences(db.Model, Base):
     specific_search_start_date = db.Column(db.Date)
     search_length = db.Column(db.String(200))
     specific_search_end_date = db.Column(db.Date)
+
+
+class FlightDeals(db.Model, Base):
+    __tablename__ = 'flightdeals'
+    id = db.Column(db.Integer, primary_key=True)
+    user_deals_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_deals = relationship("User", back_populates="flight_deals")
+    deal1 = db.Column(db.String(1000))
+    link1 = db.Column(db.String(1000))
+    deal2 = db.Column(db.String(1000))
+    link2 = db.Column(db.String(1000))
+    deal3 = db.Column(db.String(1000))
+    link3 = db.Column(db.String(1000))
+    deal4 = db.Column(db.String(1000))
+    link4 = db.Column(db.String(1000))
+    deal5 = db.Column(db.String(1000))
+    link5 = db.Column(db.String(1000))
+    deal6 = db.Column(db.String(1000))
+    link6 = db.Column(db.String(1000))
+    deal7 = db.Column(db.String(1000))
+    link7 = db.Column(db.String(1000))
+    deal8 = db.Column(db.String(1000))
+    link8 = db.Column(db.String(1000))
+    deal9 = db.Column(db.String(1000))
+    link9 = db.Column(db.String(1000))
+    deal10 = db.Column(db.String(1000))
+    link10 = db.Column(db.String(1000))
 
 # db.create_all()
 
@@ -123,10 +150,15 @@ def landing_page():
     return render_template("index.html", page_title="")
 
 
-@app.route('/new')
-def new():
-    page_title = "Page Title"
-    return render_template("header.html", page_title=page_title)
+# @app.route('/new', methods=["GET","POST"])
+# def new():
+#     if request.method == "GET":
+#         print("GET")
+#     if request.method == "POST":
+#         print("POST")
+#         print(request.data)
+#     page_title = "Page Title"
+#     return render_template("new_register.html", page_title=page_title)
 
 
 @app.route('/home')
@@ -213,7 +245,7 @@ def update_destinations():
         # it will pre-populate the form so they see their older values while updating/editing.
         # Small feature, big headache!
 
-        user_des.home_airport = form.home_airport.data
+        user_des.home_airport = form.home_airport.data.upper()
         user_des.city1 = update_list[0]
         user_des.price1 = update_list[1]
         user_des.city2 = update_list[2]
@@ -262,7 +294,6 @@ def update_preferences():
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
     # Pass prefs as obj into form: prepopulates the form with the current user's preferences
     form = PreferenceForm(obj=prefs)
-    print(form.max_nights.object_data)
     if form.validate_on_submit():
 
         # POSSIBLE CLEAN SOLUTION TO UPDATING USER PREFERENCES!!
@@ -272,7 +303,7 @@ def update_preferences():
         # Now the form data updates the user's preferences.
         # Since form was pre-populated with existing preferences, no bad data or blanks will get updated.
         # Only the things the user wants to change will get changed.
-        prefs.home_airport = form.home_airport.data.upper()
+        prefs.email_frequency = form.email_frequency.data
         prefs.min_nights = form.min_nights.data
         prefs.max_nights = form.max_nights.data
         prefs.currency = form.currency.data
@@ -331,6 +362,7 @@ def register():
             method='pbkdf2:sha256',
             salt_length=8
         )
+
         user = User(email=email,
                     password=salted_hashbrowns,
                     name=form.name.data)
@@ -339,7 +371,7 @@ def register():
         login_user(user)
         preferences = Preferences(
             user_pref=current_user,
-            home_airport="BKK",
+            email_frequency=1,
             min_nights=2,
             max_nights=7,
             currency='USD',
