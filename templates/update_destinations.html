@@ -2,13 +2,17 @@
 
 {% block content %}
 {% include "header.html" %}
+
+
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
+        rel="stylesheet" type="text/css" />
+
 <div class="container">
     <div class="row">
       <div class="col-lg-6 col-md-8 mx-auto" style="">
         <div class="form-container">
         <form method="POST" action="">
         {{ form.csrf_token }}
-
         <h4>{{form.home_airport.label}}</h4>
         {{ form.home_airport() }} <br><br>
           <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
@@ -21,16 +25,22 @@
                   <th> </th>
                     <th> Price Ceiling </th>
                 </tr>
-                 {% for destination in form.destinations: %}
-                <tr>
-                    <td style="padding-right: 22px;">{{ destination.city() }}</td>
-                  <td>$</td>
-                    <td>{{ destination.price_ceiling() }}</td>
 
+                 {% for x in range(0, form.destinations|length): %}
+                <tr>
+                    <td style="padding-right: 22px;">{{ form.destinations[x].city()}}</td>
+                  <td>$</td>
+                    <td>{{ form.destinations[x].price_ceiling() }}</td>
                 </tr>
+            {% if form.errors["destinations"][x]: %}
+                    <tr><td colspan="3">{{ form.errors["destinations"][x]["city"][0] }}</td></tr>
+            {% endif %}
+
+                 <tr><td style="padding-right: 22px;">------------------------------</td><td></td><td>------------------------------</td></tr>
                 {% endfor %}
             </table>
         <br>
+
         <button id="add-destination-field" class="btn btn-sm btn-custom-outline" type="button">Add Another Destination</button>
             <span>---</span>
         <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">Remove Last Destination</button>
@@ -42,7 +52,31 @@
       </div>
     </div>
   </div>
-<br><br><br>
+<br><br><br><br>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">
+    </script>
+
+    <script>
+  $( function() {
+    var availableTags = [
+        {% for city in city_options %}
+            "{{city_options[city]}}",
+        {% endfor %}
+    ];
+
+    {% for x in range(0, form.destinations|length): %}
+    $( "#destinations-{{x}}-city" ).autocomplete({
+      source: availableTags
+    });
+    {% endfor %}
+
+  } );
+  </script>
+
 <script>
     window.onload = function() {
         let addDestinationFieldBtn = document.getElementById('add-destination-field');
@@ -62,7 +96,12 @@
             let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
             let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
             allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<tr>
-            <td style="padding-right: 22px;"><input id="${newCityFieldName}" name="${newCityFieldName}" required="" type="text" value=""></td>
+            <td style="padding-right: 22px;"><select id="${newCityFieldName}" name="${newCityFieldName}" required="">
+            <option value></option>
+            {% for city in city_options: %}
+            <option value="{{ city }}">{{ city_options[city] }}</option>
+            {% endfor %}
+            </select></td>
             <td>$</td>
             <td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td>
             </tr>
