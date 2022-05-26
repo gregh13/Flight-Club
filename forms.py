@@ -1,6 +1,13 @@
 from flask_wtf import FlaskForm, Form
 from wtforms import *
 from wtforms.validators import *
+from codes import all_cities_international
+
+
+possible_cities = {'SFO': 'San Francisco', 'BKK': 'Bangkok (BKK)', 'DMK': 'Bangkok(DMK)',
+                   'SIN': 'Singapore', 'SMF': 'Sacramento', 'MLE': 'Male (Maldives)', 'BUD': 'Budapest',
+                   'CDG': 'Paris (CDG)', 'TPE': 'Taipei', 'SYD': 'Sydney'}
+city_list = [all_cities_international[iata] for iata in all_cities_international]
 
 
 # # WTForm
@@ -17,12 +24,28 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
+class TrialForm(FlaskForm):
+    trial = StringField("Trial", validators=[AnyOf(values=city_list, message="Please select one of the choices shown as you type")])
+    submit = SubmitField("Submit")
+
+
+# class CityPriceForm(Form):
+#     city = SelectField("City Name",
+#                        choices=[("", "")] + [(iata, city) for iata, city in all_cities_international.items()],
+#                        # [("", "")] is needed for a placeholder
+#                        validators=[InputRequired()])
+#     price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
+
+
 class CityPriceForm(Form):
-    city = StringField("City Name", validators=[DataRequired()])
+    city = StringField("City Name", validators=[DataRequired(),
+                                                AnyOf(values=city_list,
+                                                      message="Please select one of the choices shown as you type.")])
     price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
 
 
 class DestinationForm(FlaskForm):
+    search = SearchField("Search field")
     home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
     destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
 
@@ -33,7 +56,6 @@ class PreferenceForm(FlaskForm):
     max_nights = IntegerField("Trip Duration: Max Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The maximum length of time spent at your travel destination. Actual trip duration will be somewhere in-between the min and max duration")
     currency = SelectField("Currency", choices=['Select Option', 'USD', 'SGD', 'AUD', 'THB', 'CNY', 'GBP', 'CAD'], validators=[DataRequired()])
     cabin_class = SelectField("Cabin Class", choices=[('Select Option', 'Select Option'),('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    mix_class = SelectField("Mix Cabin Class?", choices=['Select Option', 'Yes', 'No'], validators=[Optional()], description="Mainly only applies when choosing a higher class than economy.")
     exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=['Select Option', 'Exclude', 'Include The Cheapos'], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
     flight_type = SelectField("Flight Type", choices=[('select', 'Select Option'), ('round', 'Round Trip'), ('oneway', 'One Way')], validators=[Optional()])
     max_stops = IntegerField("Max Number of Stops", validators=[Optional(), NumberRange(min=0, max=6)])
