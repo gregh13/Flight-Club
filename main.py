@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, TrialForm
 from functools import wraps
-from codes import all_cities_international
+from iata_codes import all_cities_international
 # from datetime import date, datetime
 # import os
 
@@ -80,13 +80,14 @@ class Preferences(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     user_pref_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user_pref = relationship("User", back_populates="preferences")
+    email = db.Column(db.String(100), nullable=False)
     email_frequency = db.Column(db.Integer)
+    email_day = db.Column(db.Integer)
     min_nights = db.Column(db.Integer, nullable=False)
     max_nights = db.Column(db.Integer, nullable=False)
     currency = db.Column(db.String(50), nullable=False)
     cabin_class = db.Column(db.String(50), nullable=False)
     exclude_airlines = db.Column(db.String(100), nullable=False)
-    flight_type = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
     max_flight_time = db.Column(db.Integer)
     num_adults = db.Column(db.Integer, nullable=False)
@@ -124,7 +125,7 @@ class FlightDeals(db.Model, Base):
     deal10 = db.Column(db.String(1000))
     link10 = db.Column(db.String(1000))
 
-# db.create_all()
+db.create_all()
 
 
 def admin_only(function):
@@ -296,13 +297,14 @@ def update_preferences():
         # Now the form data updates the user's preferences.
         # Since form was pre-populated with existing preferences, no bad data or blanks will get updated.
         # Only the things the user wants to change will get changed.
+        prefs.email = form.email.data
         prefs.email_frequency = form.email_frequency.data
+        prefs.email_day = form.email_day.data
         prefs.min_nights = form.min_nights.data
         prefs.max_nights = form.max_nights.data
         prefs.currency = form.currency.data
         prefs.cabin_class = form.cabin_class.data
         prefs.exclude_airlines = form.exclude_airlines.data
-        prefs.flight_type = form.flight_type.data
         prefs.max_stops = form.max_stops.data
         prefs.max_flight_time = form.max_flight_time.data
         prefs.num_adults = form.num_adults.data
@@ -363,13 +365,14 @@ def register():
         login_user(user)
         preferences = Preferences(
             user_pref=current_user,
+            email=user.email,
             email_frequency=1,
+            email_day=4,
             min_nights=2,
             max_nights=7,
             currency='USD',
             cabin_class='M',
-            exclude_airlines='Exclude',
-            flight_type='round',
+            exclude_airlines='True',
             max_stops=3,
             max_flight_time=33,
             num_adults=1,

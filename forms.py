@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm, Form
 from wtforms import *
 from wtforms.validators import *
-from codes import all_cities_international
+from iata_codes import all_cities_international
 
 
 possible_cities = {'SFO': 'San Francisco', 'BKK': 'Bangkok (BKK)', 'DMK': 'Bangkok(DMK)',
@@ -51,13 +51,15 @@ class DestinationForm(FlaskForm):
 
 
 class PreferenceForm(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired()])
     email_frequency = SelectField("Email Frequency", choices=[(111, 'Select Option'), (1, "Once a week"), (2, "Once every two weeks"), (4, "Once a month")], validators=[DataRequired()])
+    email_day = SelectField("Day of Week to Receive Email",
+                            choices=[(0, "Monday"), (1, "Tuesday"), (2, "Wednesday"), (3, "Thursday"), (4, "Friday"), (5, "Saturday"), (6, "Sunday")])
     min_nights = IntegerField("Trip Duration: Minimum Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The minimum length of time spent at your travel destination.")
     max_nights = IntegerField("Trip Duration: Max Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The maximum length of time spent at your travel destination. Actual trip duration will be somewhere in-between the min and max duration")
     currency = SelectField("Currency", choices=['Select Option', 'USD', 'SGD', 'AUD', 'THB', 'CNY', 'GBP', 'CAD'], validators=[DataRequired()])
     cabin_class = SelectField("Cabin Class", choices=[('Select Option', 'Select Option'),('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=['Select Option', 'Exclude', 'Include The Cheapos'], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
-    flight_type = SelectField("Flight Type", choices=[('select', 'Select Option'), ('round', 'Round Trip'), ('oneway', 'One Way')], validators=[Optional()])
+    exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=[("", 'Select Option'), ('True', 'Exclude'), ('False', 'Include The Cheapos')], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
     max_stops = IntegerField("Max Number of Stops", validators=[Optional(), NumberRange(min=0, max=6)])
     max_flight_time = IntegerField("Max Flight Duration", validators=[Optional()])
     num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=0, max=6)])
