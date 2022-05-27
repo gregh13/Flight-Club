@@ -5,8 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, TrialForm
 from functools import wraps
+from codes import all_cities_international
 # from datetime import date, datetime
 # import os
 
@@ -84,7 +85,6 @@ class Preferences(db.Model, Base):
     max_nights = db.Column(db.Integer, nullable=False)
     currency = db.Column(db.String(50), nullable=False)
     cabin_class = db.Column(db.String(50), nullable=False)
-    mix_class = db.Column(db.String(50))
     exclude_airlines = db.Column(db.String(100), nullable=False)
     flight_type = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
@@ -168,54 +168,44 @@ def user_home():
     page_title = f"Hello, {user_name}"
     return render_template("user_home.html", page_title=page_title)
 
+@app.route('/new', methods=["GET", "POST"])
+def new():
+    cities = all_cities_international
+    form = TrialForm()
+    if form.validate_on_submit():
+        print("Success")
+        print(form.trial.data)
+    return render_template('new_register.html', form=form, cities=cities)
 
 @app.route('/my_destinations')
 @login_required
 def my_destinations():
     page_title = "My Destinations"
+    city_options = all_cities_international
     des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
-    return render_template("my_destinations.html", page_title=page_title, des=des)
+    return render_template("my_destinations.html", page_title=page_title, des=des, city_options=city_options)
 
 
 @app.route('/update_destinations', methods=['GET', 'POST'])
 @login_required
 def update_destinations():
     page_title = "Update Destinations"
+    city_options = all_cities_international
     # Grabs the current user object which contains their data
     user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
     # Form obj below doesn't populate fields contained within the FieldList/FormField.
     # instead, need to manually add the data from the user object and pass it as a list of dictionaries
-    # to the SQL table varable that matches the name of the FieldList variable in the form (ex: 'destinations)
-    user_des.destinations = [{'city': user_des.city1, 'price_ceiling': user_des.price1},
-                             {'city': user_des.city2, 'price_ceiling': user_des.price2},
-                             {'city': user_des.city3, 'price_ceiling': user_des.price3},
-                             {'city': user_des.city4, 'price_ceiling': user_des.price4},
-                             {'city': user_des.city5, 'price_ceiling': user_des.price5},
-                             {'city': user_des.city6, 'price_ceiling': user_des.price6},
-                             {'city': user_des.city7, 'price_ceiling': user_des.price7},
-                             {'city': user_des.city8, 'price_ceiling': user_des.price8},
-                             {'city': user_des.city9, 'price_ceiling': user_des.price9},
-                             {'city': user_des.city10, 'price_ceiling': user_des.price10}]
-    # Get rid of empty destination so it doesn't show up on the form:
-    # iterating through a list while deleting items from the list causes weird behavior
-    # Used proxy method with removal count
-    removal = 0
-    for dict in user_des.destinations:
-        print(dict)
-        if dict['city']:
-            print("filled")
+    # to the SQL table variable that matches the name of the FieldList variable in the form (ex: 'destinations)
+    user_data_dict = user_des.__dict__
+    print(user_data_dict)
+    list_of_dicts = []
+    for x in range(1, 11):
+        if user_data_dict[f'city{x}'] is None:
+            pass
         else:
-            removal += 1
-            print("empty")
-    for step in range(0, removal):
-        user_des.destinations.remove({'city': None, 'price_ceiling': None})
-
-    # # This shows all the column names and their corresponding data.
-    # print(user_des.__dict__)
-    # # Same thing, but keys are in the same order as designated in the table
-    # # NOTE: no 'destinations' field
-    # destination_dict = dict((col, getattr(user_des, col)) for col in Destinations.__table__.columns.keys())
-    # print(destination_dict)
+            dict_to_add = {"city": city_options[user_data_dict[f'city{x}']], "price_ceiling": user_data_dict[f'price{x}']}
+            list_of_dicts.append(dict_to_add)
+    user_des.destinations = list_of_dicts
 
     # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
@@ -228,6 +218,7 @@ def update_destinations():
         # Below is my very unelegant solution: Create a list of values equal to the total number of columns to update
         # cycle through the entries and replace the default values, then update the list.
         # need a step in the loop ('z') since entry has 2 nested values
+
         update_list = [None for x in range(0, 20)]
         z = 0
         destinations = form.destinations.entries
@@ -235,7 +226,8 @@ def update_destinations():
             dest_dict = destinations[x].data
             # This is the submitted data: a dictionary with the city and price
             print(dest_dict)
-            update_list[z] = dest_dict['city']
+
+            update_list[z] = [iata_code for iata_code, city_name in city_options.items() if city_name == dest_dict['city']][0]
             z += 1
             update_list[z] = dest_dict['price_ceiling']
             z += 1
@@ -244,6 +236,7 @@ def update_destinations():
         # All this work so that users can dynamically choose number of destinations AND so when they go to update
         # it will pre-populate the form so they see their older values while updating/editing.
         # Small feature, big headache!
+        print (update_list)
 
         user_des.home_airport = form.home_airport.data.upper()
         user_des.city1 = update_list[0]
@@ -271,7 +264,7 @@ def update_destinations():
 
         flash("Your destinations have been successfully updated.")
         return redirect(url_for('my_destinations'))
-    return render_template("update_destinations.html", form=form, page_title=page_title)
+    return render_template("update_destinations.html", form=form, page_title=page_title, city_options=city_options)
 
 
 @app.route('/my_preferences')
@@ -308,7 +301,6 @@ def update_preferences():
         prefs.max_nights = form.max_nights.data
         prefs.currency = form.currency.data
         prefs.cabin_class = form.cabin_class.data
-        prefs.mix_class = form.mix_class.data
         prefs.exclude_airlines = form.exclude_airlines.data
         prefs.flight_type = form.flight_type.data
         prefs.max_stops = form.max_stops.data
@@ -376,7 +368,6 @@ def register():
             max_nights=7,
             currency='USD',
             cabin_class='M',
-            mix_class='Yes',
             exclude_airlines='Exclude',
             flight_type='round',
             max_stops=3,
