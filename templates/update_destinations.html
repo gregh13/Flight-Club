@@ -4,63 +4,72 @@
 {% include "header.html" %}
 
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">
+</script>
+
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
-        rel="stylesheet" type="text/css" />
+      rel="stylesheet" type="text/css"/>
 
 <div class="container">
     <div class="row">
-      <div class="col-lg-6 col-md-8 mx-auto" style="">
-        <div class="form-container">
-        <form method="POST" action="">
-        {{ form.csrf_token }}
-        <h4>{{form.home_airport.label}}</h4>
-        {{ form.home_airport() }} <br><br>
-          <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
-          {{form.home_airport.description}}</p>
-          <br>
-        <h4>Your Travel Destinations</h4><br>
-             <table id="destinations" style="margin: 0 auto;">
-                <tr>
-                    <th> City Name </th>
-                  <th> </th>
-                    <th> Price Ceiling </th>
-                </tr>
+        <div class="col-lg-6 col-md-8 mx-auto" style="">
+            <div class="form-container">
+                <form method="POST" action="">
+                    {{ form.csrf_token }}
+                    <h4>{{form.home_airport.label}}</h4>
+                    {{ form.home_airport() }} <br><br>
+                    <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
+                        {{form.home_airport.description}}</p>
+                    <br>
+                    <h4>Your Travel Destinations</h4><br>
+                    <table id="destinations" style="margin: 0 auto;">
+                        <tr>
+                            <th> City Name</th>
+                            <th></th>
+                            <th> Price Ceiling</th>
+                        </tr>
 
-                 {% for x in range(0, form.destinations|length): %}
-                <tr>
-                    <td style="padding-right: 22px;">{{ form.destinations[x].city()}}</td>
-                  <td>$</td>
-                    <td>{{ form.destinations[x].price_ceiling() }}</td>
-                </tr>
-            {% if form.errors["destinations"][x]: %}
-                    <tr><td colspan="3">{{ form.errors["destinations"][x]["city"][0] }}</td></tr>
-            {% endif %}
+                        {% for x in range(0, form.destinations|length): %}
+                        <tr>
+                            <td style="padding-right: 22px;">{{ form.destinations[x].city()}}</td>
+                            <td>$</td>
+                            <td>{{ form.destinations[x].price_ceiling() }}</td>
+                        </tr>
+                        {% if form.errors %}
+                        {% if form.errors["destinations"][x]: %}
+                        <tr>
+                            <td colspan="3">{{ form.errors["destinations"][x]["city"][0] }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </table>
+                    <br>
 
-                 <tr><td style="padding-right: 22px;">------------------------------</td><td></td><td>------------------------------</td></tr>
-                {% endfor %}
-            </table>
-        <br>
+                    <button id="add-destination-field" class="btn btn-sm btn-custom-outline" type="button">Add Another
+                        Destination
+                    </button>
+                    <span>---</span>
+                    <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">Remove
+                        Last Destination
+                    </button>
+                    <br><br><br>
+                    <button class="w-100 btn btn-lg btn-custom" type="submit">Save Changes</button>
 
-        <button id="add-destination-field" class="btn btn-sm btn-custom-outline" type="button">Add Another Destination</button>
-            <span>---</span>
-        <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">Remove Last Destination</button>
-        <br><br><br>
-        <button class="w-100 btn btn-lg btn-custom" type="submit">Save Changes</button>
-
-        </form>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 <br><br><br><br>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">
-    </script>
+<script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">
-    </script>
+<!------------adds jQuery autocomplete functionality to the existing input fields on page load -->
 
-    <script>
   $( function() {
     var availableTags = [
         {% for city in city_options %}
@@ -75,9 +84,14 @@
     {% endfor %}
 
   } );
-  </script>
+
+</script>
+
 
 <script>
+
+<!---------------adds a new input field, helps control total number of inputs on page -------------------------------------->
+
     window.onload = function() {
         let addDestinationFieldBtn = document.getElementById('add-destination-field');
         addDestinationFieldBtn.addEventListener('click', function(e){
@@ -92,21 +106,45 @@
             for(let i = 0; i < allDestinationsField.length; i++) {
                 destinationInputIds.push(parseInt(allDestinationsField[i].name.split('-')[1]));
             }
-            let newFieldId = `destinations-${Math.max(...destinationInputIds) + 1}`;
             let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
             let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
             allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<tr>
-            <td style="padding-right: 22px;"><select id="${newCityFieldName}" name="${newCityFieldName}" required="">
-            <option value></option>
-            {% for city in city_options: %}
-            <option value="{{ city }}">{{ city_options[city] }}</option>
-            {% endfor %}
-            </select></td>
+            <td style="padding-right: 22px;">
+                <input id="${newCityFieldName}" name="${newCityFieldName}" type="text"
+                required="" class="ui-autocomplete-input" autocomplete="off"
+                role="textbox" aria-autocomplete="list" aria-haspopup="true">
+            </td>
             <td>$</td>
             <td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td>
             </tr>
             `);
-        });
+
+
+<!----------------adds jQuery autocomplete to the newly added input fields (since others were done on page loading)------------------ -->
+
+        $( function() {
+                            var availableTags = [
+                                {% for city in city_options %}
+                                    "{{city_options[city]}}",
+                                {% endfor %}
+                            ];
+
+<!--                            let allDestinationsFieldWrapper = document.getElementById('destinations');-->
+<!--                            let allDestinationsField = allDestinationsFieldWrapper.getElementsByTagName('input');-->
+<!--                            let destinationInputIds = []-->
+<!--                            for(let i = 0; i < allDestinationsField.length; i++) {-->
+<!--                            destinationInputIds.push(parseInt(allDestinationsField[i].name.split('-')[1]));-->
+<!--                            }-->
+<!--                            var newCityFieldName = `#destinations-${Math.max(...destinationInputIds) + 1}-city`;-->
+
+                            $( "#" + newCityFieldName ).autocomplete({
+                              source: availableTags
+                            });
+                          });
+  });
+
+
+ <!-- ---------------JS functionality to remove the most recent destination input field--------------->
 
         let removeDestinationFieldBtn = document.getElementById('remove-destination-field');
         removeDestinationFieldBtn.addEventListener('click', function(e){
@@ -121,6 +159,7 @@
             lastItem.remove();
         });
     }
+
 </script>
 
 {% include "footer.html" %}
