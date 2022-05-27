@@ -13,25 +13,6 @@ headers = {
         }
 
 
-def search_destination_code(user_city):
-    location_query = {
-                "term": user_city,
-                "location_types": "city",
-                "limit": 1,
-                "active_only": "true",
-            }
-    response = requests.get(url=LOCATION_ENDPOINT, headers=headers, params=location_query)
-    code_data = response.json()
-    try:
-        iata_code = code_data["locations"][0]["code"]
-    except IndexError:
-        print(f"ERROR! {user_city} didn't get any results. Check spelling?")
-        iata_code = "WTF"
-        return iata_code
-    else:
-        return iata_code
-
-
 def look_for_flights(user_prefs, destination):
     if user_prefs["specific_search_start_date"]:
         print(user_prefs["specific_search_start_date"])
@@ -46,11 +27,14 @@ def look_for_flights(user_prefs, destination):
         "date_to": (today + timedelta(days=int(user_prefs['search_length']))).strftime("%d/%m/%Y"),
         "nights_in_dst_from": user_prefs["min_nights"],
         "nights_in_dst_to": user_prefs["max_nights"],
-        "flight_type": user_prefs["flight_type"],
+        "flight_type": "round",
         "adults": user_prefs["num_adults"],
         "children": user_prefs["num_children"],
         "infants": user_prefs["num_infants"],
         "curr": user_prefs["currency"],
+        "selected_cabins": user_prefs["cabin_class"],
+        "max_fly_duration": user_prefs["max_flight_time"],
+        "max_sector_stopovers": user_prefs["max_stops"],
         "limit": 500
     }
     try:
@@ -124,10 +108,22 @@ if day_of_week == 4:
         user_name = u.name
         user_email = u.email
         print(f"{user_name}: {user_email}")
+
         user_preferences_dict = u.preferences[0].__dict__
         user_destinations_dict = u.destinations[0].__dict__
+        print("\n\n")
         print(f'Preferences: {user_preferences_dict}')
         print(f'Destinations: {user_destinations_dict}')
+        print("\n\n")
+
+        passengers = ""
+        if user_preferences_dict['num_adults'] != 0:
+            passengers += f"{user_preferences_dict['num_adults']} adults"
+        if user_preferences_dict['num_children'] != 0:
+            passengers += f", {user_preferences_dict['num_children']} children"
+        if user_preferences_dict['num_infants'] != 0:
+            passengers += f", {user_preferences_dict['num_infants']} infants"
+        print(passengers)
         list_of_dicts = []
         for x in range(1, 11):
             dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
@@ -137,11 +133,14 @@ if day_of_week == 4:
                 pass
             else:
                 list_of_dicts.append(dict_to_add)
+        print("\n\n")
+        print("List of Destination Dictionaries")
         print(list_of_dicts)
+        print("\n\n")
         for destination in list_of_dicts:
-            # city = destination["city"]
-            # iata_code = search_destination_code(user_city=city)
-            # destination["iata_code"] = iata_code
+
+            print("\n\n")
+            print("Destination")
             print(destination)
             flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
             # print(flight_data)
@@ -150,19 +149,28 @@ if day_of_week == 4:
                 continue
             else:
                 flight_dict = process_flight_info(flight_data=flight_data)
+                print("\n\n")
+                print("Flight Data for Destination")
                 print(flight_dict)
-                flight_deal_list.append({"city": flight_dict["city_to"],
-                 "price": flight_dict["price"],
-                 "nights": flight_dict["nights_at_destination"],
-                 "date1": flight_dict["departure"],
-                 "date2": flight_dict["arrival"],
-                 "image": "REPLACE LATER",
-                 "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
-                         f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
-                         f"{flight_dict['leave_destination_date']}?sortBy=price"})
+                flight_deal_list.append(
+                    {
+                        "city": flight_dict["city_to"],
+                         "price": flight_dict["price"],
+                         "nights": flight_dict["nights_at_destination"],
+                         "date1": flight_dict["departure"],
+                         "date2": flight_dict["arrival"],
+                         "image": "REPLACE LATER",
+                         "passengers": passengers,
+                         "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
+                                 f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
+                                 f"{flight_dict['leave_destination_date']}?sortBy=price"
+                    }
+                )
 
         if flight_deal_list:
-            # send_email(user_name=user_name, user_email=user_email, flight_deal_list=flight_deal_list)
+            send_email(user_name=user_name, user_email=user_email, flight_deal_list=flight_deal_list)
+            print("\n\n\n")
+            print("Flight Deal List:")
             print(flight_deal_list)
         else:
             print("No flight deals this time around :(")
