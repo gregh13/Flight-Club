@@ -285,9 +285,9 @@ def my_preferences():
     specific_start = None
     specific_end = None
     if prefs.specific_search_start_date:
-        specific_start = prefs.specific_search_start_date.strftime('%A, %b %-d')
+        specific_start = prefs.specific_search_start_date.strftime('%a, %B %-d')
     if prefs.specific_search_end_date:
-        specific_end = prefs.specific_search_end_date.strftime('%A, %b %-d')
+        specific_end = prefs.specific_search_end_date.strftime('%a, %B %-d')
 
     preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
                               "cabin_class": cabin_class_dict, "lead_time_start": lead_time_dict,
