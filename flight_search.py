@@ -32,7 +32,6 @@ def figure_out_dates(user_prefs):
     # Sets defaults, helps clean up 'if' statements below
     date_from = forward_start
     date_to = forward_end
-    return_to = None
 
     if specific_start:
         if specific_end:
@@ -42,13 +41,11 @@ def figure_out_dates(user_prefs):
                 # Kiwi Flight Search requires dd/mm/yyyy format
                 date_from = specific_start.strftime("%d/%m/%Y")
                 date_to = specific_end.strftime("%d/%m/%Y")
-                return_to = specific_end.strftime("%d/%m/%Y")
 
             elif specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
                 # start date is past, check end date is ok
                 date_from = today.strftime("%d/%m/%Y")
                 date_to = specific_end.strftime("%d/%m/%Y")
-                return_to = specific_end.strftime("%d/%m/%Y")
 
         elif specific_start >= today:
             # No end date, start date is okay (not past)
@@ -59,11 +56,9 @@ def figure_out_dates(user_prefs):
         if specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
             # end date is okay (far enough out to possibly get results)
             date_to = specific_end.strftime("%d/%m/%Y")
-            return_to = specific_end.strftime("%d/%m/%Y")
 
-    date_dictionary = {"date_from": date_from,
-                       "date_to": date_to,
-                       "return_to": return_to}
+    date_dictionary = {"date_from": date_from, "date_to": date_to}
+
     return date_dictionary
 
 
@@ -85,22 +80,40 @@ def road_goat_image_search(city_name, country_to):
     print(f"City Name: {city_name}")
     city_name = city_name.split(" - ")[0]
     url_encoded_city_name = urllib.parse.quote(city_name)
+    url_encoded_country_name = urllib.parse.quote(country_to)
 
     results = send_api_request(query=url_encoded_city_name)
-
-    if results['data'][0]['relationships']['featured_photo']['data']:
-        print(results["included"])
-        image_link = results["included"][0]["attributes"]["image"]["full"]
-    else:
-        url_encoded_country_name = urllib.parse.quote(country_to)
-        results = send_api_request(query=url_encoded_country_name)
-
+    if results["data"]:
         if results['data'][0]['relationships']['featured_photo']['data']:
             print(results["included"])
             image_link = results["included"][0]["attributes"]["image"]["full"]
         else:
+            results = send_api_request(query=url_encoded_country_name)
+            if results["data"]:
+                if results['data'][0]['relationships']['featured_photo']['data']:
+                    print(results["included"])
+                    image_link = results["included"][0]["attributes"]["image"]["full"]
+                else:
+                    airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                    image_link = airplane
+            else:
+                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                image_link = airplane
+    else:
+        results = send_api_request(query=url_encoded_country_name)
+        if results["data"]:
+            if results['data'][0]['relationships']['featured_photo']['data']:
+                print(results["included"])
+                image_link = results["included"][0]["attributes"]["image"]["full"]
+            else:
+                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                image_link = airplane
+        else:
             airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
             image_link = airplane
+
+
+
     print("IMAGE LINK:")
     print(image_link)
     print("END OF LINK")
@@ -111,20 +124,22 @@ def road_goat_image_search(city_name, country_to):
 def look_for_flights(user_prefs, destination):
 
     flight_date_dict = figure_out_dates(user_prefs)
-
+    print(flight_date_dict)
+    print(type(flight_date_dict["date_to"]))
+    print(user_prefs)
+    print(destination)
     flight_parameters = {
         "fly_from": destination["home_airport"],
         "fly_to": destination["iata"],
         "date_from": flight_date_dict["date_from"],
         "date_to": flight_date_dict["date_to"],
-        "return_to": flight_date_dict["return_to"],
         "nights_in_dst_from": user_prefs["min_nights"],
         "nights_in_dst_to": user_prefs["max_nights"],
         "flight_type": "round",
         "adults": user_prefs["num_adults"],
         "children": user_prefs["num_children"],
         "infants": user_prefs["num_infants"],
-        "curr": user_prefs["currency"],
+        "curr": destination["currency"],
         "selected_cabins": user_prefs["cabin_class"],
         "max_fly_duration": user_prefs["max_flight_time"],
         "max_sector_stopovers": user_prefs["max_stops"],
@@ -207,8 +222,8 @@ for u in all_users:
     user_destinations_dict = u.destinations[0].__dict__
     print("\n")
     print(f'Preferences: {user_preferences_dict}')
-    # print(f'Destinations: {user_destinations_dict}')
-    # print("\n")
+    print(f'Destinations: {user_destinations_dict}')
+    print("\n")
     total_passengers = (user_preferences_dict['num_adults']
                         + user_preferences_dict['num_children']
                         + user_preferences_dict['num_infants'])
@@ -233,7 +248,8 @@ for u in all_users:
     for x in range(1, 11):
         dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
                        "price_ceiling": user_destinations_dict[f'price{x}'],
-                       "home_airport": user_destinations_dict["home_airport"]}
+                       "home_airport": user_destinations_dict["home_airport"],
+                       "currency": user_destinations_dict["currency"]}
         if dict_to_add["iata"] is None:
             pass
         else:
@@ -243,10 +259,10 @@ for u in all_users:
     # print(list_of_dicts)
     # print("\n")
     for destination in list_of_dicts:
-
         print("\n")
         print("Destination")
         print(destination)
+
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # print(flight_data)
         if len(flight_data["data"]) == 0:
