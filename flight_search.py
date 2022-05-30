@@ -23,72 +23,49 @@ headers = {
 
 
 def figure_out_dates(user_prefs):
+
     today = date.today()
     specific_start = user_prefs["specific_search_start_date"]
     specific_end = user_prefs["specific_search_end_date"]
-    forward_start = (today + timedelta(days=int(user_prefs["search_start_date"])))
-    forward_end = (today + timedelta(days=(int(user_prefs["search_start_date"]) + int(user_prefs["search_length"]))))
-    # date_from = forward_start
-    # date_to = forward_end
+    forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
+    forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
+                                           user_prefs["search_length"]))).strftime("%d/%m/%Y")
+
+    # Sets defaults, helps clean up 'if' statements below
+    date_from = forward_start
+    date_to = forward_end
     return_to = None
 
     if specific_start:
-        # Test
-        print(specific_start)
-        date_from = specific_start.strftime("%d/%m/%Y")
-        print(date_from)
-        # End test
-
-        # Checks for both start and end date
         if specific_end:
-            # Start date is ok (and end date since validated with form)
+
             if specific_start >= today:
+                # Start date is ok (and end date since validated with form)
                 # Kiwi Flight Search requires dd/mm/yyyy format
                 date_from = specific_start.strftime("%d/%m/%Y")
                 date_to = specific_end.strftime("%d/%m/%Y")
                 return_to = specific_end.strftime("%d/%m/%Y")
-            # start date is past, check end date is ok
+
             elif specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
+                # start date is past, check end date is ok
+                date_from = today.strftime("%d/%m/%Y")
                 date_to = specific_end.strftime("%d/%m/%Y")
                 return_to = specific_end.strftime("%d/%m/%Y")
 
-            # start date is past and end date is too close
-            else:
-                date_from = forward_start
-                date_to = forward_end
-
-        # No end date, start date is okay (not past)
         elif specific_start >= today:
+            # No end date, start date is okay (not past)
             date_from = specific_start.strftime("%d/%m/%Y")
-            date_to = forward_end
 
-        # Only start date, date is already past
-        else:
-            date_from = forward_start
-            date_to = forward_end
-
-    # Only end date, using default start advance
     elif specific_end:
-        date_from = forward_start
-
-        # end date is okay (far enough out to possibly get results)
-        if specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"] + int(user_prefs["search_start_date"])))):
+        # Only end date, using default start advance
+        if specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
+            # end date is okay (far enough out to possibly get results)
             date_to = specific_end.strftime("%d/%m/%Y")
             return_to = specific_end.strftime("%d/%m/%Y")
-
-        # end date is too close, defaults for both
-        else:
-            date_to = forward_end
-
-    # No start date, no end date, defaults for both
-    else:
-        date_from = forward_start
-        date_to = forward_end
 
     date_dictionary = {"date_from": date_from,
                        "date_to": date_to,
                        "return_to": return_to}
-
     return date_dictionary
 
 
@@ -113,7 +90,6 @@ def road_goat_image_search(city_name, country_to):
 
     results = send_api_request(query=url_encoded_city_name)
 
-    # ADD TRY/EXCEPT Later as this might break code
     if results['data'][0]['relationships']['featured_photo']['data']:
         print(results["included"])
         image_link = results["included"][0]["attributes"]["image"]["full"]
