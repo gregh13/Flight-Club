@@ -1,5 +1,5 @@
 from urllib.error import HTTPError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from main import User
 from iata_codes import all_cities_international
 import requests
@@ -20,6 +20,76 @@ GOAT_SECRET_KEY = "ab3b07cb5f9b54eb249b495d6da62e67"
 headers = {
     "apikey": FLIGHT_API_KEY
         }
+
+
+def figure_out_dates(user_prefs):
+    today = date.today()
+    specific_start = user_prefs["specific_search_start_date"]
+    specific_end = user_prefs["specific_search_end_date"]
+    forward_start = (today + timedelta(days=int(user_prefs["search_start_date"])))
+    forward_end = (today + timedelta(days=(int(user_prefs["search_start_date"]) + int(user_prefs["search_length"]))))
+    # date_from = forward_start
+    # date_to = forward_end
+    return_to = None
+
+    if specific_start:
+        # Test
+        print(specific_start)
+        date_from = specific_start.strftime("%d/%m/%Y")
+        print(date_from)
+        # End test
+
+        # Checks for both start and end date
+        if specific_end:
+            # Start date is ok (and end date since validated with form)
+            if specific_start >= today:
+                # Kiwi Flight Search requires dd/mm/yyyy format
+                date_from = specific_start.strftime("%d/%m/%Y")
+                date_to = specific_end.strftime("%d/%m/%Y")
+                return_to = specific_end.strftime("%d/%m/%Y")
+            # start date is past, check end date is ok
+            elif specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
+                date_to = specific_end.strftime("%d/%m/%Y")
+                return_to = specific_end.strftime("%d/%m/%Y")
+
+            # start date is past and end date is too close
+            else:
+                date_from = forward_start
+                date_to = forward_end
+
+        # No end date, start date is okay (not past)
+        elif specific_start >= today:
+            date_from = specific_start.strftime("%d/%m/%Y")
+            date_to = forward_end
+
+        # Only start date, date is already past
+        else:
+            date_from = forward_start
+            date_to = forward_end
+
+    # Only end date, using default start advance
+    elif specific_end:
+        date_from = forward_start
+
+        # end date is okay (far enough out to possibly get results)
+        if specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"] + int(user_prefs["search_start_date"])))):
+            date_to = specific_end.strftime("%d/%m/%Y")
+            return_to = specific_end.strftime("%d/%m/%Y")
+
+        # end date is too close, defaults for both
+        else:
+            date_to = forward_end
+
+    # No start date, no end date, defaults for both
+    else:
+        date_from = forward_start
+        date_to = forward_end
+
+    date_dictionary = {"date_from": date_from,
+                       "date_to": date_to,
+                       "return_to": return_to}
+
+    return date_dictionary
 
 
 def road_goat_image_search(city_name, country_to):
@@ -65,17 +135,15 @@ def road_goat_image_search(city_name, country_to):
 
 
 def look_for_flights(user_prefs, destination):
-    if user_prefs["specific_search_start_date"]:
-        print(user_prefs["specific_search_start_date"])
-        print(today)
-        start_date = (today + timedelta(days=20)).strftime("%d/%m/%Y")
-        end_date = (today + timedelta(days=50)).strftime("%d/%m/%Y")
-        print(start_date)
+
+    flight_date_dict = figure_out_dates(user_prefs)
+
     flight_parameters = {
         "fly_from": destination["home_airport"],
         "fly_to": destination["iata"],
-        "date_from": (today + timedelta(days=int(user_prefs['search_start_date']))).strftime("%d/%m/%Y"),
-        "date_to": (today + timedelta(days=int(user_prefs['search_length']))).strftime("%d/%m/%Y"),
+        "date_from": flight_date_dict["date_from"],
+        "date_to": flight_date_dict["date_to"],
+        "return_to": flight_date_dict["return_to"],
         "nights_in_dst_from": user_prefs["min_nights"],
         "nights_in_dst_to": user_prefs["max_nights"],
         "flight_type": "round",
@@ -127,7 +195,7 @@ def send_email(user_name, user_email, flight_deal_list, template_id):
                 "email": user_email,
                 "name": user_name
             }],
-            "subject": "This week's dose of flight deals is here!",
+            "subject": "The results for your flight search are here! Come check it out",
             "params": {
                 "destinations": flight_deal_list
             },
@@ -146,7 +214,7 @@ def send_email(user_name, user_email, flight_deal_list, template_id):
 
 
 # Scheduler runs everyday, this turns it into a weekly task run on Friday (day 4)
-if day_of_week == 4:
+if day_of_week == 0:
     today = datetime.now()
     print(today)
     tomorrow = (today + timedelta(days=1))
@@ -206,33 +274,35 @@ if day_of_week == 4:
                 continue
             else:
                 flight_dict = process_flight_info(flight_data=flight_data)
-                # print("\n")
-                # print("Flight Data for Destination")
-                # print(flight_dict)
-                # print("\n")
+                print("\n")
+                print("Flight Data for Destination")
+                print(flight_dict)
+                print("\n")
+                if flight_dict["price"] <= destination["price_ceiling"]:
+                    depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
+                    depart_day = depart.strftime('%A, %b %-d')
+                    back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
+                    back_home_day = back_home.strftime('%A, %b %-d')
+                    print("\nRoad Goat Results:")
+                    city_name = all_cities_international[destination["iata"]]
+                    image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
-                depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
-                depart_day = depart.strftime('%A, %b %-d')
-                back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
-                back_home_day = back_home.strftime('%A, %b %-d')
-                print("\nRoad Goat Results:")
-                city_name = all_cities_international[destination["iata"]]
-                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
-
-                flight_deal_list.append(
-                    {
-                         "city": flight_dict["city_to"],
-                         "price": flight_dict["price"],
-                         "nights": flight_dict["nights_at_destination"],
-                         "date1": depart_day,
-                         "date2": back_home_day,
-                         "image": image_link,
-                         "passengers": passengers,
-                         "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
-                                 f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
-                                 f"{flight_dict['leave_destination_date']}?sortBy=price"
-                    }
-                )
+                    flight_deal_list.append(
+                        {
+                             "city": flight_dict["city_to"],
+                             "price": flight_dict["price"],
+                             "nights": flight_dict["nights_at_destination"],
+                             "date1": depart_day,
+                             "date2": back_home_day,
+                             "image": image_link,
+                             "passengers": passengers,
+                             "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
+                                     f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
+                                     f"{flight_dict['leave_destination_date']}?sortBy=price"
+                        }
+                    )
+                else:
+                    print("\n\nPrice is NO GOOD\n\n")
 
         if flight_deal_list:
             template_id = 1
@@ -249,7 +319,9 @@ if day_of_week == 4:
                        user_email=user_email,
                        flight_deal_list=flight_deal_list,
                        template_id=template_id)
-            print("No flight deals this time around :(")
+            print("\n\n")
+            print("No flight deals this time around :(\n NO DEALSSS")
+            print("\n\n")
 
 
 
