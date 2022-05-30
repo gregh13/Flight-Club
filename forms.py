@@ -2,10 +2,18 @@ from flask import flash
 from flask_wtf import FlaskForm, Form
 from wtforms import *
 from wtforms.validators import *
-from datetime import timedelta
+from datetime import timedelta, date
 from iata_codes import all_cities_international
 
 city_list = [all_cities_international[iata] for iata in all_cities_international]
+
+
+def invalid_date(form, field):
+    if field.data < date.today():
+        flash("Error: You can't choose a specific date that is in the past! Only future dates are accepted",
+              "error")
+        raise ValidationError(
+            "Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
 
 
 def date_range_check(form, field):
@@ -69,14 +77,14 @@ class PreferenceForm(FlaskForm):
                                              (60, 'Two months'), (90, 'Three months'),
                                              (0, 'Specific Start Date? Use the input below')],
                                     validators=[DataRequired()], description="Note: This is a rolling date range, meaning it will move as time passes. Since Flight Club searches flights weekly, this is better than a specific date range.")
-    specific_search_start_date = DateField('Alternatively, choose a specific Start Date', validators=[Optional()],
+    specific_search_start_date = DateField('Alternatively, choose a specific Start Date', validators=[Optional(), invalid_date],
                                            description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     search_length = SelectField("Search Date Range (the window of time flights will be searched)", coerce=int,
                                 choices=[(7, 'One week'), (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'), (60, 'Two months'), (90, 'Three months'), (120, 'Four months'),
                                          (0, 'Specific End Date? Use the input below')], validators=[DataRequired()],
                                 description="Note: This is also a rolling date range, meaning it will move as time passes. For example, if it begins looking for flights 'One month' out and has a date range of '3 months', then if it searches on June 10th, it would look for all flights between July 10th and October 10th.")
     specific_search_end_date = DateField('Alternatively, choose a specific End Date',
-                                           validators=[Optional(), date_range_check], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
+                                           validators=[Optional(), invalid_date, date_range_check], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     submit = SubmitField("Save Changes")
 
 
