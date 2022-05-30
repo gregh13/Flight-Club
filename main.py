@@ -275,7 +275,8 @@ def my_preferences():
     page_title = "My Preferences"
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
 
-    email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 4: "Once a month"}
+    email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 3: "Once every two weeks",
+                       4: "Once a month", 5: "Once a month", 6: "Once a month", 7: "Once a month"}
     email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
     lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
