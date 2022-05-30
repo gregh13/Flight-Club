@@ -237,17 +237,25 @@ if day_of_week == 0:
         # print(f'Preferences: {user_preferences_dict}')
         # print(f'Destinations: {user_destinations_dict}')
         # print("\n")
-
+        total_passengers = (user_preferences_dict['num_adults']
+                            + user_preferences_dict['num_children']
+                            + user_preferences_dict['num_infants'])
         passengers = ""
         if user_preferences_dict['num_adults'] != 0:
             if user_preferences_dict['num_adults'] == 1:
-                passengers += f"{user_preferences_dict['num_adults']} adult"
+                passengers += f"{user_preferences_dict['num_adults']} Adult"
             else:
-                passengers += f"{user_preferences_dict['num_adults']} adults"
+                passengers += f"{user_preferences_dict['num_adults']} Adults"
         if user_preferences_dict['num_children'] != 0:
-            passengers += f", {user_preferences_dict['num_children']} children"
+            if user_preferences_dict['num_children'] == 1:
+                passengers += f"{user_preferences_dict['num_children']} Child"
+            else:
+                passengers += f", {user_preferences_dict['num_children']} Children"
         if user_preferences_dict['num_infants'] != 0:
-            passengers += f", {user_preferences_dict['num_infants']} infants"
+            if user_preferences_dict['num_infants'] == 1:
+                passengers += f"{user_preferences_dict['num_infants']} Infant"
+            else:
+                passengers += f", {user_preferences_dict['num_infants']} Infants"
         # print(passengers)
         list_of_dicts = []
         for x in range(1, 11):
@@ -274,16 +282,20 @@ if day_of_week == 0:
                 continue
             else:
                 flight_dict = process_flight_info(flight_data=flight_data)
-                print("\n")
-                print("Flight Data for Destination")
-                print(flight_dict)
-                print("\n")
-                if flight_dict["price"] <= destination["price_ceiling"]:
+                # print("\n")
+                # print("Flight Data for Destination")
+                # print(flight_dict)
+                # print("\n")
+                # searched_currency = flight_data["currency"]
+                # currency_rate_to_USD = flight_data["fx_rate"]
+                price_ceiling = total_passengers * destination["price_ceiling"]
+
+                if flight_dict["price"] <= price_ceiling:
                     depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
                     depart_day = depart.strftime('%A, %b %-d')
                     back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
                     back_home_day = back_home.strftime('%A, %b %-d')
-                    print("\nRoad Goat Results:")
+
                     city_name = all_cities_international[destination["iata"]]
                     image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
