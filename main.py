@@ -93,9 +93,9 @@ class Preferences(db.Model, Base):
     num_adults = db.Column(db.Integer, nullable=False)
     num_children = db.Column(db.Integer, nullable=False)
     num_infants = db.Column(db.Integer, nullable=False)
-    search_start_date = db.Column(db.String(200))
+    search_start_date = db.Column(db.Integer)
     specific_search_start_date = db.Column(db.Date)
-    search_length = db.Column(db.String(200))
+    search_length = db.Column(db.Integer)
     specific_search_end_date = db.Column(db.Date)
 
 
