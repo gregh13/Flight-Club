@@ -284,13 +284,17 @@ for u in all_users:
                 back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
                 back_home_day = back_home.strftime('%A, %b %-d')
 
+                price_formatted = "{:,}".format(flight_dict["price"])
+                print(price_formatted)
+                price_formatted = str(price_formatted) + f" {destination['currency']}"
+                print(price_formatted)
                 city_name = all_cities_international[destination["iata"]]
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
                 flight_deal_list.append(
                     {
                          "city": flight_dict["city_to"],
-                         "price": flight_dict["price"],
+                         "price": price_formatted,
                          "nights": flight_dict["nights_at_destination"],
                          "date1": depart_day,
                          "date2": back_home_day,
