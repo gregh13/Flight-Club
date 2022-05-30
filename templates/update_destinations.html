@@ -20,9 +20,11 @@
                 <form method="POST" action="">
                     {{ form.csrf_token }}
                     <h4>{{form.home_airport.label}}</h4>
-                    {{ form.home_airport() }} <br><br>
+                    {{ form.home_airport() }} <br>
                     <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
-                        {{form.home_airport.description}}</p>
+                        {{ form.home_airport.description }}</p>
+                    <br>
+                    <h6>Currency: {{ form.currency() }}</h6>
                     <br>
                     <h4>Your Travel Destinations</h4><br>
                     <table id="destinations" style="margin: 0 auto;">
