@@ -125,7 +125,7 @@ class FlightDeals(db.Model, Base):
     deal10 = db.Column(db.String(1000))
     link10 = db.Column(db.String(1000))
 
-db.create_all()
+# db.create_all()
 
 
 def admin_only(function):
@@ -282,17 +282,17 @@ def my_preferences():
                       60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
     search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
                           60: 'Two months', 90: 'Three months', 120: 'Four months', 0: 'Using Specific Date'}
-    specific_start = None
-    specific_end = None
+    start_specific = None
+    end_specific = None
     if prefs.specific_search_start_date:
-        specific_start = prefs.specific_search_start_date.strftime('%a, %B %-d')
+        start_specific = prefs.specific_search_start_date.strftime('%a, %B %-d')
     if prefs.specific_search_end_date:
-        specific_end = prefs.specific_search_end_date.strftime('%a, %B %-d')
+        end_specific = prefs.specific_search_end_date.strftime('%a, %B %-d')
 
     preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
                               "cabin_class": cabin_class_dict, "lead_time_start": lead_time_dict,
-                              "search_length": search_length_dict, "specific_start": specific_start,
-                              "specific_end": specific_end}
+                              "search_length": search_length_dict, "start_specific": start_specific,
+                              "end_specific": end_specific}
 
     return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
 

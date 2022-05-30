@@ -1,19 +1,16 @@
 from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
-from main import User
+from main import User, Preferences, db
 from iata_codes import all_cities_international
 import requests
 import base64
 import urllib.parse
 
 day_of_week = datetime.today().weekday()
-print(day_of_week)
-print(type(day_of_week))
 
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
 FLIGHT_API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
-
 
 GOAT_ACCESS_KEY = "e1d1a17cc2722373422ab8cbd9ec51ef"
 GOAT_SECRET_KEY = "ab3b07cb5f9b54eb249b495d6da62e67"
@@ -24,8 +21,8 @@ headers = {
 
 def figure_out_dates(user_prefs):
     today = date.today()
-    specific_start = user_prefs["specific_search_start_date"]
-    specific_end = user_prefs["specific_search_end_date"]
+    start_specific = user_prefs["specific_search_start_date"]
+    end_specific = user_prefs["specific_search_end_date"]
     forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
     forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
                                            user_prefs["search_length"]))).strftime("%d/%m/%Y")
@@ -33,29 +30,28 @@ def figure_out_dates(user_prefs):
     date_from = forward_start
     date_to = forward_end
 
-    if specific_start:
-        if specific_end:
-
-            if specific_start >= today:
+    if start_specific:
+        if end_specific:
+            if start_specific >= today:
                 # Start date is ok (and end date since validated with form)
                 # Kiwi Flight Search requires dd/mm/yyyy format
-                date_from = specific_start.strftime("%d/%m/%Y")
-                date_to = specific_end.strftime("%d/%m/%Y")
+                date_from = start_specific.strftime("%d/%m/%Y")
+                date_to = end_specific.strftime("%d/%m/%Y")
 
-            elif specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
+            elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
                 # start date is past, check end date is ok
                 date_from = today.strftime("%d/%m/%Y")
-                date_to = specific_end.strftime("%d/%m/%Y")
+                date_to = end_specific.strftime("%d/%m/%Y")
 
-        elif specific_start >= today:
+        elif start_specific >= today:
             # No end date, start date is okay (not past)
-            date_from = specific_start.strftime("%d/%m/%Y")
+            date_from = start_specific.strftime("%d/%m/%Y")
 
-    elif specific_end:
+    elif end_specific:
         # Only end date, using default start advance
-        if specific_end > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
+        if end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
             # end date is okay (far enough out to possibly get results)
-            date_to = specific_end.strftime("%d/%m/%Y")
+            date_to = end_specific.strftime("%d/%m/%Y")
 
     date_dictionary = {"date_from": date_from, "date_to": date_to}
 
@@ -211,8 +207,40 @@ for u in all_users:
     if day_of_week != email_day:
         print("Not today, my friend!")
         continue
-
     print("TODAY IS THE DAY!")
+    user_preference_object = Preferences.query.filter_by(user_pref_id=u.preferences[0].user_pref_id).first()
+    email_freq = user_preference_object.email_frequency
+    # Find User Pref instead!!
+    if email_freq != 1:
+        if email_freq == 2:
+            print("Biweekly, send")
+            print(user_preference_object.email_frequency)
+            user_preference_object.email_frequency = 3
+            db.session.commit()
+            print(user_preference_object.email_frequency)
+            # change to 3
+
+        elif email_freq == 3:
+            print("Biweekly, don't send")
+            # change to 2
+            continue
+        elif email_freq == 4:
+            print("Monthly, send")
+            # change to 5
+        elif email_freq == 5:
+            print("Monthly, don't send")
+            # change to 6
+            continue
+        elif email_freq == 6:
+            print("Monthly, don't send")
+            # change to 7
+            continue
+        elif email_freq == 7:
+            print("Monthly, don't send")
+            # change to 4
+            continue
+
+    print("WEEKLY EMAIL")
     flight_deal_list = []
     user_name = u.name
     user_email = u.email
