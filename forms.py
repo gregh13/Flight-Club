@@ -1,13 +1,23 @@
+from flask import flash
 from flask_wtf import FlaskForm, Form
 from wtforms import *
 from wtforms.validators import *
+from datetime import timedelta
 from iata_codes import all_cities_international
 
-
-possible_cities = {'SFO': 'San Francisco', 'BKK': 'Bangkok (BKK)', 'DMK': 'Bangkok(DMK)',
-                   'SIN': 'Singapore', 'SMF': 'Sacramento', 'MLE': 'Male (Maldives)', 'BUD': 'Budapest',
-                   'CDG': 'Paris (CDG)', 'TPE': 'Taipei', 'SYD': 'Sydney'}
 city_list = [all_cities_international[iata] for iata in all_cities_international]
+
+
+def date_range_check(form, field):
+    if form.specific_search_start_date.data:
+        if field.data < form.specific_search_start_date.data:
+            flash("*** Error: You can't choose a specific End Date that's earlier than your specific Start Date. ***", "error")
+            raise ValidationError("Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
+        if field.data < (form.specific_search_start_date.data + timedelta(days=(form.min_nights.data))):
+            flash("*** Error: You can't have a specific date range that is shorter than your minimum nights setting. ***", "error")
+            raise ValidationError("Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
+    else:
+        print("No Bueno")
 
 
 # # WTForm
@@ -24,23 +34,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-class TrialForm(FlaskForm):
-    trial = StringField("Trial", validators=[AnyOf(values=city_list, message="Please select one of the choices shown as you type")])
-    submit = SubmitField("Submit")
-
-
-# class CityPriceForm(Form):
-#     city = SelectField("City Name",
-#                        choices=[("", "")] + [(iata, city) for iata, city in all_cities_international.items()],
-#                        # [("", "")] is needed for a placeholder
-#                        validators=[InputRequired()])
-#     price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
-
-
 class CityPriceForm(Form):
-    city = StringField("City Name", validators=[DataRequired(),
-                                                AnyOf(values=city_list,
-                                                      message="Please select one of the choices shown as you type.")])
+    city = StringField("City Name",
+                       validators=[DataRequired(),
+                                   AnyOf(values=city_list,
+                                         message="Please select one of the choices shown as you type.")])
+
     price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
 
 
@@ -62,9 +61,9 @@ class PreferenceForm(FlaskForm):
     exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=[("Select Option", 'Select Option'), ('True', 'Exclude'), ('False', 'Include The Cheapos')], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
     max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, max=6)])
     max_flight_time = IntegerField("Max Flight Duration", validators=[Optional()])
-    num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=0, max=6)])
-    num_children = IntegerField("Number of Child Passengers (Age 2-11)", validators=[Optional(), NumberRange(min=0, max=6)])
-    num_infants = IntegerField("Number of Infant Passengers (Age < 2)", validators=[Optional(), NumberRange(min=0, max=6)])
+    num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=1, max=6)])
+    num_children = IntegerField("Number of Child Passengers (Age 2-11)", validators=[Optional(), NumberRange(min=0, max=4)])
+    num_infants = IntegerField("Number of Infant Passengers (Age < 2)", validators=[Optional(), NumberRange(min=0, max=3)])
     search_start_date = SelectField("How far out should the flight search begin looking for flights", coerce=int,
                                     choices=[(1, 'One day'), (7, 'One week'),
                                              (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
@@ -78,7 +77,7 @@ class PreferenceForm(FlaskForm):
                                          (0, 'Specific End Date? Use the input below')], validators=[DataRequired()],
                                 description="Note: This is also a rolling date range, meaning it will move as time passes. For example, if it begins looking for flights 'One month' out and has a date range of '3 months', then if it searches on June 10th, it would look for all flights between July 10th and October 10th.")
     specific_search_end_date = DateField('Alternatively, choose a specific End Date',
-                                           validators=[Optional()], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
+                                           validators=[Optional(), date_range_check], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     submit = SubmitField("Save Changes")
 
 
