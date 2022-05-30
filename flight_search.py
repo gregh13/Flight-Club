@@ -5,6 +5,7 @@ from iata_codes import all_cities_international
 import requests
 import base64
 import urllib.parse
+import random
 
 day_of_week = datetime.today().weekday()
 
@@ -236,7 +237,6 @@ for u in all_users:
             db.session.commit()
             continue
 
-    print("WEEKLY EMAIL")
     flight_deal_list = []
     user_name = u.name
     user_email = u.email
@@ -286,9 +286,20 @@ for u in all_users:
         print("\n")
         print("Destination")
         print(destination)
+        # 'Surprise Me' choice
+        if destination["iata"] == "???":
+            # Protects against randomly getting "???" again
+            while destination["iata"] == "???":
+                destination["iata"] = random.choice(list(all_cities_international))
+                print("\n\nSURPRISE MEEEEE\n")
+                print(destination["iata"])
 
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # print(flight_data)
+        # When fly_to location code is bad or doesn't exist
+        if 'Unprocessable Entity' in flight_data.values():
+            print("\nBAD AIRPORT CODE\n")
+            continue
         if len(flight_data["data"]) == 0:
             print(f"No flight data for destination: {destination['iata']}")
             continue
