@@ -6,26 +6,28 @@
 <div class="container">
   <div class="row">
       <div class="col-lg-6 col-md-8 mx-auto form-container">
-        <div class="left-padded">
-          <li><strong>Your email:</strong> {{ prefs.email }}</li>
-          <li><strong>Email Frequency:</strong> {{ prefs.email_frequency }}</li>
-          <li><strong>Email Sent On:</strong> {{ prefs.email_day }}</li>
-          <li><strong>Min Nights:</strong> {{ prefs.min_nights }}</li>
-          <li><strong>Max Nights:</strong> {{ prefs.max_nights }}</li>
-          <li><strong>Currency: </strong>{{ prefs.currency }}</li>
-          <li><strong>Cabin Class:</strong> {{ prefs.cabin_class }}</li>
-          <li><strong>Exclude Airlines?:</strong> {{ prefs.exclude_airlines }}</li>
-          <li><strong>Max Stops:</strong> {{ prefs.max_stops }}</li>
-          <li><strong>Max Flight Time:</strong> {{ prefs.max_flight_time }}</li>
-          <li><strong>Num Adults:</strong> {{ prefs.num_adults }}</li>
-          <li><strong>Num Children:</strong> {{ prefs.num_children }}</li>
-          <li><strong>Num Infants:</strong> {{ prefs.num_infants }}</li>
-          <li><strong>Search Start Date:</strong> {{ prefs.search_start_date }}</li>
+        <div>
+          <table>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Your email:</strong></td><td style="text-align: left"><strong>{{ prefs.email }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Email Frequency:</strong></td><td style="text-align: left"><strong>{{ prefs.email_frequency }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Email Sent On:</strong></td><td style="text-align: left"><strong>{{ prefs.email_day }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Min Nights:</strong></td><td style="text-align: left"><strong>{{ prefs.min_nights }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Max Nights:</strong></td><td style="text-align: left"><strong>{{ prefs.max_nights }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Currency: </strong></td><td style="text-align: left"><strong>{{ prefs.currency }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Cabin Class:</strong></td><td style="text-align: left"><strong>{{ prefs.cabin_class }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Exclude Airlines?:</strong></td><td style="text-align: left"><strong>{{ prefs.exclude_airlines }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Max Stops:</strong></td><td style="text-align: left"><strong>{{ prefs.max_stops }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Max Flight Time:</strong></td><td style="text-align: left"><strong>{{ prefs.max_flight_time }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Num Adults:</strong></td><td style="text-align: left"><strong>{{ prefs.num_adults }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Num Children:</strong></td><td style="text-align: left"><strong>{{ prefs.num_children }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Num Infants:</strong></td><td style="text-align: left"><strong>{{ prefs.num_infants }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Search Start Date:</strong></td><td style="text-align: left"><strong>{{ prefs.search_start_date }}</strong></td></tr>
           {% if prefs.specific_search_start_date: %}
-          <li><strong>Specific Search Start Date:</strong> {{ prefs.specific_search_start_date }}</li>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Specific Search Start Date:</strong></td><td style="text-align: left"><strong>{{ prefs.specific_search_start_date }}</strong></td></tr>
           {% endif %}
-          <li><strong>Search Length:</strong> {{ prefs.search_length }}</li>
-          <li><strong>Specific Search End Date:</strong> {{ prefs.specific_search_end_date }}</li>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Search Length:</strong></td><td style="text-align: left"><strong>{{ prefs.search_length }}</strong></td></tr>
+            <tr><td style="text-align: right; padding-right: 10px"><strong>Specific Search End Date:</strong></td><td style="text-align: left"><strong>{{ prefs.specific_search_end_date }}</strong></td></tr>
+            </table>
         </div>
         <br>
         <a type="button" href="{{ url_for('update_preferences') }}" class="w-33 btn btn-md btn-custom">Update Preferences</a>
