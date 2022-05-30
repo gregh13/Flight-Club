@@ -16,8 +16,6 @@ def date_range_check(form, field):
         if field.data < (form.specific_search_start_date.data + timedelta(days=(form.min_nights.data))):
             flash("*** Error: You can't have a specific date range that is shorter than your minimum nights setting. ***", "error")
             raise ValidationError("Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
-    else:
-        print("No Bueno")
 
 
 # # WTForm
@@ -46,6 +44,8 @@ class CityPriceForm(Form):
 class DestinationForm(FlaskForm):
     search = SearchField("Search field")
     home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
+    currency = SelectField("Currency", choices=['Select Option', 'USD', 'SGD', 'AUD', 'THB', 'CNY', 'GBP', 'CAD'],
+                           validators=[DataRequired()])
     destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
 
 
@@ -56,7 +56,6 @@ class PreferenceForm(FlaskForm):
                             choices=[(0, "Monday"), (1, "Tuesday"), (2, "Wednesday"), (3, "Thursday"), (4, "Friday"), (5, "Saturday"), (6, "Sunday")])
     min_nights = IntegerField("Trip Duration: Minimum Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The minimum length of time spent at your travel destination.")
     max_nights = IntegerField("Trip Duration: Max Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The maximum length of time spent at your travel destination. Actual trip duration will be somewhere in-between the min and max duration")
-    currency = SelectField("Currency", choices=['Select Option', 'USD', 'SGD', 'AUD', 'THB', 'CNY', 'GBP', 'CAD'], validators=[DataRequired()])
     cabin_class = SelectField("Cabin Class", choices=[('Select Option', 'Select Option'),('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
     exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=[("Select Option", 'Select Option'), ('True', 'Exclude'), ('False', 'Include The Cheapos')], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
     max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, max=6)])
