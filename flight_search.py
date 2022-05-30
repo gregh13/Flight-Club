@@ -3,12 +3,12 @@ from datetime import datetime, timedelta, date
 from main import User
 from iata_codes import all_cities_international
 import requests
-import http.client
 import base64
 import urllib.parse
 
 day_of_week = datetime.today().weekday()
 print(day_of_week)
+print(type(day_of_week))
 
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
@@ -23,14 +23,12 @@ headers = {
 
 
 def figure_out_dates(user_prefs):
-
     today = date.today()
     specific_start = user_prefs["specific_search_start_date"]
     specific_end = user_prefs["specific_search_end_date"]
     forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
     forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
                                            user_prefs["search_length"]))).strftime("%d/%m/%Y")
-
     # Sets defaults, helps clean up 'if' statements below
     date_from = forward_start
     date_to = forward_end
@@ -189,139 +187,123 @@ def send_email(user_name, user_email, flight_deal_list, template_id):
     return
 
 
-# Scheduler runs everyday, this turns it into a weekly task run on Friday (day 4)
-if day_of_week == 0:
-    today = datetime.now()
-    print(today)
-    tomorrow = (today + timedelta(days=1))
-    if tomorrow > today:
-        print("Greater")
-    # Grab data from database
-    all_users = User.query.all()
-    print(all_users)
-    for u in all_users:
-        flight_deal_list = []
-        if flight_deal_list:
-            print("\n\n\n\n EMPTY LIST IS STILL TRUEEEE \n\n\n\n")
-        user_name = u.name
-        user_email = u.email
-        print(f"{user_name}: {user_email}")
+# Grab data from database
+all_users = User.query.all()
+print(all_users)
+for u in all_users:
+    print(u.name)
+    email_day = u.preferences[0].email_day
+    if day_of_week != email_day:
+        print("Not today, my friend!")
+        continue
 
-        user_preferences_dict = u.preferences[0].__dict__
-        user_destinations_dict = u.destinations[0].__dict__
-        # print("\n")
-        # print(f'Preferences: {user_preferences_dict}')
-        # print(f'Destinations: {user_destinations_dict}')
-        # print("\n")
-        total_passengers = (user_preferences_dict['num_adults']
-                            + user_preferences_dict['num_children']
-                            + user_preferences_dict['num_infants'])
-        passengers = ""
-        if user_preferences_dict['num_adults'] != 0:
-            if user_preferences_dict['num_adults'] == 1:
-                passengers += f"{user_preferences_dict['num_adults']} Adult"
-            else:
-                passengers += f"{user_preferences_dict['num_adults']} Adults"
-        if user_preferences_dict['num_children'] != 0:
-            if user_preferences_dict['num_children'] == 1:
-                passengers += f"{user_preferences_dict['num_children']} Child"
-            else:
-                passengers += f", {user_preferences_dict['num_children']} Children"
-        if user_preferences_dict['num_infants'] != 0:
-            if user_preferences_dict['num_infants'] == 1:
-                passengers += f"{user_preferences_dict['num_infants']} Infant"
-            else:
-                passengers += f", {user_preferences_dict['num_infants']} Infants"
-        # print(passengers)
-        list_of_dicts = []
-        for x in range(1, 11):
-            dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
-                           "price_ceiling": user_destinations_dict[f'price{x}'],
-                           "home_airport": user_destinations_dict["home_airport"]}
-            if dict_to_add["iata"] is None:
-                pass
-            else:
-                list_of_dicts.append(dict_to_add)
-        # print("\n")
-        # print("List of Destination Dictionaries")
-        # print(list_of_dicts)
-        # print("\n")
-        for destination in list_of_dicts:
+    print("TODAY IS THE DAY!")
+    flight_deal_list = []
+    user_name = u.name
+    user_email = u.email
+    print(f"{user_name}: {user_email}")
 
-            print("\n")
-            print("Destination")
-            print(destination)
-            flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
-            # print(flight_data)
-            if len(flight_data["data"]) == 0:
-                print(f"No flight data for destination: {destination['iata']}")
-                continue
-            else:
-                flight_dict = process_flight_info(flight_data=flight_data)
-                # print("\n")
-                # print("Flight Data for Destination")
-                # print(flight_dict)
-                # print("\n")
-                # searched_currency = flight_data["currency"]
-                # currency_rate_to_USD = flight_data["fx_rate"]
-                price_ceiling = total_passengers * destination["price_ceiling"]
-
-                if flight_dict["price"] <= price_ceiling:
-                    depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
-                    depart_day = depart.strftime('%A, %b %-d')
-                    back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
-                    back_home_day = back_home.strftime('%A, %b %-d')
-
-                    city_name = all_cities_international[destination["iata"]]
-                    image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
-
-                    flight_deal_list.append(
-                        {
-                             "city": flight_dict["city_to"],
-                             "price": flight_dict["price"],
-                             "nights": flight_dict["nights_at_destination"],
-                             "date1": depart_day,
-                             "date2": back_home_day,
-                             "image": image_link,
-                             "passengers": passengers,
-                             "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
-                                     f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
-                                     f"{flight_dict['leave_destination_date']}?sortBy=price"
-                        }
-                    )
-                else:
-                    print("\n\nPrice is NO GOOD\n\n")
-
-        if flight_deal_list:
-            template_id = 1
-            send_email(user_name=user_name,
-                       user_email=user_email,
-                       flight_deal_list=flight_deal_list,
-                       template_id=template_id)
-            print("\n\n")
-            print("Flight Deal List:")
-            print(flight_deal_list)
+    user_preferences_dict = u.preferences[0].__dict__
+    user_destinations_dict = u.destinations[0].__dict__
+    print("\n")
+    print(f'Preferences: {user_preferences_dict}')
+    # print(f'Destinations: {user_destinations_dict}')
+    # print("\n")
+    total_passengers = (user_preferences_dict['num_adults']
+                        + user_preferences_dict['num_children']
+                        + user_preferences_dict['num_infants'])
+    passengers = ""
+    if user_preferences_dict['num_adults'] != 0:
+        if user_preferences_dict['num_adults'] == 1:
+            passengers += f"{user_preferences_dict['num_adults']} Adult"
         else:
-            template_id = 3
-            send_email(user_name=user_name,
-                       user_email=user_email,
-                       flight_deal_list=flight_deal_list,
-                       template_id=template_id)
-            print("\n\n")
-            print("No flight deals this time around :(\n NO DEALSSS")
-            print("\n\n")
+            passengers += f"{user_preferences_dict['num_adults']} Adults"
+    if user_preferences_dict['num_children'] != 0:
+        if user_preferences_dict['num_children'] == 1:
+            passengers += f"{user_preferences_dict['num_children']} Child"
+        else:
+            passengers += f", {user_preferences_dict['num_children']} Children"
+    if user_preferences_dict['num_infants'] != 0:
+        if user_preferences_dict['num_infants'] == 1:
+            passengers += f"{user_preferences_dict['num_infants']} Infant"
+        else:
+            passengers += f", {user_preferences_dict['num_infants']} Infants"
+    # print(passengers)
+    list_of_dicts = []
+    for x in range(1, 11):
+        dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
+                       "price_ceiling": user_destinations_dict[f'price{x}'],
+                       "home_airport": user_destinations_dict["home_airport"]}
+        if dict_to_add["iata"] is None:
+            pass
+        else:
+            list_of_dicts.append(dict_to_add)
+    # print("\n")
+    # print("List of Destination Dictionaries")
+    # print(list_of_dicts)
+    # print("\n")
+    for destination in list_of_dicts:
 
+        print("\n")
+        print("Destination")
+        print(destination)
+        flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
+        # print(flight_data)
+        if len(flight_data["data"]) == 0:
+            print(f"No flight data for destination: {destination['iata']}")
+            continue
+        else:
+            flight_dict = process_flight_info(flight_data=flight_data)
+            # print("\n")
+            # print("Flight Data for Destination")
+            # print(flight_dict)
+            # print("\n")
+            # searched_currency = flight_data["currency"]
+            # currency_rate_to_USD = flight_data["fx_rate"]
+            price_ceiling = total_passengers * destination["price_ceiling"]
 
+            if flight_dict["price"] <= price_ceiling:
+                depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
+                depart_day = depart.strftime('%A, %b %-d')
+                back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
+                back_home_day = back_home.strftime('%A, %b %-d')
 
+                city_name = all_cities_international[destination["iata"]]
+                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
+                flight_deal_list.append(
+                    {
+                         "city": flight_dict["city_to"],
+                         "price": flight_dict["price"],
+                         "nights": flight_dict["nights_at_destination"],
+                         "date1": depart_day,
+                         "date2": back_home_day,
+                         "image": image_link,
+                         "passengers": passengers,
+                         "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
+                                 f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
+                                 f"{flight_dict['leave_destination_date']}?sortBy=price"
+                    }
+                )
+            else:
+                print("\n\nPrice is NO GOOD\n\n")
 
-    # ------------------------
+    if flight_deal_list:
+        template_id = 1
+        send_email(user_name=user_name,
+                   user_email=user_email,
+                   flight_deal_list=flight_deal_list,
+                   template_id=template_id)
+        print("\n\n")
+        print("Flight Deal List:")
+        print(flight_deal_list)
+    else:
+        template_id = 3
+        send_email(user_name=user_name,
+                   user_email=user_email,
+                   flight_deal_list=flight_deal_list,
+                   template_id=template_id)
+        print("\n\n")
+        print("No flight deals this time around :(\n NO DEALSSS")
+        print("\n\n")
 
-
-
-
-
-
-
-else:
-    print("Not Flight Deal time yet!")
