@@ -1,16 +1,67 @@
 from urllib.error import HTTPError
 from datetime import datetime, timedelta
 from main import User
+from iata_codes import all_cities_international
 import requests
+import http.client
+import base64
+import urllib.parse
+
 day_of_week = datetime.today().weekday()
 print(day_of_week)
 
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
-API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
+FLIGHT_API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
+
+
+GOAT_ACCESS_KEY = "e1d1a17cc2722373422ab8cbd9ec51ef"
+GOAT_SECRET_KEY = "ab3b07cb5f9b54eb249b495d6da62e67"
 headers = {
-    "apikey": API_KEY
+    "apikey": FLIGHT_API_KEY
         }
+
+
+def road_goat_image_search(city_name, country_to):
+    def send_api_request(query):
+        url = f"https://api.roadgoat.com/api/v2/destinations/auto_complete?q={query}"
+        encoded_bytes = base64.b64encode(f'{GOAT_ACCESS_KEY}:{GOAT_SECRET_KEY}'.encode("utf-8"))
+        auth_key = str(encoded_bytes, "utf-8")
+        headers = {
+            'Authorization': f'Basic {auth_key}'
+        }
+        response = requests.get(url=url, headers=headers)
+        res = response.json()
+        print("\nAutocomplete Data Results:")
+        print(res)
+        return res
+
+    print(f"\nCountry: {country_to}\n")
+    print(f"City Name: {city_name}")
+    city_name = city_name.split(" - ")[0]
+    url_encoded_city_name = urllib.parse.quote(city_name)
+
+    results = send_api_request(query=url_encoded_city_name)
+
+    # ADD TRY/EXCEPT Later as this might break code
+    if results['data'][0]['relationships']['featured_photo']['data']:
+        print(results["included"])
+        image_link = results["included"][0]["attributes"]["image"]["full"]
+    else:
+        url_encoded_country_name = urllib.parse.quote(country_to)
+        results = send_api_request(query=url_encoded_country_name)
+
+        if results['data'][0]['relationships']['featured_photo']['data']:
+            print(results["included"])
+            image_link = results["included"][0]["attributes"]["image"]["full"]
+        else:
+            airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            image_link = airplane
+    print("IMAGE LINK:")
+    print(image_link)
+    print("END OF LINK")
+
+    return image_link
 
 
 def look_for_flights(user_prefs, destination):
@@ -55,6 +106,7 @@ def process_flight_info(flight_data):
                 'city_from_code': data['cityCodeFrom'],
                 'city_to': data['cityTo'],
                 'city_to_code': data['cityCodeTo'],
+                'country_to': data['countryTo']['name'],
                 'departure': data['local_departure'].split("T")[0],
                 'leave_destination_date': data["route"][-1]['local_departure'].split("T")[0],
                 'arrival': data["route"][-1]['local_arrival'].split("T")[0],
@@ -64,7 +116,7 @@ def process_flight_info(flight_data):
         return flight_data_dict
 
 
-def send_email(user_name, user_email, flight_deal_list):
+def send_email(user_name, user_email, flight_deal_list, template_id):
     url = "https://api.sendinblue.com/v3/smtp/email"
     payload = {
             "sender": {
@@ -79,7 +131,7 @@ def send_email(user_name, user_email, flight_deal_list):
             "params": {
                 "destinations": flight_deal_list
             },
-            "templateId": 1
+            "templateId": template_id
         }
     headers = {
         "Accept": "application/json",
@@ -105,25 +157,30 @@ if day_of_week == 4:
     print(all_users)
     for u in all_users:
         flight_deal_list = []
+        if flight_deal_list:
+            print("\n\n\n\n EMPTY LIST IS STILL TRUEEEE \n\n\n\n")
         user_name = u.name
         user_email = u.email
         print(f"{user_name}: {user_email}")
 
         user_preferences_dict = u.preferences[0].__dict__
         user_destinations_dict = u.destinations[0].__dict__
-        print("\n\n")
-        print(f'Preferences: {user_preferences_dict}')
-        print(f'Destinations: {user_destinations_dict}')
-        print("\n\n")
+        # print("\n")
+        # print(f'Preferences: {user_preferences_dict}')
+        # print(f'Destinations: {user_destinations_dict}')
+        # print("\n")
 
         passengers = ""
         if user_preferences_dict['num_adults'] != 0:
-            passengers += f"{user_preferences_dict['num_adults']} adults"
+            if user_preferences_dict['num_adults'] == 1:
+                passengers += f"{user_preferences_dict['num_adults']} adult"
+            else:
+                passengers += f"{user_preferences_dict['num_adults']} adults"
         if user_preferences_dict['num_children'] != 0:
             passengers += f", {user_preferences_dict['num_children']} children"
         if user_preferences_dict['num_infants'] != 0:
             passengers += f", {user_preferences_dict['num_infants']} infants"
-        print(passengers)
+        # print(passengers)
         list_of_dicts = []
         for x in range(1, 11):
             dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
@@ -133,13 +190,13 @@ if day_of_week == 4:
                 pass
             else:
                 list_of_dicts.append(dict_to_add)
-        print("\n\n")
-        print("List of Destination Dictionaries")
-        print(list_of_dicts)
-        print("\n\n")
+        # print("\n")
+        # print("List of Destination Dictionaries")
+        # print(list_of_dicts)
+        # print("\n")
         for destination in list_of_dicts:
 
-            print("\n\n")
+            print("\n")
             print("Destination")
             print(destination)
             flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
@@ -149,17 +206,27 @@ if day_of_week == 4:
                 continue
             else:
                 flight_dict = process_flight_info(flight_data=flight_data)
-                print("\n\n")
-                print("Flight Data for Destination")
-                print(flight_dict)
+                # print("\n")
+                # print("Flight Data for Destination")
+                # print(flight_dict)
+                # print("\n")
+
+                depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
+                depart_day = depart.strftime('%A, %b %-d')
+                back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
+                back_home_day = back_home.strftime('%A, %b %-d')
+                print("\nRoad Goat Results:")
+                city_name = all_cities_international[destination["iata"]]
+                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
+
                 flight_deal_list.append(
                     {
-                        "city": flight_dict["city_to"],
+                         "city": flight_dict["city_to"],
                          "price": flight_dict["price"],
                          "nights": flight_dict["nights_at_destination"],
-                         "date1": flight_dict["departure"],
-                         "date2": flight_dict["arrival"],
-                         "image": "REPLACE LATER",
+                         "date1": depart_day,
+                         "date2": back_home_day,
+                         "image": image_link,
                          "passengers": passengers,
                          "link": f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/"
                                  f"{flight_dict['city_to_code']}/{flight_dict['departure']}/"
@@ -168,11 +235,20 @@ if day_of_week == 4:
                 )
 
         if flight_deal_list:
-            send_email(user_name=user_name, user_email=user_email, flight_deal_list=flight_deal_list)
-            print("\n\n\n")
+            template_id = 1
+            send_email(user_name=user_name,
+                       user_email=user_email,
+                       flight_deal_list=flight_deal_list,
+                       template_id=template_id)
+            print("\n\n")
             print("Flight Deal List:")
             print(flight_deal_list)
         else:
+            template_id = 3
+            send_email(user_name=user_name,
+                       user_email=user_email,
+                       flight_deal_list=flight_deal_list,
+                       template_id=template_id)
             print("No flight deals this time around :(")
 
 
