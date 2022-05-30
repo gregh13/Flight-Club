@@ -63,8 +63,8 @@ class PreferenceForm(FlaskForm):
     max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, max=6)])
     max_flight_time = IntegerField("Max Flight Duration", validators=[Optional()])
     num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=0, max=6)])
-    num_children = IntegerField("Number of Child Passengers", validators=[Optional(), NumberRange(min=0, max=6)])
-    num_infants = IntegerField("Number of Infant Passengers", validators=[Optional(), NumberRange(min=0, max=6)])
+    num_children = IntegerField("Number of Child Passengers (Age 2-11)", validators=[Optional(), NumberRange(min=0, max=6)])
+    num_infants = IntegerField("Number of Infant Passengers (Age < 2)", validators=[Optional(), NumberRange(min=0, max=6)])
     search_start_date = SelectField("How far out should the flight search begin looking for flights", coerce=int,
                                     choices=[(1, 'One day'), (7, 'One week'),
                                              (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
