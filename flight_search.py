@@ -214,30 +214,26 @@ for u in all_users:
     if email_freq != 1:
         if email_freq == 2:
             print("Biweekly, send")
-            print(user_preference_object.email_frequency)
             user_preference_object.email_frequency = 3
             db.session.commit()
-            print(user_preference_object.email_frequency)
-            # change to 3
-
         elif email_freq == 3:
             print("Biweekly, don't send")
-            # change to 2
+            user_preference_object.email_frequency = 2
+            db.session.commit()
             continue
         elif email_freq == 4:
             print("Monthly, send")
-            # change to 5
-        elif email_freq == 5:
+            user_preference_object.email_frequency = 5
+            db.session.commit()
+        elif email_freq == 5 or email_freq == 6:
             print("Monthly, don't send")
-            # change to 6
-            continue
-        elif email_freq == 6:
-            print("Monthly, don't send")
-            # change to 7
+            user_preference_object.email_frequency = (email_freq + 1)
+            db.session.commit()
             continue
         elif email_freq == 7:
             print("Monthly, don't send")
-            # change to 4
+            user_preference_object.email_frequency = 4
+            db.session.commit()
             continue
 
     print("WEEKLY EMAIL")
