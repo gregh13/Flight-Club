@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, TrialForm
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
 from functools import wraps
 from iata_codes import all_cities_international
 # from datetime import date, datetime
@@ -52,6 +52,7 @@ class Destinations(db.Model, Base):
     # back_populates to whatever you named the relationship in the parent/child
     user_dest = relationship("User", back_populates="destinations")
     home_airport = db.Column(db.String(50))
+    currency = db.Column(db.String(50))
     city1 = db.Column(db.String(100))
     price1 = db.Column(db.Integer)
     city2 = db.Column(db.String(100))
@@ -85,7 +86,6 @@ class Preferences(db.Model, Base):
     email_day = db.Column(db.Integer)
     min_nights = db.Column(db.Integer, nullable=False)
     max_nights = db.Column(db.Integer, nullable=False)
-    currency = db.Column(db.String(50), nullable=False)
     cabin_class = db.Column(db.String(50), nullable=False)
     exclude_airlines = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
@@ -169,14 +169,14 @@ def user_home():
     page_title = f"Hello, {user_name}"
     return render_template("user_home.html", page_title=page_title)
 
-@app.route('/new', methods=["GET", "POST"])
-def new():
-    cities = all_cities_international
-    form = TrialForm()
-    if form.validate_on_submit():
-        print("Success")
-        print(form.trial.data)
-    return render_template('new_register.html', form=form, cities=cities)
+# @app.route('/new', methods=["GET", "POST"])
+# def new():
+#     cities = all_cities_international
+#     form = TrialForm()
+#     if form.validate_on_submit():
+#         print("Success")
+#         print(form.trial.data)
+#     return render_template('new_register.html', form=form, cities=cities)
 
 @app.route('/my_destinations')
 @login_required
@@ -240,6 +240,7 @@ def update_destinations():
         print (update_list)
 
         user_des.home_airport = form.home_airport.data.upper()
+        user_des.currency = form.currency.data
         user_des.city1 = update_list[0]
         user_des.price1 = update_list[1]
         user_des.city2 = update_list[2]
@@ -273,11 +274,27 @@ def update_destinations():
 def my_preferences():
     page_title = "My Preferences"
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
-    # Turn the query object info into a dictionary with column name: value
-    # pref_dict = dict((col, getattr(prefs, col)) for col in Preferences.__table__.columns.keys())
-    # print(pref_dict)
 
-    return render_template("my_preferences.html", page_title=page_title, prefs=prefs)
+    email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 4: "Once a month"}
+    email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
+    cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
+    lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
+                      60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
+    search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
+                          60: 'Two months', 90: 'Three months', 120: 'Four months', 0: 'Using Specific Date'}
+    specific_start = None
+    specific_end = None
+    if prefs.specific_search_start_date:
+        specific_start = prefs.specific_search_start_date.strftime('%A, %b %-d')
+    if prefs.specific_search_end_date:
+        specific_end = prefs.specific_search_end_date.strftime('%A, %b %-d')
+
+    preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
+                              "cabin_class": cabin_class_dict, "lead_time_start": lead_time_dict,
+                              "search_length": search_length_dict, "specific_start": specific_start,
+                              "specific_end": specific_end}
+
+    return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
 
 
 @app.route('/update_preferences', methods=['GET', 'POST'])
@@ -302,7 +319,6 @@ def update_preferences():
         prefs.email_day = form.email_day.data
         prefs.min_nights = form.min_nights.data
         prefs.max_nights = form.max_nights.data
-        prefs.currency = form.currency.data
         prefs.cabin_class = form.cabin_class.data
         prefs.exclude_airlines = form.exclude_airlines.data
         prefs.max_stops = form.max_stops.data
@@ -370,7 +386,6 @@ def register():
             email_day=4,
             min_nights=2,
             max_nights=7,
-            currency='USD',
             cabin_class='M',
             exclude_airlines='True',
             max_stops=3,
