@@ -2211,11 +2211,3 @@ all_cities_international = {'AAL': "Aalborg, Denmark",
                             'OUZ': "Zouerate, Mauritania",
                             'ZRH': "Zurich, Switzerland"
                             }
-
-
-bad_boys = ['GON', 'BEO', 'RPM', 'NIC', 'NDZ', 'NCA', 'NUB', 'NYN', 'OBD', 'OKQ', 'OSK', 'OTU', 'PCH', 'AOL', 'PZE', 'PMQ', 'PMG', 'PRQ', 'PUD', 'RBP', 'RAT', 'RJN', 'RAM', 'RBJ', 'RIG', 'ROY', 'RNE', 'SZT', 'LTT', 'XPZ', 'OES', 'SVZ', 'ULA', 'SAI', 'NMG', 'STB', 'HEX', 'SWG', 'ZBY', 'QFK', 'ZEG', 'ZRI', 'SZM', 'HIL', 'JHQ', 'NKD', 'SOD', 'TZN', 'SOI', 'SQO', '???', 'TMH', 'TRA', 'TEU', 'TKB', 'TXM', 'TDB', 'TIS', 'TPR', 'TGN', 'TTS', 'TUR', 'TUJ', 'ULI', 'URU', 'USL', 'UTK', 'XVS', 'VCD', 'VLG', 'VME', 'VIV', 'VOH', 'VLK', 'WET', 'WBA', 'WGE', 'WKA', 'AGL', 'WSR', 'WED', 'WTO', 'WTE', 'WUD', 'WYN', 'KYX', 'UGU']
-print(len(bad_boys))
-print(len(all_cities_international))
-for key in bad_boys:
-    all_cities_international.pop(key)
-print(len(all_cities_international))
