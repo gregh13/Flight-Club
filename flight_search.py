@@ -110,22 +110,13 @@ def road_goat_image_search(city_name, country_to):
             airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
             image_link = airplane
 
-
-
-    print("IMAGE LINK:")
-    print(image_link)
-    print("END OF LINK")
-
     return image_link
 
 
 def look_for_flights(user_prefs, destination):
 
     flight_date_dict = figure_out_dates(user_prefs)
-    # print(flight_date_dict)
-    # print(type(flight_date_dict["date_to"]))
-    # print(user_prefs)
-    # print(destination)
+
     if user_prefs['exclude_airlines'] == "true":
         flight_parameters = {
             "fly_from": destination["home_airport"],
@@ -216,9 +207,7 @@ def send_email(user_name, user_email, flight_deal_list, template_id):
         "api-key": "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"
     }
     response = requests.post(url, json=payload, headers=headers)
-    print("Response Text")
     print(response.text)
-    print("\nEnd of CODE")
     return
 
 
@@ -231,7 +220,6 @@ for u in all_users:
     if day_of_week != email_day:
         print("Not today, my friend!")
         continue
-    print("TODAY IS THE DAY!")
     user_preference_object = Preferences.query.filter_by(user_pref_id=u.preferences[0].user_pref_id).first()
     email_freq = user_preference_object.email_frequency
     # Find User Pref instead!!
@@ -260,6 +248,7 @@ for u in all_users:
             db.session.commit()
             continue
 
+    bad_codes = []
     flight_deal_list = []
     user_name = u.name
     user_email = u.email
@@ -267,10 +256,9 @@ for u in all_users:
 
     user_preferences_dict = u.preferences[0].__dict__
     user_destinations_dict = u.destinations[0].__dict__
-    # print("\n")
-    print(f'Preferences: {user_preferences_dict}')
+    # print(f'Preferences: {user_preferences_dict}')
     # print(f'Destinations: {user_destinations_dict}')
-    # print("\n")
+
     total_passengers = (user_preferences_dict['num_adults']
                         + user_preferences_dict['num_children']
                         + user_preferences_dict['num_infants'])
@@ -290,7 +278,7 @@ for u in all_users:
             passengers += f"{user_preferences_dict['num_infants']} Infant"
         else:
             passengers += f", {user_preferences_dict['num_infants']} Infants"
-    # print(passengers)
+
     list_of_dicts = []
     for x in range(1, 11):
         dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
@@ -301,25 +289,15 @@ for u in all_users:
             pass
         else:
             list_of_dicts.append(dict_to_add)
-    # print("\n")
-    # print("List of Destination Dictionaries")
-    # print(list_of_dicts)
-    # print("\n")
-    bad_codes = []
+
     for destination in list_of_dicts:
-        # print("\n")
-        # print("Destination")
-        # print(destination)
         # 'Surprise Me' choice
         if destination["iata"] == "???":
             # Protects against randomly getting "???" again
             while destination["iata"] == "???":
                 destination["iata"] = random.choice(list(all_cities_international))
-                print("SURPRISE MEEEEE")
-                print(destination["iata"])
 
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
-        # print(flight_data)
         # When fly_to location code is bad or doesn't exist
         if 'Unprocessable Entity' in flight_data.values():
             print("BAD AIRPORT CODE\n")
@@ -331,10 +309,6 @@ for u in all_users:
             continue
         else:
             flight_dict = process_flight_info(flight_data=flight_data)
-            # print("\n")
-            # print("Flight Data for Destination")
-            # print(flight_dict)
-            # print("\n")
             # searched_currency = flight_data["currency"]
             # currency_rate_to_USD = flight_data["fx_rate"]
             price_ceiling = total_passengers * destination["price_ceiling"]
@@ -345,10 +319,8 @@ for u in all_users:
                 back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
                 back_home_day = back_home.strftime('%A, %b %-d')
 
-                price_formatted = "{:,}".format(flight_dict["price"])
-                print(price_formatted)
-                price_formatted = str(price_formatted) + f" {destination['currency']}"
-                print(price_formatted)
+                price_with_commas = "{:,}".format(flight_dict["price"])
+                price_formatted = str(price_with_commas) + f" {destination['currency']}"
                 city_name = all_cities_international[destination["iata"]]
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
@@ -367,7 +339,7 @@ for u in all_users:
                     }
                 )
             else:
-                print("Price is NO GOOD\n")
+                print("Flight results returned, but price wasn't low enough\n")
 
     if flight_deal_list:
         template_id = 1
@@ -375,7 +347,6 @@ for u in all_users:
                    user_email=user_email,
                    flight_deal_list=flight_deal_list,
                    template_id=template_id)
-        print("\n")
         print("Flight Deal List:")
         print(flight_deal_list)
         print("\nBAD CODES:")
@@ -386,8 +357,7 @@ for u in all_users:
                    user_email=user_email,
                    flight_deal_list=flight_deal_list,
                    template_id=template_id)
-        print("\n\n")
-        print("No flight deals this time around :(\n NO DEALSSS")
+        print("No flight deals found this time around :(")
         print("\nBAD CODES:")
         print(bad_codes)
 
