@@ -1,7 +1,7 @@
 from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
 from main import User, Preferences, db
-from iata_codes import all_cities_international
+from new_iata_codes import new_iata_codeset
 import requests
 import base64
 import urllib.parse
@@ -291,53 +291,9 @@ for u in all_users:
         if destination["iata"] == "???":
             # Protects against randomly getting "???" again
             while destination["iata"] == "???":
-                destination["iata"] = random.choice(list(all_cities_international))
+                destination["iata"] = random.choice(list(new_iata_codeset))
                 print("SURPRISE MEEEEE")
                 print(destination["iata"])
-# -----------------------------------------------------------
-#         for code in list(all_cities_international):
-#             print(code)
-#             destination["iata"] = code
-#             flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
-#             # print(flight_data)
-#             # When fly_to location code is bad or doesn't exist
-#             if 'Unprocessable Entity' in flight_data.values():
-#                 print("BAD AIRPORT CODE\n")
-#                 bad_codes.append(destination["iata"])
-#                 print(bad_codes)
-#                 continue
-#
-#         print(f"\n\nBAD CODES:\n{bad_codes}")
-#         break
-
-        bad_boys = ['GON', 'BEO', 'RPM', 'NIC', 'NDZ', 'NCA',
-                    'NUB', 'NYN', 'OBD', 'OKQ', 'OSK', 'OTU',
-                    'PCH', 'AOL', 'PZE', 'PMQ', 'PMG', 'PRQ',
-                    'PUD', 'RBP', 'RAT', 'RJN', 'RAM', 'RBJ',
-                    'RIG', 'ROY', 'RNE', 'SZT', 'LTT', 'XPZ',
-                    'OES', 'SVZ', 'ULA', 'SAI', 'NMG', 'STB',
-                    'HEX', 'SWG', 'ZBY', 'QFK', 'ZEG', 'ZRI',
-                    'SZM', 'HIL', 'JHQ', 'NKD', 'SOD', 'TZN',
-                    'SOI', 'SQO', '???', 'TMH', 'TRA', 'TEU',
-                    'TKB', 'TXM', 'TDB', 'TIS', 'TPR', 'TGN',
-                    'TTS', 'TUR', 'TUJ', 'ULI', 'URU', 'USL',
-                    'UTK', 'XVS', 'VCD', 'VLG', 'VME', 'VIV',
-                    'VOH', 'VLK', 'WET', 'WBA', 'WGE', 'WKA',
-                    'AGL', 'WSR', 'WED', 'WTO', 'WTE', 'WUD',
-                    'WYN', 'KYX', 'UGU']
-
-
-
-
-
-
-        for key in bad_boys:
-            all_cities_international
-
-
-
-
-# -------------------------------------------------------
 
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # print(flight_data)
@@ -345,7 +301,6 @@ for u in all_users:
         if 'Unprocessable Entity' in flight_data.values():
             print("BAD AIRPORT CODE\n")
             bad_codes.append(destination["iata"])
-
             continue
         if len(flight_data["data"]) == 0:
             print(f"No flight data for destination: {destination['iata']}\n")
@@ -371,7 +326,7 @@ for u in all_users:
                 print(price_formatted)
                 price_formatted = str(price_formatted) + f" {destination['currency']}"
                 print(price_formatted)
-                city_name = all_cities_international[destination["iata"]]
+                city_name = new_iata_codeset[destination["iata"]]
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
                 flight_deal_list.append(
@@ -400,6 +355,8 @@ for u in all_users:
         print("\n")
         print("Flight Deal List:")
         print(flight_deal_list)
+        print("\nBAD CODES:")
+        print(bad_codes)
     else:
         template_id = 3
         # send_email(user_name=user_name,
@@ -408,7 +365,7 @@ for u in all_users:
         #            template_id=template_id)
         print("\n\n")
         print("No flight deals this time around :(\n NO DEALSSS")
-        print("\n\n")
+        print("\nBAD CODES:")
         print(bad_codes)
 
 
