@@ -279,10 +279,12 @@ def my_preferences():
                        4: "Once a month", 5: "Once a month", 6: "Once a month", 7: "Once a month"}
     email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
+    exclude_airlines_dict = {'true': 'Exclude Lowest Rated Airlines', 'false': 'Include All Airlines'}
     lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
                       60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
     search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
-                          60: 'Two months', 90: 'Three months', 120: 'Four months', 0: 'Using Specific Date'}
+                          60: 'Two months', 90: 'Three months', 120: 'Four months', 150: 'Five months',
+                          180: 'Six months', 0: 'Using Specific Date'}
     start_specific = None
     end_specific = None
     if prefs.specific_search_start_date:
@@ -291,9 +293,9 @@ def my_preferences():
         end_specific = prefs.specific_search_end_date.strftime('%a, %B %-d')
 
     preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
-                              "cabin_class": cabin_class_dict, "lead_time_start": lead_time_dict,
-                              "search_length": search_length_dict, "start_specific": start_specific,
-                              "end_specific": end_specific}
+                              "cabin_class": cabin_class_dict, "exclude_airlines": exclude_airlines_dict,
+                              "lead_time_start": lead_time_dict, "search_length": search_length_dict,
+                              "start_specific": start_specific, "end_specific": end_specific}
 
     return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
 

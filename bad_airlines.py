@@ -69,4 +69,4 @@ for airline in list(bad_airline_dict.keys()):
         string += ","
 
 bad_airline_string = string
-print(bad_airline_string)
+

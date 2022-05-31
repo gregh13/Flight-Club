@@ -2,6 +2,7 @@ from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
 from main import User, Preferences, db
 from new_iata_codes import all_cities_international
+from bad_airlines import bad_airline_string
 import requests
 import base64
 import urllib.parse
@@ -125,23 +126,45 @@ def look_for_flights(user_prefs, destination):
     # print(type(flight_date_dict["date_to"]))
     # print(user_prefs)
     # print(destination)
-    flight_parameters = {
-        "fly_from": destination["home_airport"],
-        "fly_to": destination["iata"],
-        "date_from": flight_date_dict["date_from"],
-        "date_to": flight_date_dict["date_to"],
-        "nights_in_dst_from": user_prefs["min_nights"],
-        "nights_in_dst_to": user_prefs["max_nights"],
-        "flight_type": "round",
-        "adults": user_prefs["num_adults"],
-        "children": user_prefs["num_children"],
-        "infants": user_prefs["num_infants"],
-        "curr": destination["currency"],
-        "selected_cabins": user_prefs["cabin_class"],
-        "max_fly_duration": user_prefs["max_flight_time"],
-        "max_sector_stopovers": user_prefs["max_stops"],
-        "limit": 22
-    }
+    if user_prefs['exclude_airlines'] == "true":
+        flight_parameters = {
+            "fly_from": destination["home_airport"],
+            "fly_to": destination["iata"],
+            "date_from": flight_date_dict["date_from"],
+            "date_to": flight_date_dict["date_to"],
+            "nights_in_dst_from": user_prefs["min_nights"],
+            "nights_in_dst_to": user_prefs["max_nights"],
+            "flight_type": "round",
+            "adults": user_prefs["num_adults"],
+            "children": user_prefs["num_children"],
+            "infants": user_prefs["num_infants"],
+            "curr": destination["currency"],
+            "selected_cabins": user_prefs["cabin_class"],
+            "max_fly_duration": user_prefs["max_flight_time"],
+            "max_sector_stopovers": user_prefs["max_stops"],
+            "select_airlines": bad_airline_string,
+            "select_airlines_exclude": "true",
+            "limit": 500
+        }
+    else:
+        flight_parameters = {
+            "fly_from": destination["home_airport"],
+            "fly_to": destination["iata"],
+            "date_from": flight_date_dict["date_from"],
+            "date_to": flight_date_dict["date_to"],
+            "nights_in_dst_from": user_prefs["min_nights"],
+            "nights_in_dst_to": user_prefs["max_nights"],
+            "flight_type": "round",
+            "adults": user_prefs["num_adults"],
+            "children": user_prefs["num_children"],
+            "infants": user_prefs["num_infants"],
+            "curr": destination["currency"],
+            "selected_cabins": user_prefs["cabin_class"],
+            "max_fly_duration": user_prefs["max_flight_time"],
+            "max_sector_stopovers": user_prefs["max_stops"],
+            "limit": 500
+        }
+
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
         # search_response.raise_for_status()
@@ -245,7 +268,7 @@ for u in all_users:
     user_preferences_dict = u.preferences[0].__dict__
     user_destinations_dict = u.destinations[0].__dict__
     # print("\n")
-    # print(f'Preferences: {user_preferences_dict}')
+    print(f'Preferences: {user_preferences_dict}')
     # print(f'Destinations: {user_destinations_dict}')
     # print("\n")
     total_passengers = (user_preferences_dict['num_adults']

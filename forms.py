@@ -64,8 +64,8 @@ class PreferenceForm(FlaskForm):
                             choices=[(0, "Monday"), (1, "Tuesday"), (2, "Wednesday"), (3, "Thursday"), (4, "Friday"), (5, "Saturday"), (6, "Sunday")])
     min_nights = IntegerField("Trip Duration: Minimum Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The minimum length of time spent at your travel destination.")
     max_nights = IntegerField("Trip Duration: Max Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The maximum length of time spent at your travel destination. Actual trip duration will be somewhere in-between the min and max duration")
-    cabin_class = SelectField("Cabin Class", choices=[('', 'Select Option'),('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    exclude_airlines = SelectField("Exclude Lowest Rated/Cheapo Airlines?", choices=[("Select Option", 'Select Option'), ('True', 'Exclude'), ('False', 'Include The Cheapos')], validators=[Optional()], description="Excludes lowest rated airlines in safety and service from flight search")
+    cabin_class = SelectField("Cabin Class", choices=[('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
+    exclude_airlines = SelectField("Exclude Lowest Rated Airlines?", choices=[('true', 'Exclude Lowest Rated Airlines'), ('false', 'Include All Airlines')], validators=[Optional()], description="Excludes airlines rated lowest in safety, service, claims processing, and punctuality from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)")
     max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, max=6)])
     max_flight_time = IntegerField("Max Flight Duration", validators=[Optional()])
     num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=1, max=6)])
@@ -80,7 +80,7 @@ class PreferenceForm(FlaskForm):
     specific_search_start_date = DateField('Alternatively, choose a specific Start Date', validators=[Optional(), invalid_date],
                                            description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     search_length = SelectField("Search Date Range (the window of time flights will be searched)", coerce=int,
-                                choices=[(7, 'One week'), (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'), (60, 'Two months'), (90, 'Three months'), (120, 'Four months'),
+                                choices=[(7, 'One week'), (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'), (60, 'Two months'), (90, 'Three months'), (120, 'Four months'), (150, 'Five months'), (180, 'Six months'),
                                          (0, 'Specific End Date? Use the input below')], validators=[DataRequired()],
                                 description="Note: This is also a rolling date range, meaning it will move as time passes. For example, if it begins looking for flights 'One month' out and has a date range of '3 months', then if it searches on June 10th, it would look for all flights between July 10th and October 10th.")
     specific_search_end_date = DateField('Alternatively, choose a specific End Date',
