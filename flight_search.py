@@ -382,10 +382,10 @@ for u in all_users:
         print(bad_codes)
     else:
         template_id = 3
-        # send_email(user_name=user_name,
-        #            user_email=user_email,
-        #            flight_deal_list=flight_deal_list,
-        #            template_id=template_id)
+        send_email(user_name=user_name,
+                   user_email=user_email,
+                   flight_deal_list=flight_deal_list,
+                   template_id=template_id)
         print("\n\n")
         print("No flight deals this time around :(\n NO DEALSSS")
         print("\nBAD CODES:")

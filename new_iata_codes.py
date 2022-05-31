@@ -1463,7 +1463,6 @@ all_cities_international = {
     "ZAZ": "Zaragoza, Spain - (ZAZ)",
     "CGO": "Zhengzhou, China - (CGO)",
     "HSN": "Zhoushan, China - (HSN)",
-    "ZRH": "Zurich, Switzerland - (ZRH)"
+    "ZRH": "Zurich, Switzerland - (ZRH)",
+    "???": "Surprise Me"
 }
-
-
