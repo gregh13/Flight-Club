@@ -121,10 +121,10 @@ def road_goat_image_search(city_name, country_to):
 def look_for_flights(user_prefs, destination):
 
     flight_date_dict = figure_out_dates(user_prefs)
-    print(flight_date_dict)
-    print(type(flight_date_dict["date_to"]))
-    print(user_prefs)
-    print(destination)
+    # print(flight_date_dict)
+    # print(type(flight_date_dict["date_to"]))
+    # print(user_prefs)
+    # print(destination)
     flight_parameters = {
         "fly_from": destination["home_airport"],
         "fly_to": destination["iata"],
@@ -140,7 +140,7 @@ def look_for_flights(user_prefs, destination):
         "selected_cabins": user_prefs["cabin_class"],
         "max_fly_duration": user_prefs["max_flight_time"],
         "max_sector_stopovers": user_prefs["max_stops"],
-        "limit": 500
+        "limit": 22
     }
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
@@ -244,10 +244,10 @@ for u in all_users:
 
     user_preferences_dict = u.preferences[0].__dict__
     user_destinations_dict = u.destinations[0].__dict__
-    print("\n")
-    print(f'Preferences: {user_preferences_dict}')
-    print(f'Destinations: {user_destinations_dict}')
-    print("\n")
+    # print("\n")
+    # print(f'Preferences: {user_preferences_dict}')
+    # print(f'Destinations: {user_destinations_dict}')
+    # print("\n")
     total_passengers = (user_preferences_dict['num_adults']
                         + user_preferences_dict['num_children']
                         + user_preferences_dict['num_infants'])
@@ -282,26 +282,74 @@ for u in all_users:
     # print("List of Destination Dictionaries")
     # print(list_of_dicts)
     # print("\n")
+    bad_codes = []
     for destination in list_of_dicts:
-        print("\n")
-        print("Destination")
-        print(destination)
+        # print("\n")
+        # print("Destination")
+        # print(destination)
         # 'Surprise Me' choice
         if destination["iata"] == "???":
             # Protects against randomly getting "???" again
             while destination["iata"] == "???":
                 destination["iata"] = random.choice(list(all_cities_international))
-                print("\n\nSURPRISE MEEEEE\n")
+                print("SURPRISE MEEEEE")
                 print(destination["iata"])
+# -----------------------------------------------------------
+#         for code in list(all_cities_international):
+#             print(code)
+#             destination["iata"] = code
+#             flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
+#             # print(flight_data)
+#             # When fly_to location code is bad or doesn't exist
+#             if 'Unprocessable Entity' in flight_data.values():
+#                 print("BAD AIRPORT CODE\n")
+#                 bad_codes.append(destination["iata"])
+#                 print(bad_codes)
+#                 continue
+#
+#         print(f"\n\nBAD CODES:\n{bad_codes}")
+#         break
+
+        bad_boys = ['GON', 'BEO', 'RPM', 'NIC', 'NDZ', 'NCA',
+                    'NUB', 'NYN', 'OBD', 'OKQ', 'OSK', 'OTU',
+                    'PCH', 'AOL', 'PZE', 'PMQ', 'PMG', 'PRQ',
+                    'PUD', 'RBP', 'RAT', 'RJN', 'RAM', 'RBJ',
+                    'RIG', 'ROY', 'RNE', 'SZT', 'LTT', 'XPZ',
+                    'OES', 'SVZ', 'ULA', 'SAI', 'NMG', 'STB',
+                    'HEX', 'SWG', 'ZBY', 'QFK', 'ZEG', 'ZRI',
+                    'SZM', 'HIL', 'JHQ', 'NKD', 'SOD', 'TZN',
+                    'SOI', 'SQO', '???', 'TMH', 'TRA', 'TEU',
+                    'TKB', 'TXM', 'TDB', 'TIS', 'TPR', 'TGN',
+                    'TTS', 'TUR', 'TUJ', 'ULI', 'URU', 'USL',
+                    'UTK', 'XVS', 'VCD', 'VLG', 'VME', 'VIV',
+                    'VOH', 'VLK', 'WET', 'WBA', 'WGE', 'WKA',
+                    'AGL', 'WSR', 'WED', 'WTO', 'WTE', 'WUD',
+                    'WYN', 'KYX', 'UGU']
+
+
+
+
+
+
+        for key in bad_boys:
+            all_cities_international
+
+
+
+
+# -------------------------------------------------------
 
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # print(flight_data)
         # When fly_to location code is bad or doesn't exist
         if 'Unprocessable Entity' in flight_data.values():
-            print("\nBAD AIRPORT CODE\n")
+            print("BAD AIRPORT CODE\n")
+            bad_codes.append(destination["iata"])
+
             continue
         if len(flight_data["data"]) == 0:
-            print(f"No flight data for destination: {destination['iata']}")
+            print(f"No flight data for destination: {destination['iata']}\n")
+            bad_codes.append(destination["iata"])
             continue
         else:
             flight_dict = process_flight_info(flight_data=flight_data)
@@ -341,7 +389,7 @@ for u in all_users:
                     }
                 )
             else:
-                print("\n\nPrice is NO GOOD\n\n")
+                print("Price is NO GOOD\n")
 
     if flight_deal_list:
         template_id = 1
@@ -349,16 +397,20 @@ for u in all_users:
                    user_email=user_email,
                    flight_deal_list=flight_deal_list,
                    template_id=template_id)
-        print("\n\n")
+        print("\n")
         print("Flight Deal List:")
         print(flight_deal_list)
     else:
         template_id = 3
-        send_email(user_name=user_name,
-                   user_email=user_email,
-                   flight_deal_list=flight_deal_list,
-                   template_id=template_id)
+        # send_email(user_name=user_name,
+        #            user_email=user_email,
+        #            flight_deal_list=flight_deal_list,
+        #            template_id=template_id)
         print("\n\n")
         print("No flight deals this time around :(\n NO DEALSSS")
         print("\n\n")
+        print(bad_codes)
+
+
+
 
