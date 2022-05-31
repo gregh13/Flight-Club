@@ -1,7 +1,7 @@
 from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
 from main import User, Preferences, db
-from new_iata_codes import new_iata_codeset
+from new_iata_codes import all_cities_international
 import requests
 import base64
 import urllib.parse
@@ -291,7 +291,7 @@ for u in all_users:
         if destination["iata"] == "???":
             # Protects against randomly getting "???" again
             while destination["iata"] == "???":
-                destination["iata"] = random.choice(list(new_iata_codeset))
+                destination["iata"] = random.choice(list(all_cities_international))
                 print("SURPRISE MEEEEE")
                 print(destination["iata"])
 
@@ -326,7 +326,7 @@ for u in all_users:
                 print(price_formatted)
                 price_formatted = str(price_formatted) + f" {destination['currency']}"
                 print(price_formatted)
-                city_name = new_iata_codeset[destination["iata"]]
+                city_name = all_cities_international[destination["iata"]]
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
                 flight_deal_list.append(

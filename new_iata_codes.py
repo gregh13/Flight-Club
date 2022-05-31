@@ -1,4 +1,4 @@
-new_iata_codeset = {
+all_cities_international = {
     "AAL": "Aalborg, Denmark - (AAL)",
     "AES": "Aalesund, Norway - (AES)",
     "AAR": "Aarhus, Denmark - (AAR)",

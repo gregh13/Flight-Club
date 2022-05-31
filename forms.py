@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm, Form
 from wtforms import *
 from wtforms.validators import *
 from datetime import timedelta, date
-from iata_codes import all_cities_international
+from new_iata_codes import all_cities_international
 
 city_list = [all_cities_international[iata] for iata in all_cities_international]
 

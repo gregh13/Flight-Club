@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
 from functools import wraps
-from iata_codes import all_cities_international
+from new_iata_codes import all_cities_international
 # from datetime import date, datetime
 # import os
 
