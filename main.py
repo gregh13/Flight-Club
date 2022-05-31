@@ -104,6 +104,7 @@ class FlightDeals(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     user_deals_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user_deals = relationship("User", back_populates="flight_deals")
+    flight_search_date = db.Column(db.String(300))
     place1 = db.Column(db.String(300))
     message1 = db.Column(db.String(2000))
     place2 = db.Column(db.String(300))
@@ -125,7 +126,7 @@ class FlightDeals(db.Model, Base):
     place10 = db.Column(db.String(300))
     message10 = db.Column(db.String(2000))
 
-# db.create_all()
+db.create_all()
 
 
 def admin_only(function):

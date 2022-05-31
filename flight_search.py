@@ -251,7 +251,7 @@ for u in all_users:
 
     bad_codes = []
     email_flight_deal_list = []
-    website_flight_deal_dict = {}
+    website_flight_deal_dict = {"flight_search_date": date.today().strftime('%a, %B %-d, %Y')}
     user_name = u.name
     user_email = u.email
     print(f"{user_name}: {user_email}")
@@ -296,10 +296,12 @@ for u in all_users:
         destination = list_of_dicts[x]
         # 'Surprise Me' choice
         if destination["iata"] == "???":
-            # Protects against randomly getting "???" again
+            # While loop protects against randomly getting "???" again
             while destination["iata"] == "???":
                 destination["iata"] = random.choice(list(all_cities_international))
 
+        city_name = all_cities_international[destination["iata"]]
+        print(f"{city_name}: {destination['iata']}")
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # When fly_to location code is bad or doesn't exist
         if 'Unprocessable Entity' in flight_data.values():
@@ -333,7 +335,6 @@ for u in all_users:
 
                 price_with_commas = "{:,}".format(flight_dict["price"])
                 price_formatted = str(price_with_commas) + f" {destination['currency']}"
-                city_name = all_cities_international[destination["iata"]]
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
                 flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/" \
                               f"{flight_dict['city_to_code']}/{flight_dict['departure']}/" \
@@ -363,6 +364,11 @@ for u in all_users:
                 website_flight_deal_dict[f"message{x + 1}"] = message
                 print(message)
 
+    print("\nUpdate User FlightDeal Table Dictionary:")
+    print(website_flight_deal_dict)
+    FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
+    db.session.commit()
+
     if email_flight_deal_list:
         template_id = 1
         send_email(user_name=user_name,
@@ -382,8 +388,5 @@ for u in all_users:
         print("No flight deals found this time around :(")
         print("\nBAD CODES:")
         print(bad_codes)
-    print("\nUpdate User FlightDeal Table Dictionary:")
-    print(website_flight_deal_dict)
-    FlightDeals.filter_by(user_deals_id=u.flightdeals[0].user_deals_id).update(website_flight_deal_dict)
-    db.session.commit()
+
     print("FINISHED")
