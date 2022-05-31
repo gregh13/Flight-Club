@@ -2211,3 +2211,4 @@ all_cities_international = {'AAL': "Aalborg, Denmark",
                             'OUZ': "Zouerate, Mauritania",
                             'ZRH': "Zurich, Switzerland"
                             }
+
