@@ -106,27 +106,38 @@ class FlightDeals(db.Model, Base):
     user_deals = relationship("User", back_populates="flight_deals")
     flight_search_date = db.Column(db.String(300))
     place1 = db.Column(db.String(300))
-    message1 = db.Column(db.String(2000))
+    message1 = db.Column(db.String(1000))
+    link1 = db.Column(db.String(1000))
     place2 = db.Column(db.String(300))
-    message2 = db.Column(db.String(2000))
+    message2 = db.Column(db.String(1000))
+    link2 = db.Column(db.String(1000))
     place3 = db.Column(db.String(300))
-    message3 = db.Column(db.String(2000))
+    message3 = db.Column(db.String(1000))
+    link3 = db.Column(db.String(1000))
     place4 = db.Column(db.String(300))
-    message4 = db.Column(db.String(2000))
+    message4 = db.Column(db.String(1000))
+    link4 = db.Column(db.String(1000))
     place5 = db.Column(db.String(300))
-    message5 = db.Column(db.String(2000))
+    message5 = db.Column(db.String(1000))
+    link5 = db.Column(db.String(1000))
     place6 = db.Column(db.String(300))
-    message6 = db.Column(db.String(2000))
+    message6 = db.Column(db.String(1000))
+    link6 = db.Column(db.String(1000))
     place7 = db.Column(db.String(300))
-    message7 = db.Column(db.String(2000))
+    message7 = db.Column(db.String(1000))
+    link7 = db.Column(db.String(1000))
     place8 = db.Column(db.String(300))
-    message8 = db.Column(db.String(2000))
+    message8 = db.Column(db.String(1000))
+    link8 = db.Column(db.String(1000))
     place9 = db.Column(db.String(300))
-    message9 = db.Column(db.String(2000))
+    message9 = db.Column(db.String(1000))
+    link9 = db.Column(db.String(1000))
     place10 = db.Column(db.String(300))
-    message10 = db.Column(db.String(2000))
+    message10 = db.Column(db.String(1000))
+    link10 = db.Column(db.String(1000))
 
-db.create_all()
+
+# db.create_all()
 
 
 def admin_only(function):
@@ -178,6 +189,17 @@ def user_home():
 #         print("Success")
 #         print(form.trial.data)
 #     return render_template('new_register.html', form=form, cities=cities)
+
+@app.route('/my_deals')
+@login_required
+def my_deals():
+    page_title = "My Flight Deals"
+    user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
+    print(user_deals)
+    return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
+
+
+
 
 @app.route('/my_destinations')
 @login_required
@@ -240,7 +262,7 @@ def update_destinations():
         # Small feature, big headache!
         print (update_list)
 
-        user_des.home_airport = form.home_airport.data.upper()
+        user_des.home_airport = form.home_airport.data
         user_des.currency = form.currency.data
         user_des.city1 = update_list[0]
         user_des.price1 = update_list[1]
@@ -392,8 +414,8 @@ def register():
             max_nights=7,
             cabin_class='M',
             exclude_airlines='True',
-            max_stops=3,
-            max_flight_time=33,
+            max_stops=2,
+            max_flight_time=35,
             num_adults=1,
             num_children=0,
             num_infants=0,
@@ -412,8 +434,6 @@ def register():
             user_deals=current_user)
         db.session.add(flight_deals)
         db.session.commit()
-
-
 
         flash("Account created successfully. Please update your destinations.")
         return redirect(url_for('user_home'))
