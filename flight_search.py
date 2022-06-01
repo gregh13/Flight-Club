@@ -21,6 +21,47 @@ headers = {
 }
 
 
+def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_string):
+
+    flight_link_string = ""
+    add_and_sign = True
+
+    flight_link_string += f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
+                          f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
+                          f"{flight_dict['leave_destination_date']}?"
+    if user_pref['max_flight_time'] < 60:
+        add_and_sign = False
+        flight_link_string += f"flightDurationMax={user_pref['max_flight_time']}&"
+    if user_pref["max_stops"] < 3:
+        add_and_sign = False
+        flight_link_string += f"stopNumber={user_pref['max_stops']}%7Etrue&"
+    if user_pref['exclude_airlines'] == "true":
+        add_and_sign = False
+        flight_link_string += f"airlinesList={bad_airline_string.replace(',', '%2C')}&" \
+                              f"selectedAirlinesExclude=true&"
+    if add_and_sign:
+        flight_link_string += "&"
+
+    flight_link_string += f"sortBy=price"
+
+    if user_pref['num_adults'] == 1 and total_passengers == 1:
+        pass
+    else:
+        flight_link_string += f"&adults={user_pref['num_adults']}&" \
+                              f"children={user_pref['num_children']}&" \
+                              f"infants={user_pref['num_infants']}"
+    if user_pref["cabin_class"] != "M":
+        if user_pref["cabin_class"] == "W":
+            flight_link_string += f"&cabinClass=PREMIUM_ECONOMY-true"
+        if user_pref["cabin_class"] == "C":
+            flight_link_string += f"&cabinClass=BUSINESS-true"
+        if user_pref["cabin_class"] == "F":
+            flight_link_string += f"&cabinClass=FIRST_CLASS-true"
+
+    print(flight_link_string)
+    return flight_link_string
+
+
 def figure_out_dates(user_prefs):
     today = date.today()
     start_specific = user_prefs["specific_search_start_date"]
@@ -136,7 +177,7 @@ def look_for_flights(user_prefs, destination):
             "max_sector_stopovers": user_prefs["max_stops"],
             "select_airlines": bad_airline_string,
             "select_airlines_exclude": "true",
-            "limit": 500
+            "limit": 1000
         }
     else:
         flight_parameters = {
@@ -154,9 +195,9 @@ def look_for_flights(user_prefs, destination):
             "selected_cabins": user_prefs["cabin_class"],
             "max_fly_duration": user_prefs["max_flight_time"],
             "max_sector_stopovers": user_prefs["max_stops"],
-            "limit": 500
+            "limit": 1000
         }
-
+    # print(flight_parameters)
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
         # search_response.raise_for_status()
@@ -169,18 +210,26 @@ def look_for_flights(user_prefs, destination):
 
 def process_flight_info(flight_data):
     data = flight_data["data"][0]
+    leave_destination_date = data["route"][-1]['local_departure'].split("T")[0]
+    for route in data["route"]:
+        if route["flyFrom"] == data['flyTo']:
+            leave_destination_date = route['local_departure'].split("T")[0]
+        if route["flyFrom"] == data["routes"][0][1]:
+            leave_destination_date = route['local_departure'].split("T")[0]
+
     flight_data_dict = \
         {
             'city_from': data['cityFrom'],
-            'city_from_code': data['cityCodeFrom'],
+            'airport_from_code': data['flyFrom'],
             'city_to': data['cityTo'],
-            'city_to_code': data['cityCodeTo'],
+            'airport_to_code': data['flyTo'],
             'country_to': data['countryTo']['name'],
             'departure': data['local_departure'].split("T")[0],
-            'leave_destination_date': data["route"][-1]['local_departure'].split("T")[0],
+            'leave_destination_date': leave_destination_date,
             'arrival': data["route"][-1]['local_arrival'].split("T")[0],
-            'nights_at_destination': int(data['nightsInDest']) + 1,
-            'price': data['price']
+            'nights_at_destination': int(data['nightsInDest']),
+            'price': data['price'],
+            "deeplink": data["deep_link"]
         }
     return flight_data_dict
 
@@ -272,20 +321,23 @@ for u in all_users:
             passengers += f"{user_preferences_dict['num_adults']} Adults"
     if user_preferences_dict['num_children'] != 0:
         if user_preferences_dict['num_children'] == 1:
-            passengers += f"{user_preferences_dict['num_children']} Child"
+            passengers += f", {user_preferences_dict['num_children']} Child"
         else:
             passengers += f", {user_preferences_dict['num_children']} Children"
     if user_preferences_dict['num_infants'] != 0:
         if user_preferences_dict['num_infants'] == 1:
-            passengers += f"{user_preferences_dict['num_infants']} Infant"
+            passengers += f", {user_preferences_dict['num_infants']} Infant"
         else:
             passengers += f", {user_preferences_dict['num_infants']} Infants"
+
+    home_airport = [iata_code for iata_code, home in all_cities_international.items() if home == user_destinations_dict["home_airport"]][0]
+    print(home_airport)
 
     list_of_dicts = []
     for x in range(1, 11):
         dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
                        "price_ceiling": user_destinations_dict[f'price{x}'],
-                       "home_airport": user_destinations_dict["home_airport"],
+                       "home_airport": home_airport,
                        "currency": user_destinations_dict["currency"]}
         if dict_to_add["iata"] is None:
             pass
@@ -310,16 +362,17 @@ for u in all_users:
             message = "Error: Destination not recognized by flight search. Please change"
             website_flight_deal_dict[f"place{x + 1}"] = city_name
             website_flight_deal_dict[f"message{x + 1}"] = message
-            print(message)
+            # print(message)
             continue
         elif len(flight_data["data"]) == 0:
             print(f"No flight data for destination: {destination['iata']}\n")
             bad_codes.append(destination["iata"])
-            message = "No flights available. Perhaps destination is too remote from your home airport or " \
-                      "travel restrictions are in place."
+            message = "No flights available. Perhaps destination is too remote or quite far from your home airport " \
+                      "(exceeds your max stops or flight duration), " \
+                      "or perhaps travel restrictions are currently in place."
             website_flight_deal_dict[f"place{x + 1}"] = city_name
             website_flight_deal_dict[f"message{x + 1}"] = message
-            print(message)
+            # print(message)
             continue
         else:
             flight_dict = process_flight_info(flight_data=flight_data)
@@ -329,16 +382,22 @@ for u in all_users:
 
             if flight_dict["price"] <= price_ceiling:
                 depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
-                depart_day = depart.strftime('%A, %b %-d')
+                depart_day = depart.strftime('%A, %B %-d')
                 back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
-                back_home_day = back_home.strftime('%A, %b %-d')
+                back_home_day = back_home.strftime('%A, %B %-d')
 
                 price_with_commas = "{:,}".format(flight_dict["price"])
                 price_formatted = str(price_with_commas) + f" {destination['currency']}"
-                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
-                flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['city_from_code']}/" \
-                              f"{flight_dict['city_to_code']}/{flight_dict['departure']}/" \
-                              f"{flight_dict['leave_destination_date']}?sortBy=price"
+                # image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
+
+                flight_link = configure_flight_link(user_pref=user_preferences_dict,
+                                                    flight_dict=flight_dict,
+                                                    total_passengers=total_passengers,
+                                                    bad_airline_string=bad_airline_string)
+
+                # flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
+                #               f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
+                #               f"{flight_dict['leave_destination_date']}?sortBy=price"
                 email_flight_deal_list.append(
                     {
                         "city": flight_dict["city_to"],
@@ -346,47 +405,50 @@ for u in all_users:
                         "nights": flight_dict["nights_at_destination"],
                         "date1": depart_day,
                         "date2": back_home_day,
-                        "image": image_link,
+                        "image": "image_link",
+                        "num_passengers": total_passengers,
                         "passengers": passengers,
                         "link": flight_link
                     }
                 )
 
-                message = f"Deal Found! ${price_formatted} for {passengers}: {flight_link}"
+                message = f"Deal Found! ${price_formatted} for {total_passengers} passengers ({passengers}) " \
+                          f"from {depart_day} returning home on {back_home_day} " \
+                          f"- ({flight_dict['nights_at_destination']} nights total)"
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
-                print(message)
+                website_flight_deal_dict[f"link{x + 1}"] = flight_link
+                # print(message)
+                print(f"\nHomebrew Link: {flight_link}")
+                print(f"\nDeeplink: {flight_dict['deeplink']}")
+                print("\n")
 
             else:
                 message = f"Flights available, but price wasn't lower than your limit " \
                           f"(${'{:,}'.format(destination['price_ceiling'])} {destination['currency']})"
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
-                print(message)
+                # print(message)
 
-    print("\nUpdate User FlightDeal Table Dictionary:")
-    print(website_flight_deal_dict)
     FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
     db.session.commit()
-
-    if email_flight_deal_list:
-        template_id = 1
-        send_email(user_name=user_name,
-                   user_email=user_email,
-                   email_flight_deal_list=email_flight_deal_list,
-                   template_id=template_id)
-        print("Flight Deal List:")
-        print(email_flight_deal_list)
-        print("\nBAD CODES:")
-        print(bad_codes)
-    else:
-        template_id = 3
-        send_email(user_name=user_name,
-                   user_email=user_email,
-                   email_flight_deal_list=email_flight_deal_list,
-                   template_id=template_id)
-        print("No flight deals found this time around :(")
-        print("\nBAD CODES:")
-        print(bad_codes)
+    #
+    # if email_flight_deal_list:
+    #     template_id = 1
+    #     send_email(user_name=user_name,
+    #                user_email=user_email,
+    #                email_flight_deal_list=email_flight_deal_list,
+    #                template_id=template_id)
+    #     print("Flight Deal List:")
+    #     print(email_flight_deal_list)
+    #     print(f"\nNo flight info for: {bad_codes}")
+    # else:
+    #     template_id = 3
+    #     send_email(user_name=user_name,
+    #                user_email=user_email,
+    #                email_flight_deal_list=email_flight_deal_list,
+    #                template_id=template_id)
+    #     print("No flight deals found this time around :(")
+    #     print(f"\nNo flight info for: {bad_codes}")
 
     print("FINISHED")
