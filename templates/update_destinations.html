@@ -20,12 +20,11 @@
                 <form method="POST" action="">
                     {{ form.csrf_token }}
                     <h4>{{form.home_airport.label}}</h4>
-                    {{ form.home_airport() }} <br>
-                    <p style="font-size: .8rem;">(ex: SFO, PHX, SIN, BKK)<br>
-                        {{ form.home_airport.description }}</p>
-                    <br>
-                    <h6>Currency: {{ form.currency() }}</h6>
-                    <br>
+                    {{ form.home_airport(size=35) }}
+                    <p>(where you will fly out from)</p>
+                    <hr>
+                    <h5>Currency: {{ form.currency() }}</h5>
+                    <hr>
                     <h4>Your Travel Destinations</h4><br>
                     <table id="destinations" style="margin: 0 auto;">
                         <tr>
@@ -78,6 +77,10 @@
             "{{city_options[city]}}",
         {% endfor %}
     ];
+
+       $( "#home_airport" ).autocomplete({
+      source: availableTags
+    });
 
     {% for x in range(0, form.destinations|length): %}
     $( "#destinations-{{x}}-city" ).autocomplete({
