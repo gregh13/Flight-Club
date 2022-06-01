@@ -51,7 +51,8 @@ class CityPriceForm(Form):
 
 class DestinationForm(FlaskForm):
     search = SearchField("Search field")
-    home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
+    home_airport = StringField("Home Airport", validators=[DataRequired(), AnyOf(values=city_list, message="Please select one of the choices shown as you type.")])
+    # home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
     currency = SelectField("Currency", choices=['USD', 'EUR', 'SGD', 'AUD', 'THB', 'CNY', 'HUF', 'GBP', 'CAD'],
                            validators=[DataRequired()])
     destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
@@ -65,12 +66,12 @@ class PreferenceForm(FlaskForm):
     min_nights = IntegerField("Trip Duration: Minimum Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The minimum length of time spent at your travel destination.")
     max_nights = IntegerField("Trip Duration: Max Number of Nights", validators=[DataRequired(), NumberRange(min=0)], description="The maximum length of time spent at your travel destination. Actual trip duration will be somewhere in-between the min and max duration")
     cabin_class = SelectField("Cabin Class", choices=[('M', 'Economy'), ('W', 'Premium Economy'), ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    exclude_airlines = SelectField("Exclude Lowest Rated Airlines?", choices=[('true', 'Exclude Lowest Rated Airlines'), ('false', 'Include All Airlines')], validators=[Optional()], description="Excludes airlines rated lowest in safety, service, claims processing, and punctuality from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)")
-    max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, max=6)])
-    max_flight_time = IntegerField("Max Flight Duration", validators=[Optional()])
-    num_adults = IntegerField("Number of Adult Passengers", validators=[Optional(), NumberRange(min=1, max=6)])
-    num_children = IntegerField("Number of Child Passengers (Age 2-11)", validators=[Optional(), NumberRange(min=0, max=4)])
-    num_infants = IntegerField("Number of Infant Passengers (Age < 2)", validators=[Optional(), NumberRange(min=0, max=3)])
+    exclude_airlines = SelectField("Exclude Lowest Rated Airlines?", choices=[("", "Select Option"), ('true', 'Exclude Lowest Rated Airlines'), ('false', 'Include All Airlines')], validators=[Optional()], description="Excludes airlines rated lowest in safety, service, claims processing, and punctuality from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)")
+    max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0)])
+    max_flight_time = IntegerField("Max Flight Duration", validators=[Optional(), NumberRange(min=1)])
+    num_adults = IntegerField("Number of Adult Passengers", validators=[DataRequired(), NumberRange(min=1, max=6)])
+    num_children = IntegerField("Number of Child Passengers (Age 2-11)", validators=[InputRequired(), NumberRange(min=0, max=4)])
+    num_infants = IntegerField("Number of Infant Passengers (Age < 2)", validators=[InputRequired(), NumberRange(min=0, max=3)])
     search_start_date = SelectField("How far out should the flight search begin looking for flights", coerce=int,
                                     choices=[(1, 'One day'), (7, 'One week'),
                                              (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
