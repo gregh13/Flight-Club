@@ -192,6 +192,18 @@ h2 {
   background-color: #1C16BD;
 }
 
+.btn-custom-outline-form {
+    @include button-variant(pink, red, red, #444, #333, red);
+    color: #1C16BD;
+    background-color: #f2f2f2;
+    border-color: #1C16BD;
+}
+
+.btn-custom-outline-form:hover {
+  color: #fff;
+  background-color: #1C16BD;
+}
+
 .card-body h2 {
   padding: 2.2% 0;
 }
@@ -215,6 +227,11 @@ h2 {
 .btn-mega {
   padding: 6%;
   font-family: "Ubuntu", sans-serif;
+}
+
+.btn-tiny {
+  padding: 0px 5px;
+  font-size: 11px;
 }
 
 .text-mega {
