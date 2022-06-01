@@ -1,0 +1,47 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+
+<div class="container">
+  <div class="row">
+      <div class="col-lg-6 col-md-8 mx-auto form-container">
+        <div>
+          <h5>Results from: <strong>{{ user_deals["flight_search_date"] }}</strong></h5>
+          <hr>
+          <table>
+
+             {% for x in range(1, 11): %}
+
+
+            {% if user_deals['place' + x|string]: %}
+            <tr><td><br></td></tr>
+            <tr>
+              <td style="text-align: center"><strong>{{ user_deals["place" + x|string] }}</strong></td>
+            </tr>
+
+              {% if user_deals["link" + x|string]: %}
+            <tr>
+              <td style="text-align: left; padding: 0.5% 22% 0%;">{{ user_deals["message" + x|string] }}</td></tr>
+               <tr><td><a type="button" class="w-33 btn btn-tiny btn-custom-outline-form"
+                          href='{{ user_deals["link" + x|string] }}' target="_blank">View Details</a></td>
+              {% else: %}
+              <td style="text-align: left; padding: 0.5% 22% 0%;">{{ user_deals["message" + x|string] }}</td>
+              {% endif %}
+            </tr>
+            <tr><td><br></td></tr>
+            <tr><td><span>- - - - - - - - - - - - - - - - - - - - - - -</span></td></tr>
+            {% endif %}
+            {% endfor %}
+
+            </table>
+        </div>
+        <br>
+        <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">My Destinations</a>
+      </div>
+    </div>
+    <br><br>
+</div>
+
+{% include "footer.html" %}
+{% endblock %}
