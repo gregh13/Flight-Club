@@ -90,6 +90,7 @@ class Preferences(db.Model, Base):
     exclude_airlines = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
     max_flight_time = db.Column(db.Integer)
+    diff_airports_okay = db.Column(db.String(100))
     num_adults = db.Column(db.Integer, nullable=False)
     num_children = db.Column(db.Integer, nullable=False)
     num_infants = db.Column(db.Integer, nullable=False)
@@ -137,7 +138,7 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-# db.create_all()
+db.create_all()
 
 
 def admin_only(function):
@@ -416,6 +417,7 @@ def register():
             exclude_airlines='True',
             max_stops=2,
             max_flight_time=35,
+            diff_airports_okay="True",
             num_adults=1,
             num_children=0,
             num_infants=0,
