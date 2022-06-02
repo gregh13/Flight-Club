@@ -30,7 +30,11 @@ def date_range_check(form, field):
 class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = EmailField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=22)])
+    confirm_password = PasswordField("Confirm Password",
+                                     validators=[InputRequired(),
+                                                 Length(min=8, max=22),
+                                                 EqualTo('password', message='Passwords must match')])
     submit = SubmitField("Register")
 
 
@@ -38,6 +42,21 @@ class LoginForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
+
+
+class SendResetEmail(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired()])
+    submit = SubmitField("Send Reset Email")
+
+
+class ResetPassword(FlaskForm):
+    email = EmailField("Your Email", validators=[DataRequired()])
+    password = PasswordField("New Password", validators=[InputRequired(), Length(min=8, max=22)])
+    confirm_password = PasswordField("Confirm Password",
+                                     validators=[InputRequired(),
+                                                 Length(min=8, max=22),
+                                                 EqualTo('password', message='Passwords must match')])
+    submit = SubmitField("Send Reset Email")
 
 
 class CityPriceForm(Form):

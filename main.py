@@ -5,10 +5,12 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword
 from functools import wraps
 from new_iata_codes import all_cities_international
-# from datetime import date, datetime
+from numbers_and_letters import COMBINED_LIST
+import random
+from datetime import date, datetime
 # import os
 
 app = Flask(__name__)
@@ -36,6 +38,8 @@ class User(UserMixin, db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(50))
+    reset = db.Column(db.String(100))
+    reset_timestamp = db.Column(db.String(100))
     name = db.Column(db.String(100))
     preferences = relationship('Preferences', back_populates="user_pref")
     destinations = relationship('Destinations', back_populates="user_dest")
@@ -164,15 +168,75 @@ def landing_page():
     return render_template("index.html", page_title="")
 
 
-# @app.route('/new', methods=["GET","POST"])
-# def new():
-#     if request.method == "GET":
-#         print("GET")
-#     if request.method == "POST":
-#         print("POST")
-#         print(request.data)
-#     page_title = "Page Title"
-#     return render_template("new_register.html", page_title=page_title)
+@app.route('/reset_password_page', methods=["GET","POST"])
+def reset_password_page():
+    form = SendResetEmail()
+    page_title = "Send Password Reset Email"
+    if form.validate_on_submit():
+        timestamp = datetime.today()
+        print(timestamp)
+        # Convert into string?
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        print(user)
+        if user is None:
+            flash(f"Sorry, there is no account for '{email}' in our database.")
+            return redirect(url_for('reset_password_page'))
+
+        seq_len = random.randint(70, 90)
+        print(seq_len)
+        reset_string = ""
+        for x in range(0, seq_len):
+            reset_string += random.choice(COMBINED_LIST)
+        print(reset_string)
+        user.reset = reset_string
+        user.reset_timestamp = "timestamp"
+        db.session.commit()
+
+        # send email to user with a link with string at end
+
+        return render_template("reset_email_sent.html", page_title="Reset Email Sent!")
+
+    return render_template("reset_password.html", page_title=page_title, form=form)
+
+
+@app.route('/22dneirfymdrowssapruoytogrofuoykosti/<user_recovery_string>', methods=["GET", "POST"])
+def authenticate_reset_password(user_recovery_string):
+
+    form = ResetPassword()
+    page_title = "Reset Your Password"
+    if form.validate_on_submit():
+        current_timestamp = datetime.today()
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        print(user)
+        if user is None:
+            flash(f"Sorry, there is no account for '{email}' in our database.")
+            return redirect(url_for('authenticate_reset_password', user_recovery_string=user_recovery_string))
+        if user.reset is None:
+            flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
+            return redirect(url_for("reset_password_page"))
+
+        # reformat user.reset_timestamp into datetime
+        # if current_timestamp - user.reset_timestamp < 30 minutes:
+        #     flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
+        #     return redirect(url_for("reset_password_page"))
+
+        if user.reset == user_recovery_string:
+            password = form.password.data
+            salted_hashbrowns = generate_password_hash(
+                password=password,
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+            user.password = salted_hashbrowns
+            user.reset = None
+            db.session.commit()
+
+            # send email to user noting that they changed their password
+
+            return render_template("reset_password_success.html", page_title="Password Reset Successfully!")
+    return render_template("reset_password.html", page_title=page_title, form=form)
 
 
 @app.route('/home')
@@ -403,6 +467,7 @@ def register():
 
         user = User(email=email,
                     password=salted_hashbrowns,
+                    reset=None,
                     name=form.name.data)
         db.session.add(user)
         db.session.commit()
