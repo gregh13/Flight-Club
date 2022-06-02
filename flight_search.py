@@ -101,11 +101,12 @@ def figure_out_dates(user_prefs):
     elif end_specific:
         # Only end date, using default start advance
         if end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
-            # end date is okay (far enough out to possibly get results)
+            # end date is okay (far enough out to possibly get results), use lead time preference
             date_to = end_specific.strftime("%d/%m/%Y")
             return_from = date_from
             return_to = end_specific.strftime("%d/%m/%Y")
         elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
+            # end date isn't far enough away to use lead time, use today for flight start
             date_to = end_specific.strftime("%d/%m/%Y")
             date_from = today.strftime("%d/%m/%Y")
             return_from = date_from
@@ -423,8 +424,8 @@ for u in all_users:
                                                         total_passengers=total_passengers,
                                                         bad_airline_string=bad_airline_string)
                 else:
-                    add_note = f" - Note: Leaving airport ({flight_dict['routes'][0][0]})" \
-                               f" and returning airport ({({flight_dict['routes'][1][1]})}) are not the same"
+                    add_note = f"Note: Leaving airport ({flight_dict['routes'][0][0]})" \
+                               f" and returning airport ({flight_dict['routes'][1][1]}) are not the same"
                     flight_link = flight_dict["deep_link"]
 
                 # flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
@@ -446,7 +447,7 @@ for u in all_users:
 
                 message = f"Deal Found! ${price_formatted} for {total_passengers} passengers ({passengers}) " \
                           f"from {depart_day} returning home on {back_home_day} " \
-                          f"- ({flight_dict['nights_at_destination']} nights total){add_note}"
+                          f"- ({flight_dict['nights_at_destination']} nights total)\n\n{add_note}"
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
                 website_flight_deal_dict[f"link{x + 1}"] = flight_link
