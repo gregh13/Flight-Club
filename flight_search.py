@@ -59,6 +59,7 @@ def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_
             flight_link_string += f"&cabinClass=FIRST_CLASS-true"
 
     print(flight_link_string)
+
     return flight_link_string
 
 
@@ -69,6 +70,8 @@ def figure_out_dates(user_prefs):
     forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
     forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
                                            user_prefs["search_length"]))).strftime("%d/%m/%Y")
+    return_from = None
+    return_to = None
     # Sets defaults, helps clean up 'if' statements below
     date_from = forward_start
     date_to = forward_end
@@ -80,23 +83,35 @@ def figure_out_dates(user_prefs):
                 # Kiwi Flight Search requires dd/mm/yyyy format
                 date_from = start_specific.strftime("%d/%m/%Y")
                 date_to = end_specific.strftime("%d/%m/%Y")
+                return_from = start_specific.strftime("%d/%m/%Y")
+                return_to = end_specific.strftime("%d/%m/%Y")
 
             elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
                 # start date is past, check end date is ok
                 date_from = today.strftime("%d/%m/%Y")
                 date_to = end_specific.strftime("%d/%m/%Y")
+                return_from = today.strftime("%d/%m/%Y")
+                return_to = end_specific.strftime("%d/%m/%Y")
 
         elif start_specific >= today:
             # No end date, start date is okay (not past)
             date_from = start_specific.strftime("%d/%m/%Y")
+            date_to = (start_specific + timedelta(days=user_prefs["search_length"])).strftime("%d/%m/%Y")
 
     elif end_specific:
         # Only end date, using default start advance
         if end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
             # end date is okay (far enough out to possibly get results)
             date_to = end_specific.strftime("%d/%m/%Y")
+            return_from = date_from
+            return_to = end_specific.strftime("%d/%m/%Y")
+        elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
+            date_to = end_specific.strftime("%d/%m/%Y")
+            date_from = today.strftime("%d/%m/%Y")
+            return_from = date_from
+            return_to = end_specific.strftime("%d/%m/%Y")
 
-    date_dictionary = {"date_from": date_from, "date_to": date_to}
+    date_dictionary = {"date_from": date_from, "date_to": date_to, "return_from": return_from, "return_to": return_to}
 
     return date_dictionary
 
@@ -158,6 +173,7 @@ def road_goat_image_search(city_name, country_to):
 
 def look_for_flights(user_prefs, destination):
     flight_date_dict = figure_out_dates(user_prefs)
+    print(flight_date_dict)
 
     if user_prefs['exclude_airlines'] == "true":
         flight_parameters = {
@@ -209,8 +225,11 @@ def look_for_flights(user_prefs, destination):
 
 
 def process_flight_info(flight_data):
+    # Grabs first (cheapest) result
     data = flight_data["data"][0]
+    # Sets default value in case 'if' statements don't get triggered
     leave_destination_date = data["route"][-1]['local_departure'].split("T")[0]
+    # Catches more accurate departure date when return trip has multiple flights
     for route in data["route"]:
         if route["flyFrom"] == data['flyTo']:
             leave_destination_date = route['local_departure'].split("T")[0]
@@ -229,7 +248,8 @@ def process_flight_info(flight_data):
             'arrival': data["route"][-1]['local_arrival'].split("T")[0],
             'nights_at_destination': int(data['nightsInDest']),
             'price': data['price'],
-            "deeplink": data["deep_link"]
+            'routes': data["routes"],
+            "deep_link": data["deep_link"]
         }
     return flight_data_dict
 
@@ -301,6 +321,10 @@ for u in all_users:
     bad_codes = []
     email_flight_deal_list = []
     website_flight_deal_dict = {"flight_search_date": date.today().strftime('%a, %B %-d, %Y')}
+    for x in range(0, 10):
+        website_flight_deal_dict[f"place{x + 1}"] = None
+        website_flight_deal_dict[f"message{x + 1}"] = None
+        website_flight_deal_dict[f"link{x + 1}"] = None
     user_name = u.name
     user_email = u.email
     print(f"{user_name}: {user_email}")
@@ -348,8 +372,8 @@ for u in all_users:
         destination = list_of_dicts[x]
         # 'Surprise Me' choice
         if destination["iata"] == "???":
-            # While loop protects against randomly getting "???" again
-            while destination["iata"] == "???":
+            # While loop protects against randomly getting "???" again or same as home airport
+            while destination["iata"] == "???" or destination["iata"] == home_airport:
                 destination["iata"] = random.choice(list(all_cities_international))
 
         city_name = all_cities_international[destination["iata"]]
@@ -390,10 +414,18 @@ for u in all_users:
                 price_formatted = str(price_with_commas) + f" {destination['currency']}"
                 # image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
-                flight_link = configure_flight_link(user_pref=user_preferences_dict,
-                                                    flight_dict=flight_dict,
-                                                    total_passengers=total_passengers,
-                                                    bad_airline_string=bad_airline_string)
+                # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
+                print(flight_dict["routes"])
+                add_note = ""
+                if flight_dict["routes"][0][0] == flight_dict["routes"][1][1]:
+                    flight_link = configure_flight_link(user_pref=user_preferences_dict,
+                                                        flight_dict=flight_dict,
+                                                        total_passengers=total_passengers,
+                                                        bad_airline_string=bad_airline_string)
+                else:
+                    add_note = f" - Note: Leaving airport ({flight_dict['routes'][0][0]})" \
+                               f" and returning airport ({({flight_dict['routes'][1][1]})}) are not the same"
+                    flight_link = flight_dict["deep_link"]
 
                 # flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
                 #               f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
@@ -414,13 +446,13 @@ for u in all_users:
 
                 message = f"Deal Found! ${price_formatted} for {total_passengers} passengers ({passengers}) " \
                           f"from {depart_day} returning home on {back_home_day} " \
-                          f"- ({flight_dict['nights_at_destination']} nights total)"
+                          f"- ({flight_dict['nights_at_destination']} nights total){add_note}"
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
                 website_flight_deal_dict[f"link{x + 1}"] = flight_link
                 # print(message)
                 print(f"\nHomebrew Link: {flight_link}")
-                print(f"\nDeeplink: {flight_dict['deeplink']}")
+                print(f"\nDeep_link: {flight_dict['deep_link']}")
                 print("\n")
 
             else:
