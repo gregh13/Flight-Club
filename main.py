@@ -138,7 +138,7 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-db.create_all()
+# db.create_all()
 
 
 def admin_only(function):
@@ -207,7 +207,7 @@ def my_deals():
 def my_destinations():
     page_title = "My Destinations"
     city_options = all_cities_international
-    des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
+    des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
     return render_template("my_destinations.html", page_title=page_title, des=des, city_options=city_options)
 
 
@@ -231,7 +231,7 @@ def update_destinations():
             dict_to_add = {"city": city_options[user_data_dict[f'city{x}']], "price_ceiling": user_data_dict[f'price{x}']}
             list_of_dicts.append(dict_to_add)
     user_des.destinations = list_of_dicts
-
+    user_des.home_airport = city_options[user_data_dict["home_airport"]]
     # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
 
