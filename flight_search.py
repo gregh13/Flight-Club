@@ -70,8 +70,8 @@ def figure_out_dates(user_prefs):
     forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
     forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
                                            user_prefs["search_length"]))).strftime("%d/%m/%Y")
-    return_from = None
-    return_to = None
+    return_from = ""
+    return_to = ""
     # Sets defaults, helps clean up 'if' statements below
     date_from = forward_start
     date_to = forward_end
@@ -99,17 +99,17 @@ def figure_out_dates(user_prefs):
             date_to = (start_specific + timedelta(days=user_prefs["search_length"])).strftime("%d/%m/%Y")
 
     elif end_specific:
-        # Only end date, using default start advance
-        if end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"] + user_prefs["search_start_date"]))):
-            # end date is okay (far enough out to possibly get results), use lead time preference
+        # Only end date
+        if end_specific > (today + timedelta(days=(user_prefs["search_length"] + user_prefs["search_start_date"]))):
+            # end date is okay (far enough out to cover search length), use lead time preference
             date_to = end_specific.strftime("%d/%m/%Y")
-            return_from = date_from
+            return_from = forward_start
             return_to = end_specific.strftime("%d/%m/%Y")
         elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
             # end date isn't far enough away to use lead time, use today for flight start
-            date_to = end_specific.strftime("%d/%m/%Y")
             date_from = today.strftime("%d/%m/%Y")
-            return_from = date_from
+            date_to = end_specific.strftime("%d/%m/%Y")
+            return_from = today.strftime("%d/%m/%Y")
             return_to = end_specific.strftime("%d/%m/%Y")
 
     date_dictionary = {"date_from": date_from, "date_to": date_to, "return_from": return_from, "return_to": return_to}
@@ -182,6 +182,8 @@ def look_for_flights(user_prefs, destination):
             "fly_to": destination["iata"],
             "date_from": flight_date_dict["date_from"],
             "date_to": flight_date_dict["date_to"],
+            "return_from": flight_date_dict["return_from"],
+            "return_to": flight_date_dict["return_to"],
             "nights_in_dst_from": user_prefs["min_nights"],
             "nights_in_dst_to": user_prefs["max_nights"],
             "flight_type": "round",
