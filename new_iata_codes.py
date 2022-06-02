@@ -1046,7 +1046,6 @@ all_cities_international = {
     "PAP": "Port-au-Prince, Haiti - (PAP)",
     "PWM": "Portland, ME, USA - (PWM)",
     "PDX": "Portland, OR, USA - (PDX)",
-    "PTJ": "Portland, Vic., Australia - (PTJ)",
     "OPO": "Porto, Portugal - (OPO)",
     "POA": "Porto Alegre, Brazil - (POA)",
     "PXO": "Porto Santo, Madeira - (PXO)",
@@ -1132,7 +1131,6 @@ all_cities_international = {
     "ROW": "Roswell, NM, USA - (ROW)",
     "ROT": "Rotorua, New Zealand - (ROT)",
     "RTM": "Rotterdam, Netherlands - (RTM)",
-    "URO": "Rouen, France - (URO)",
     "YUY": "Rouyn-Noranda, PQ, Canada - (YUY)",
     "RVN": "Rovaniemi, Finland - (RVN)",
     "RXS": "Roxas City, Philippines - (RXS)",
@@ -1462,5 +1460,5 @@ all_cities_international = {
     "CGO": "Zhengzhou, China - (CGO)",
     "HSN": "Zhoushan, China - (HSN)",
     "ZRH": "Zurich, Switzerland - (ZRH)",
-    "???": "Surprise Me"
+    "???": "Surprise Me!",
 }
