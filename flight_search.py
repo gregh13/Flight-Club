@@ -214,7 +214,7 @@ def look_for_flights(user_prefs, destination):
             "max_sector_stopovers": user_prefs["max_stops"],
             "limit": 1000
         }
-    # print(flight_parameters)
+    print(flight_parameters)
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
         # search_response.raise_for_status()
@@ -355,14 +355,14 @@ for u in all_users:
         else:
             passengers += f", {user_preferences_dict['num_infants']} Infants"
 
-    home_airport = [iata_code for iata_code, home in all_cities_international.items() if home == user_destinations_dict["home_airport"]][0]
-    print(home_airport)
+    # home_airport = [iata_code for iata_code, home in all_cities_international.items() if home == user_destinations_dict["home_airport"]][0]
+    # print(home_airport)
 
     list_of_dicts = []
     for x in range(1, 11):
         dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
                        "price_ceiling": user_destinations_dict[f'price{x}'],
-                       "home_airport": home_airport,
+                       "home_airport": user_destinations_dict["home_airport"],
                        "currency": user_destinations_dict["currency"]}
         if dict_to_add["iata"] is None:
             pass

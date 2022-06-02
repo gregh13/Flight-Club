@@ -244,6 +244,8 @@ def update_destinations():
         # cycle through the entries and replace the default values, then update the list.
         # need a step in the loop ('z') since entry has 2 nested values
 
+        home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
+        print(f"Home Airport: {home_airport}")
         update_list = [None for x in range(0, 20)]
         z = 0
         destinations = form.destinations.entries
@@ -261,9 +263,8 @@ def update_destinations():
         # All this work so that users can dynamically choose number of destinations AND so when they go to update
         # it will pre-populate the form so they see their older values while updating/editing.
         # Small feature, big headache!
-        print (update_list)
 
-        user_des.home_airport = form.home_airport.data
+        user_des.home_airport = home_airport
         user_des.currency = form.currency.data
         user_des.city1 = update_list[0]
         user_des.price1 = update_list[1]
