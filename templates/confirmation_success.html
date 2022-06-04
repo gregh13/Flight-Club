@@ -1,0 +1,19 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+
+<div class="container form-padding">
+
+<h4>Your account has been confirmed!</h4>
+  <p>Looks like you know the secret password. Welcome to the club, my friend!</p>
+    <br>
+    <a type="button" href="{{ url_for('user_home') }}" class="w-33 btn btn-sm btn-custom">Go to My Account</a>
+
+
+    <br><br><br><br><br><br>
+
+</div>
+
+{% include "footer.html" %}
+{% endblock %}

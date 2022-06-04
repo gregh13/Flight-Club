@@ -10,11 +10,15 @@ from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
 import random
-from datetime import date, datetime
+import requests
+from datetime import datetime
 # import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
+api_key = "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"
+company_email = "flightclubdeals@gmail.com"
+company_name = "Flight Club"
 Bootstrap(app)
 
 # LATER, during Heroku stage
@@ -38,7 +42,9 @@ class User(UserMixin, db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(50))
-    reset = db.Column(db.String(100))
+    confirmation_token = db.Column(db.String(300))
+    confirmed = db.Column(db.Boolean)
+    reset_token = db.Column(db.String(100))
     reset_timestamp = db.Column(db.String(100))
     name = db.Column(db.String(100))
     preferences = relationship('Preferences', back_populates="user_pref")
@@ -142,7 +148,42 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-# db.create_all()
+db.create_all()
+
+
+def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
+    url = "https://api.sendinblue.com/v3/smtp/email"
+    payload = {
+        "sender": {
+            "email": company_email,
+            "name": company_name
+        },
+        "to": [{
+            "email": user_email,
+            "name": user_name
+        }],
+        "subject": subject,
+        "params": params,
+        "templateId": template_id
+    }
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": api_key
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    print(response.text)
+    return response.text
+
+
+def create_random_string():
+    seq_len = random.randint(75, 97)
+    print(seq_len)
+    random_string = ""
+    for x in range(0, seq_len):
+        random_string += random.choice(COMBINED_LIST)
+    print(random_string)
+    return random_string
 
 
 def admin_only(function):
@@ -152,14 +193,23 @@ def admin_only(function):
             return abort(403)
         else:
             return function(*args, **kwargs)
-
     return decorated_function
+
+
+# def confirmed_account(function):
+#     @wraps(function)
+#     def decorated_function(*args, **kwargs):
+#         print(current_user.id)
+#         user = User.query.filter_by(id=current_user.id).first()
+#         if not user.confirmed:
+#             return render_template("confirm_your_account.html")
+#         else:
+#             return function(*args, **kwargs)
+#     return decorated_function
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    # print(user_id)
-
     return User.query.get(user_id)
 
 
@@ -168,8 +218,24 @@ def landing_page():
     return render_template("index.html", page_title="")
 
 
-@app.route('/reset_password_page', methods=["GET","POST"])
-def reset_password_page():
+@app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
+def confirm_your_account(confirm_string):
+    all_users = User.query.all()
+    for user in all_users:
+        if user.confirmed:
+            continue
+        # Since tokens are unique, we can confirm without checking which user is confirming
+        if user.confirmation_token == confirm_string:
+            user.confirmed = True
+            db.session.commit()
+            return render_template("confirmation_success.html")
+        return render_template("confirm_your_account.html")
+
+    return render_template("confirm_your_account.html")
+
+
+@app.route('/reset_your_password', methods=["GET", "POST"])
+def reset_your_password():
     form = SendResetEmail()
     page_title = "Send Password Reset Email"
     if form.validate_on_submit():
@@ -181,26 +247,35 @@ def reset_password_page():
         print(user)
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
-            return redirect(url_for('reset_password_page'))
+            return redirect(url_for('reset_your_password'))
 
-        seq_len = random.randint(70, 90)
-        print(seq_len)
-        reset_string = ""
-        for x in range(0, seq_len):
-            reset_string += random.choice(COMBINED_LIST)
-        print(reset_string)
-        user.reset = reset_string
-        user.reset_timestamp = "timestamp"
+        reset_string = create_random_string()
+
+        user.reset_token = reset_string
+        user.reset_timestamp = timestamp
         db.session.commit()
 
         # send email to user with a link with string at end
+        subject = "Password Reset Request"
+        params = {"reset_token": reset_string, "notify": "notify_link_ADD LATER"}
+        template_id = 4
+        email_status = send_email(company_email=company_email,
+                                  company_name=company_name,
+                                  user_name=user.name,
+                                  user_email=user.email,
+                                  subject=subject,
+                                  params=params,
+                                  template_id=template_id,
+                                  api_key=api_key)
 
+        if email_status == "good":
+            pass
         return render_template("reset_email_sent.html", page_title="Reset Email Sent!")
 
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
-@app.route('/22dneirfymdrowssapruoytogrofuoykosti/<user_recovery_string>', methods=["GET", "POST"])
+@app.route('/itsokfriendweforgiveyou/<user_recovery_string>', methods=["GET", "POST"])
 def authenticate_reset_password(user_recovery_string):
 
     form = ResetPassword()
@@ -213,16 +288,32 @@ def authenticate_reset_password(user_recovery_string):
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('authenticate_reset_password', user_recovery_string=user_recovery_string))
-        if user.reset is None:
+
+        if user.reset_token is None:
             flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
-            return redirect(url_for("reset_password_page"))
+            return redirect(url_for("reset_your_password"))
 
+        print(user.reset_timestamp)
+        print(type(user.reset_timestamp))
         # reformat user.reset_timestamp into datetime
-        # if current_timestamp - user.reset_timestamp < 30 minutes:
-        #     flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
-        #     return redirect(url_for("reset_password_page"))
+        timestamp_config = tuple([int(x) for x in user.reset_timestamp[:10].split('-')]) + \
+                           tuple([int(float(x)) for x in user.reset_timestamp[11:].split(':')])
+        print(timestamp_config)
+        reset_timestamp = datetime(*timestamp_config)
 
-        if user.reset == user_recovery_string:
+        print(reset_timestamp)
+        print(current_timestamp)
+        td = current_timestamp - reset_timestamp
+        print(td)
+        time_difference_mins = int(round(td.total_seconds() / 60))
+        print(time_difference_mins)
+
+        if time_difference_mins > 30:
+            user.reset_token = None
+            flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
+            return redirect(url_for("reset_your_password"))
+
+        if user.reset_token == user_recovery_string:
             password = form.password.data
             salted_hashbrowns = generate_password_hash(
                 password=password,
@@ -230,12 +321,15 @@ def authenticate_reset_password(user_recovery_string):
                 salt_length=8
             )
             user.password = salted_hashbrowns
-            user.reset = None
+            user.reset_token = None
             db.session.commit()
 
             # send email to user noting that they changed their password
 
             return render_template("reset_password_success.html", page_title="Password Reset Successfully!")
+
+        return redirect(url_for('landing_page'))
+
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
@@ -255,6 +349,7 @@ def user_home():
 #         print(form.trial.data)
 #     return render_template('new_register.html', form=form, cities=cities)
 
+
 @app.route('/my_deals')
 @login_required
 def my_deals():
@@ -262,8 +357,6 @@ def my_deals():
     user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
     print(user_deals)
     return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
-
-
 
 
 @app.route('/my_destinations')
@@ -292,10 +385,14 @@ def update_destinations():
         if user_data_dict[f'city{x}'] is None:
             pass
         else:
-            dict_to_add = {"city": city_options[user_data_dict[f'city{x}']], "price_ceiling": user_data_dict[f'price{x}']}
+            dict_to_add = {"city": city_options[user_data_dict[f'city{x}']],
+                           "price_ceiling": user_data_dict[f'price{x}']}
             list_of_dicts.append(dict_to_add)
     user_des.destinations = list_of_dicts
-    user_des.home_airport = city_options[user_data_dict["home_airport"]]
+    if user_des.home_airport is None:
+        pass
+    else:
+        user_des.home_airport = city_options[user_data_dict["home_airport"]]
     # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
 
@@ -310,48 +407,53 @@ def update_destinations():
 
         home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
         print(f"Home Airport: {home_airport}")
-        update_list = [None for x in range(0, 20)]
-        z = 0
+
+        destinations_update_dict = {}
+        for x in range(1, 11):
+            destinations_update_dict[f"city{x}"] = None
+            destinations_update_dict[f"price{x}"] = None
+
         destinations = form.destinations.entries
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
-            # This is the submitted data: a dictionary with the city and price
-            print(dest_dict)
+            destinations_update_dict[f"city{x}"] = [iata_code for iata_code, city_name in city_options.items()
+                                                    if city_name == dest_dict['city']][0]
+            destinations_update_dict[f"price{x}"] = dest_dict['price_ceiling']
 
-            update_list[z] = [iata_code for iata_code, city_name in city_options.items() if city_name == dest_dict['city']][0]
-            z += 1
-            update_list[z] = dest_dict['price_ceiling']
-            z += 1
+        user_des.update(destinations_update_dict)
+
+        db.session.commit()
+
 
         # Again, very lengthy since each update must be done manually.
         # All this work so that users can dynamically choose number of destinations AND so when they go to update
         # it will pre-populate the form so they see their older values while updating/editing.
         # Small feature, big headache!
 
-        user_des.home_airport = home_airport
-        user_des.currency = form.currency.data
-        user_des.city1 = update_list[0]
-        user_des.price1 = update_list[1]
-        user_des.city2 = update_list[2]
-        user_des.price2 = update_list[3]
-        user_des.city3 = update_list[4]
-        user_des.price3 = update_list[5]
-        user_des.city4 = update_list[6]
-        user_des.price4 = update_list[7]
-        user_des.city5 = update_list[8]
-        user_des.price5 = update_list[9]
-        user_des.city6 = update_list[10]
-        user_des.price6 = update_list[11]
-        user_des.city7 = update_list[12]
-        user_des.price7 = update_list[13]
-        user_des.city8 = update_list[14]
-        user_des.price8 = update_list[15]
-        user_des.city9 = update_list[16]
-        user_des.price9 = update_list[17]
-        user_des.city10 = update_list[18]
-        user_des.price10 = update_list[19]
+        # user_des.home_airport = home_airport
+        # user_des.currency = form.currency.data
+        # user_des.city1 = update_list[0]
+        # user_des.price1 = update_list[1]
+        # user_des.city2 = update_list[2]
+        # user_des.price2 = update_list[3]
+        # user_des.city3 = update_list[4]
+        # user_des.price3 = update_list[5]
+        # user_des.city4 = update_list[6]
+        # user_des.price4 = update_list[7]
+        # user_des.city5 = update_list[8]
+        # user_des.price5 = update_list[9]
+        # user_des.city6 = update_list[10]
+        # user_des.price6 = update_list[11]
+        # user_des.city7 = update_list[12]
+        # user_des.price7 = update_list[13]
+        # user_des.city8 = update_list[14]
+        # user_des.price8 = update_list[15]
+        # user_des.city9 = update_list[16]
+        # user_des.price9 = update_list[17]
+        # user_des.city10 = update_list[18]
+        # user_des.price10 = update_list[19]
 
-        db.session.commit()
+        # db.session.commit()
 
         flash("Your destinations have been successfully updated.")
         return redirect(url_for('my_destinations'))
@@ -395,33 +497,46 @@ def update_preferences():
     page_title = "Update Preferences"
     # Grabs the user's current preferences
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
-    # Pass prefs as obj into form: prepopulates the form with the current user's preferences
+    # Pass prefs as obj into form: populates the form with the current user's preferences
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
 
         # POSSIBLE CLEAN SOLUTION TO UPDATING USER PREFERENCES!!
         # form.populate_obj(prefs)
         # ??????????????
-
         # Now the form data updates the user's preferences.
         # Since form was pre-populated with existing preferences, no bad data or blanks will get updated.
         # Only the things the user wants to change will get changed.
-        prefs.email = form.email.data
-        prefs.email_frequency = form.email_frequency.data
-        prefs.email_day = form.email_day.data
-        prefs.min_nights = form.min_nights.data
-        prefs.max_nights = form.max_nights.data
-        prefs.cabin_class = form.cabin_class.data
-        prefs.exclude_airlines = form.exclude_airlines.data
-        prefs.max_stops = form.max_stops.data
-        prefs.max_flight_time = form.max_flight_time.data
-        prefs.num_adults = form.num_adults.data
-        prefs.num_children = form.num_children.data
-        prefs.num_infants = form.num_infants.data
-        prefs.search_start_date = form.search_start_date.data
-        prefs.specific_search_start_date = form.specific_search_start_date.data
-        prefs.search_length = form.search_length.data
-        prefs.specific_search_end_date = form.specific_search_end_date.data
+
+        updated_preferences = {
+            "email": form.email.data, "email_frequency": form.email_frequency.data, "email_day": form.email_day.data,
+            "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
+            "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
+            "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
+            "num_adults": form.num_adults.data, "num_children": form.num_children.data,
+            "num_infants": form.num_infants.data, "search_start_date": form.search_start_date.data,
+            "specific_search_start_date": form.specific_search_start_date.data,
+            "search_length": form.search_length.data, "specific_search_end_date": form.specific_search_end_date.data
+        }
+
+        prefs.update(updated_preferences)
+
+        # prefs.email = form.email.data
+        # prefs.email_frequency = form.email_frequency.data
+        # prefs.email_day = form.email_day.data
+        # prefs.min_nights = form.min_nights.data
+        # prefs.max_nights = form.max_nights.data
+        # prefs.cabin_class = form.cabin_class.data
+        # prefs.exclude_airlines = form.exclude_airlines.data
+        # prefs.max_stops = form.max_stops.data
+        # prefs.max_flight_time = form.max_flight_time.data
+        # prefs.num_adults = form.num_adults.data
+        # prefs.num_children = form.num_children.data
+        # prefs.num_infants = form.num_infants.data
+        # prefs.search_start_date = form.search_start_date.data
+        # prefs.specific_search_start_date = form.specific_search_start_date.data
+        # prefs.search_length = form.search_length.data
+        # prefs.specific_search_end_date = form.specific_search_end_date.data
 
         db.session.commit()
         flash("Your preferences have been successfully updated.")
@@ -440,10 +555,15 @@ def login():
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('login'))
+        if not user.confirmed:
+            return render_template("confirm_your_account.html")
         if check_password_hash(user.password, password):
             # flash("Login Successful")
             login_user(user)
             return redirect(url_for('user_home'))
+
+        # Prepopulate email field so user doesn't need to retype it???
+
         flash("Sorry, the password is incorrect. Please try again.")
         return redirect(url_for('login'))
     return render_template("login.html", form=form, page_title=page_title)
@@ -464,14 +584,27 @@ def register():
             method='pbkdf2:sha256',
             salt_length=8
         )
+        all_users = User.query.all()
+        confirmation_string = create_random_string()
+        # check existing tokens, makes sure no one has the same token (even thoough the odds are insanely small)
+        all_confirmations_tokens = [user.confirmation_token for user in all_users]
+        while confirmation_string in all_confirmations_tokens:
+            confirmation_string = create_random_string()
 
         user = User(email=email,
                     password=salted_hashbrowns,
-                    reset=None,
+                    confirmed=False,
+                    confirmation_token=confirmation_string,
                     name=form.name.data)
         db.session.add(user)
         db.session.commit()
-        login_user(user)
+
+        params = {"confirmation_token": confirmation_string, "name": user.name}
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=user.name, user_email=user.email,
+                   subject="Account Confirmation", params=params,
+                   template_id=5, api_key=api_key)
+
         preferences = Preferences(
             user_pref=current_user,
             email=user.email,
@@ -492,25 +625,24 @@ def register():
         db.session.add(preferences)
         db.session.commit()
 
-        destinations = Destinations(
-            user_dest=current_user,
-            home_airport="")
+        destinations = Destinations(user_dest=current_user)
         db.session.add(destinations)
         db.session.commit()
 
-        flight_deals = FlightDeals(
-            user_deals=current_user)
+        flight_deals = FlightDeals(user_deals=current_user)
         db.session.add(flight_deals)
         db.session.commit()
 
-        flash("Account created successfully. Please update your destinations.")
-        return redirect(url_for('user_home'))
+        # flash("Account created successfully. Please confirm your account.")
+        return render_template("confirm_your_account.html")
     return render_template('register.html', form=form, page_title=page_title)
 
 
 @app.route('/secret')
 @admin_only
 def secret():
+    # Placeholder location for now
+    # Will add admin features according to the needs of the projects (once users become active and problems arise)
     return render_template('secret.html')
 
 
