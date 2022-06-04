@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword, SubmitTicketForm
 from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
@@ -196,18 +196,6 @@ def admin_only(function):
     return decorated_function
 
 
-# def confirmed_account(function):
-#     @wraps(function)
-#     def decorated_function(*args, **kwargs):
-#         print(current_user.id)
-#         user = User.query.filter_by(id=current_user.id).first()
-#         if not user.confirmed:
-#             return render_template("confirm_your_account.html")
-#         else:
-#             return function(*args, **kwargs)
-#     return decorated_function
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -333,6 +321,21 @@ def authenticate_reset_password(user_recovery_string):
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
+@app.route('/submit_ticket', methods=["GET", "POST"])
+@login_required
+def submit_ticket():
+    form = SubmitTicketForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(user_id=current_user.id).first()
+        print(user.email)
+        # send email to user as a copy of their ticket
+        # send email to FlightClub to notify of a ticket submission
+        print("Success")
+        return render_template('action_successful.html')
+
+    return render_template('submit_ticket.html', form=form)
+
+
 @app.route('/home')
 @login_required
 def user_home():
@@ -340,14 +343,6 @@ def user_home():
     page_title = f"Hello, {user_name}"
     return render_template("user_home.html", page_title=page_title)
 
-# @app.route('/new', methods=["GET", "POST"])
-# def new():
-#     cities = all_cities_international
-#     form = TrialForm()
-#     if form.validate_on_submit():
-#         print("Success")
-#         print(form.trial.data)
-#     return render_template('new_register.html', form=form, cities=cities)
 
 
 @app.route('/my_deals')

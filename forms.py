@@ -59,6 +59,12 @@ class ResetPassword(FlaskForm):
     submit = SubmitField("Send Reset Email")
 
 
+class SubmitTicketForm(FlaskForm):
+    issue_subject = StringField("Subject of Issue", validators=[InputRequired()])
+    issue_description = StringField("Description of Issue", validators=[InputRequired()])
+    submit = SubmitField("Submit")
+
+
 class CityPriceForm(Form):
     city = StringField("City Name",
                        validators=[DataRequired(),
@@ -70,8 +76,11 @@ class CityPriceForm(Form):
 
 class DestinationForm(FlaskForm):
     search = SearchField("Search field")
-    home_airport = StringField("Home Airport", validators=[DataRequired(), AnyOf(values=city_list, message="Please select one of the choices shown as you type.")])
-    # home_airport = StringField("Home Airport Code", validators=[DataRequired(), Length(min=3, max=3)], description="The 3 letter code for the airport that you fly out from")
+    home_airport = StringField("Home Airport", validators=[DataRequired(),
+                                                           AnyOf(values=city_list,
+                                                                 message="Please select one of the "
+                                                                         "choices shown as you type.")])
+
     currency = SelectField("Currency", choices=['USD', 'EUR', 'SGD', 'AUD', 'THB', 'CNY', 'HUF', 'GBP', 'CAD'],
                            validators=[DataRequired()])
     destinations = FieldList(FormField(CityPriceForm), min_entries=3, max_entries=10)
@@ -106,30 +115,4 @@ class PreferenceForm(FlaskForm):
     specific_search_end_date = DateField('Alternatively, choose a specific End Date',
                                            validators=[Optional(), invalid_date, date_range_check], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     submit = SubmitField("Save Changes")
-
-
-#
-# class NumberDestinationsForm(Form):
-#     location_id = StringField('location_id')
-#     city = StringField('city')
-#
-# class CompanyForm(Form):
-#     company_name = StringField('company_name')
-#     locations = FieldList(FormField(LocationForm))
-
-
-
-
-
-#
-# class CreatePostForm(FlaskForm):
-#     title = StringField("Blog Post Title", validators=[DataRequired()])
-#     subtitle = StringField("Subtitle", validators=[DataRequired()])
-#     img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
-#     body = CKEditorField("Blog Content", validators=[DataRequired()])
-#     submit = SubmitField("Submit Post")
-#
-# class CommentForm(FlaskForm):
-#     comment_text = CKEditorField("Post A Comment", validators=[DataRequired()])
-#     submit = SubmitField("Submit Comment")
 
