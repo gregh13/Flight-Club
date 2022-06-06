@@ -346,6 +346,12 @@ padding-left: 25%;
 width: 14%
 }
 
+.table-border {
+border-collapse: collapse;
+border: 1px solid black;
+}
+
+
 
 /* --------------------------------------------------------------------------------------------- */
 /* GOT THIS HELPFUL CODE FROM STACK OVERFLOW: Wanted to make date picker more user friendly */
