@@ -2,16 +2,47 @@
 
 {% block content %}
 {% include "header.html" %}
-<br>
 <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
+      <div class="col-lg-6 col-md-8 mx-auto content">
+        <div class="form-container" style="text-align: left;">
+            <div style="margin: 0% 10%;">
+          <form method="POST" action="">
+                    {{ form.csrf_token }}
+              <br>
+              <strong>{{ form.name.label(style="margin-bottom: 6px;") }}</strong>
+              {{ form.name(style="width:100%") }}
+              <br><br>
+              <strong>{{ form.email.label(style="margin-bottom: 6px;") }}</strong>
+              {{ form.email(style="width:100%") }}
+              <br><br>
+              <strong>{{ form.password.label(style="margin-bottom: 6px;") }}</strong>
+              {{ form.password(style="width:100%") }}
+              <br><br>
+              <strong>{{ form.confirm_password.label(style="margin-bottom: 6px;") }}</strong>
+              {{ form.confirm_password(style="width:100%") }}
+              <br><br>
+              <table  style="display: table; width: 100%;">
+                  <tbody style="display: table; width: 100%;">
+                  <tr>
+                      <td><button class="w-22 btn btn-md btn-custom" type="submit">Register</button></td>
 
-       {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-
+                <td>
+                    <table  style="text-align: right; display: table; width: 100%;">
+                        <tr><td><a class="button" href="{{ url_for('reset_your_password') }}">Sign in</a></td></tr>
+                    </table>
+                      </td>
+                  </tr>
+                  </tbody>
+                  </table>
+          </form>
+                </div>
+        </div>
+                <br>
       </div>
     </div>
   </div>
 
+<br><br>
 {% include "footer.html" %}
 {% endblock %}

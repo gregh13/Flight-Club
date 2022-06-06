@@ -44,34 +44,22 @@
                 <ul class="navbar-nav ml-auto">
                     {% if not current_user.is_authenticated %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('landing_page') }}">Home <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item dropdown active">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-expanded="false">
-                            Navigation
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#features">Features</a>
-                            <a class="dropdown-item" href="#testimonials">Testimonials</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#pricing">Plans</a>
-                        </div>
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        <a class="nav-link" href="{{ url_for('landing_page') }}">Home <span class="sr-only">(current)</span></a>
                     </li>
                     {% else %}
                     <li class="nav-item active">
                         <a class="nav-link" href="{{ url_for('user_home') }}">Home <span class="sr-only">(current)</span></a>
                     </li>
-                    <li class="nav-item dropdown active">
+                  <li class="nav-item dropdown active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-expanded="false">
-                            Navigation
+                            Account
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{{url_for('my_destinations')}}">Destinations</a>
@@ -90,6 +78,7 @@
 </section>
 
 <div class="container page-title">
+    <br>
                 <h2><span style="font-weight: 500; text-align: center;">{{ page_title }}</span></h2>
 {% with messages = get_flashed_messages() %}
 {% if messages %}

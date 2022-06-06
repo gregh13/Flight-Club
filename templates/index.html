@@ -47,8 +47,12 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     {% if not current_user.is_authenticated %}
+
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('landing_page') }}">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
                     </li>
                     <li class="nav-item dropdown active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -58,15 +62,10 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="#features">Features</a>
                             <a class="dropdown-item" href="#testimonials">Testimonials</a>
-                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#pricing">Plans</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#cta">Join FC</a>
                         </div>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                     </li>
                     {% else %}
                     <li class="nav-item active">
@@ -80,7 +79,8 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{{url_for('my_destinations')}}">Destinations</a>
                             <a class="dropdown-item" href="{{url_for('my_preferences')}}">Preferences</a>
-                            <a class="dropdown-item" href="https://www.lonelyplanet.com/">Explore</a>
+                            <a class="dropdown-item" href="{{url_for('my_deals')}}">My Deals</a>
+                            <a class="dropdown-item" href="https://www.lonelyplanet.com/" target="_blank">Explore</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{url_for('logout')}}">Logout</a>
                         </div>
@@ -144,25 +144,25 @@
     <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <h2>These deals make me mad. And jealous. They're just so good.</h2>
+                <h2>These deals make me mad. And jealous. They're just so good.</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/jeff_bezos.png") }}
                 alt="bezos">
-                <em>Jeff, Albuquerque</em>
+                <em>Jeff, New Mexico</em>
             </div>
             <div class="carousel-item">
-                <h2>Great site, looking forward to the partnership with SpaceX!</h2>
+                <h2>Great site, looking forward to the partnership with SpaceX!</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/elon_musk.jpeg") }}
                 alt="musk">
                 <em>Elon, Pretoria</em>
             </div>
             <div class="carousel-item">
-                <h2>The last honest flight deal finder around. And I know a thing or two about honesty.</h2>
+                <h2>The last honest flight deal finder around. And I know a thing or two about honesty.</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/abraham.jpeg") }}
                 alt="abraham">
                 <em>Abe, Kentucky</em>
             </div>
             <div class="carousel-item">
-                <h2>Simply brilliant!</h2>
+                <h2>Simply brilliant!</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/einstein.jpeg") }}
                 alt="einstein">
                 <em>Bertie, Ulm</em>

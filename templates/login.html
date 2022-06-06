@@ -2,24 +2,44 @@
 
 {% block content %}
 {% include "header.html" %}
-<br><br>
  <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto content">
-<!--        {% with messages = get_flashed_messages() %}-->
-<!--        {% if messages %}-->
-<!--        <div class=flashes>-->
-<!--            {% for message in messages %}-->
-<!--            <p>{{ message }}</p>-->
-<!--            {% endfor %}-->
-<!--        </div>-->
-<!--        {% endif %}-->
-<!--        {% endwith %}-->
+      <div class="col-lg-6 col-md-8 mx-auto content">
+        <div class="form-container" style="text-align: left;">
+            <div style="margin: 0% 10%;">
+          <form method="POST" action="">
+                    {{ form.csrf_token }}
+              <br>
+              <h5><strong>{{ form.email.label }}</strong></h5>
+              {{ form.email(style="width:100%") }}
+              <br><br>
+              <h5><strong>{{ form.password.label }}</strong></h5>
+              {{ form.password(style="width:100%") }}
+              <br><br><br>
+              <table  style="display: table; width: 100%;">
+                  <tbody style="display: table; width: 100%;">
+                  <tr>
+                      <td><button class="w-22 btn btn-md btn-custom" type="submit">Login</button></td>
 
-        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+                <td>
+                    <table  style="text-align: right; display: table; width: 100%;">
+                        <tr><td><a class="button" style="font-size: 0.8rem;" href="{{ url_for('reset_your_password') }}">Forgot Password?</a></td></tr>
+                        <tr><td> <a class="button" style="font-size: 0.8rem;" href="{{ url_for('create_an_account', join_type='mini') }}">Create New Account</a></td></tr>
+                    </table>
+                      </td>
+                  </tr>
+                  </tbody>
+                  </table>
+          </form>
+                </div>
+        </div>
+
+<!--        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}-->
+
       </div>
     </div>
   </div>
+<br><br>
 
 
 {% include "footer.html" %}
