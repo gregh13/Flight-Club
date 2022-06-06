@@ -1,3 +1,4 @@
+import time
 from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
 from main import User, Preferences, FlightDeals, db
@@ -7,7 +8,7 @@ import requests
 import base64
 import urllib.parse
 import random
-import os
+
 
 day_of_week = datetime.today().weekday()
 
@@ -289,7 +290,8 @@ def send_email(user_name, user_email, email_flight_deal_list, template_id):
 all_users = User.query.all()
 print(all_users)
 for u in all_users:
-
+    # # Helps slow down API calls to Tequila Kiwi Flight Search (100 requests per minute)
+    # time.sleep(22)
     print(u.name)
     email_day = u.preferences[0].email_day
     if day_of_week != email_day:
