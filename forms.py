@@ -103,16 +103,17 @@ class PreferenceForm(FlaskForm):
     search_start_date = SelectField("How far out should the flight search begin looking for flights", coerce=int,
                                     choices=[(1, 'One day'), (7, 'One week'),
                                              (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
-                                             (60, 'Two months'), (90, 'Three months'),
-                                             (0, 'Specific Start Date? Use the input below')],
+                                             (60, 'Two months'), (90, 'Three months')],
                                     validators=[DataRequired()], description="Note: This is a rolling date range, meaning it will move as time passes. Since Flight Club searches flights weekly, this is better than a specific date range.")
-    specific_search_start_date = DateField('Alternatively, choose a specific Start Date', validators=[Optional(), invalid_date],
+    specific_search_start_date = DateField('Specific Start Date (Optional)', validators=[Optional(), invalid_date],
                                            description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     search_length = SelectField("Search Date Range (the window of time flights will be searched)", coerce=int,
-                                choices=[(7, 'One week'), (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'), (60, 'Two months'), (90, 'Three months'), (120, 'Four months'), (150, 'Five months'), (180, 'Six months'),
-                                         (0, 'Specific End Date? Use the input below')], validators=[DataRequired()],
+                                choices=[(14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
+                                         (60, 'Two months'), (90, 'Three months'), (120, 'Four months'),
+                                         (150, 'Five months'), (180, 'Six months')],
+                                validators=[DataRequired()],
                                 description="Note: This is also a rolling date range, meaning it will move as time passes. For example, if it begins looking for flights 'One month' out and has a date range of '3 months', then if it searches on June 10th, it would look for all flights between July 10th and October 10th.")
-    specific_search_end_date = DateField('Alternatively, choose a specific End Date',
+    specific_search_end_date = DateField('Specific End Date (Optional)',
                                            validators=[Optional(), invalid_date, date_range_check], description="Note: This is a fixed date which will not move as time passes. Choose this if you only have specific date ranges available to travel (holidays, summer, etc.)")
     submit = SubmitField("Save Changes")
 

@@ -12,54 +12,56 @@
                         {{ form.csrf_token }}
                   <br>
                   <strong>{{ form.email.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.email(style="width:100%") }}
+                  <br>{{ form.email(style="width:90%") }}
                   <br><br>
                   <strong>{{ form.email_frequency.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.email_frequency(style="width:100%") }}
+                  <br>{{ form.email_frequency(style="width:70%") }}
                   <br><br>
                   <strong>{{ form.email_day.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.email_day(style="width:100%") }}
+                  <br>{{ form.email_day(style="width:40%") }}
                   <br><br>
                   <strong>{{ form.min_nights.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.min_nights(style="width:100%") }}
+                  <br>{{ form.min_nights(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.max_nights(style="width:100%") }}
+                  <br>{{ form.max_nights(style="width:17%;") }}
                   <br><br>
                   <strong>{{ form.cabin_class.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.cabin_class(style="width:100%") }}
+                  <br>{{ form.cabin_class(style="width:55%") }}
                   <br><br>
                   <strong>{{ form.exclude_airlines.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.exclude_airlines(style="width:100%") }}
+                  <br>{{ form.exclude_airlines(style="width:80%") }}
                   <br><br>
                   <strong>{{ form.max_stops.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.max_stops(style="width:100%") }}
+                  <br>{{ form.max_stops(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.max_flight_time.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.max_flight_time(style="width:100%") }}
+                  <br>{{ form.max_flight_time(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.num_adults.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.num_adults(style="width:100%") }}
+                  <br>{{ form.num_adults(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.num_children.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.num_children(style="width:100%") }}
+                  <br>{{ form.num_children(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.num_infants.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.num_infants(style="width:100%") }}
+                  <br>{{ form.num_infants(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.search_start_date.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.search_start_date(style="width:100%") }}
+                  <br>{{ form.search_start_date(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.specific_search_start_date.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.specific_search_start_date(style="width:100%") }}
+                  <br>{{ form.specific_search_start_date(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.search_length.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.search_length(style="width:100%") }}
+                  <br>{{ form.search_length(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.specific_search_end_date.label(style="margin-bottom: 6px;") }}</strong>
-                  {{ form.specific_search_end_date(style="width:100%") }}
-                  <br><br>
+                  <br>{{ form.specific_search_end_date(style="width:50%") }}
+                  <br><br><br>
+                  <div style="text-align: center">
                   <button class="w-22 btn btn-md btn-custom" type="submit">Save Preferences</button>
+                    </div>
               </form>
             </div>
         </div>
@@ -67,7 +69,7 @@
       </div>
     </div>
   </div>
-
+<br>
 <br><br>
 {% include "footer.html" %}
 {% endblock %}
