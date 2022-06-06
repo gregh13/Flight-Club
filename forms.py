@@ -61,7 +61,7 @@ class ResetPassword(FlaskForm):
 
 class SubmitTicketForm(FlaskForm):
     issue_subject = StringField("Subject of Issue", validators=[InputRequired()])
-    issue_description = StringField("Description of Issue", validators=[InputRequired()])
+    issue_description = TextAreaField("Description of Issue", validators=[InputRequired()])
     submit = SubmitField("Submit")
 
 

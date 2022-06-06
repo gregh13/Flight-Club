@@ -1,0 +1,32 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+ <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto content">
+        <div class="form-container" style="text-align: left;">
+            <div style="margin: 0% 10%;">
+          <form method="POST" action="">
+                    {{ form.csrf_token }}
+              <br>
+              <h5><strong>{{ form.issue_subject.label }}</strong></h5>
+              {{ form.issue_subject(style="width:100%") }}
+              <br><br>
+              <h5><strong>{{ form.issue_description.label }}</strong></h5>
+              {{ form.issue_description(style="width:100%", rows="6") }}
+              <br><br><br>
+
+             <button class="w-22 btn btn-md btn-custom" type="submit">Report Issue</button></td>
+
+          </form>
+                </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<br><br>
+
+
+{% include "footer.html" %}
+{% endblock %}

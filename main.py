@@ -209,6 +209,7 @@ def landing_page():
 
 @app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
 def confirm_your_account(confirm_string):
+    page_title = "Confirm Your Account"
     all_users = User.query.all()
     for user in all_users:
         if user.confirmed:
@@ -217,10 +218,12 @@ def confirm_your_account(confirm_string):
         if user.confirmation_token == confirm_string:
             user.confirmed = True
             db.session.commit()
-            return render_template("confirmation_success.html")
-        return render_template("confirm_your_account.html")
 
-    return render_template("confirm_your_account.html")
+            login_user(user)
+            return render_template("confirmation_success.html")
+        return render_template("confirm_your_account.html", page_title=page_title)
+
+    return render_template("confirm_your_account.html", page_title=page_title)
 
 
 @app.route('/reset_your_password', methods=["GET", "POST"])
@@ -327,7 +330,7 @@ def authenticate_reset_password(user_recovery_string):
 def submit_ticket():
     form = SubmitTicketForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(user_id=current_user.id).first()
+        user = User.query.filter_by(id=current_user.id).first()
         print(user.email)
         # send email to user as a copy of their ticket
         # send email to FlightClub to notify of a ticket submission
@@ -552,7 +555,7 @@ def login():
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('login'))
         if not user.confirmed:
-            return render_template("confirm_your_account.html")
+            return render_template("confirm_your_account.html", page_title="Confirm Your Account")
         if check_password_hash(user.password, password):
             # flash("Login Successful")
             login_user(user)
@@ -596,14 +599,14 @@ def create_an_account(join_type):
         db.session.add(user)
         db.session.commit()
 
-        params = {"confirmation_token": confirmation_string, "name": user.name}
-        send_email(company_email=company_email, company_name=company_name,
-                   user_name=user.name, user_email=user.email,
-                   subject="Account Confirmation", params=params,
-                   template_id=5, api_key=api_key)
+        # params = {"confirmation_token": confirmation_string, "name": user.name}
+        # send_email(company_email=company_email, company_name=company_name,
+        #            user_name=user.name, user_email=user.email,
+        #            subject="Account Confirmation", params=params,
+        #            template_id=5, api_key=api_key)
 
         preferences = Preferences(
-            user_pref=current_user,
+            user_pref=user,
             email=user.email,
             email_frequency=1,
             email_day=4,
@@ -622,16 +625,16 @@ def create_an_account(join_type):
         db.session.add(preferences)
         db.session.commit()
 
-        destinations = Destinations(user_dest=current_user)
+        destinations = Destinations(user_dest=user)
         db.session.add(destinations)
         db.session.commit()
 
-        flight_deals = FlightDeals(user_deals=current_user)
+        flight_deals = FlightDeals(user_deals=user)
         db.session.add(flight_deals)
         db.session.commit()
 
         # flash("Account created successfully. Please confirm your account.")
-        return render_template("confirm_your_account.html")
+        return render_template("confirm_your_account.html", page_title=page_title)
     return render_template('register.html', form=form, page_title=page_title)
 
 

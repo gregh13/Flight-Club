@@ -13,7 +13,7 @@ body{
 body::after {
   content: '';
   display: block;
-  height: 33px; /* Set same as footer's height */
+  height: 53px; /* Set same as footer's height */
 }
 
 /* Footer */
@@ -27,7 +27,7 @@ body::after {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 33px;
+  height: 53px;
 }
 
 
