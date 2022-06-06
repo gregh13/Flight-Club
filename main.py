@@ -149,7 +149,7 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-db.create_all()
+# db.create_all()
 
 
 def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
@@ -210,17 +210,27 @@ def landing_page():
 @app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
 def confirm_your_account(confirm_string):
     page_title = "Confirm Your Account"
+    params = {"heading": "Your account has been confirmed!",
+              "body1": "You've climbed the ladder, said the secret password, "
+                       "and the wooden door has opened for you.",
+              "body2": "Welcome to the club, my friend!",
+              "button_text": "Go to My Account",
+              "url_for": "user_home"}
     all_users = User.query.all()
     for user in all_users:
         if user.confirmed:
-            continue
+            if user.confirmation_token == confirm_string:
+                return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
+            else:
+                continue
         # Since tokens are unique, we can confirm without checking which user is confirming
         if user.confirmation_token == confirm_string:
             user.confirmed = True
             db.session.commit()
 
             login_user(user)
-            return render_template("confirmation_success.html")
+
+            return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
         return render_template("confirm_your_account.html", page_title=page_title)
 
     return render_template("confirm_your_account.html", page_title=page_title)
@@ -249,20 +259,26 @@ def reset_your_password():
 
         # send email to user with a link with string at end
         subject = "Password Reset Request"
-        params = {"reset_token": reset_string, "notify": "notify_link_ADD LATER"}
+        email_params = {"reset_token": reset_string, "notify": "notify_link_ADD LATER"}
         template_id = 4
         email_status = send_email(company_email=company_email,
                                   company_name=company_name,
                                   user_name=user.name,
                                   user_email=user.email,
                                   subject=subject,
-                                  params=params,
+                                  params=email_params,
                                   template_id=template_id,
                                   api_key=api_key)
 
         if email_status == "good":
             pass
-        return render_template("reset_email_sent.html", page_title="Reset Email Sent!")
+
+        params = {"heading": "An email has been sent to help you reset your password.",
+                  "body1": "Please check your email and follow the instructions provided.",
+                  "body2": None,
+                  "button_text": None,
+                  "url_for": None}
+        return render_template("action_successful.html", page_title="Reset Email Sent!", params=params)
 
     return render_template("reset_password.html", page_title=page_title, form=form)
 
@@ -318,7 +334,13 @@ def authenticate_reset_password(user_recovery_string):
 
             # send email to user noting that they changed their password
 
-            return render_template("reset_password_success.html", page_title="Password Reset Successfully!")
+            params = {"heading": "Your password has been reset to your new password",
+                      "body1": "Please login to your account.",
+                      "body2": None,
+                      "button_text": "Go to Login Page",
+                      "url_for": 'login'}
+
+            return render_template("action_successful.html", params=params, page_title="Password Reset Successfully!")
 
         return redirect(url_for('landing_page'))
 
@@ -328,6 +350,7 @@ def authenticate_reset_password(user_recovery_string):
 @app.route('/submit_ticket', methods=["GET", "POST"])
 @login_required
 def submit_ticket():
+    page_title = "Have A Concern?"
     form = SubmitTicketForm()
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
@@ -335,9 +358,18 @@ def submit_ticket():
         # send email to user as a copy of their ticket
         # send email to FlightClub to notify of a ticket submission
         print("Success")
-        return render_template('action_successful.html')
 
-    return render_template('submit_ticket.html', form=form)
+        params = {"heading": "Your issue has been successfully reported",
+                  "body1": "An email has been sent to Flight Club about your concern. "
+                           "You have also been sent an email with the details of your report.",
+                  "body2":"Flight Club will try to respond to this concern in a timely manner. "
+                           "Thank you for your patience",
+                  "button_text": "Return to Home",
+                  "url_for": 'user_home'}
+
+        return render_template('action_successful.html', params=params, page_title="Report Submitted!")
+
+    return render_template('submit_ticket.html', form=form, page_title=page_title)
 
 
 @app.route('/home')
@@ -346,7 +378,6 @@ def user_home():
     user_name = current_user.name
     page_title = f"Hello, {user_name}"
     return render_template("user_home.html", page_title=page_title)
-
 
 
 @app.route('/my_deals')
