@@ -7,6 +7,7 @@ import requests
 import base64
 import urllib.parse
 import random
+import os
 
 day_of_week = datetime.today().weekday()
 
@@ -288,6 +289,7 @@ def send_email(user_name, user_email, email_flight_deal_list, template_id):
 all_users = User.query.all()
 print(all_users)
 for u in all_users:
+
     print(u.name)
     email_day = u.preferences[0].email_day
     if day_of_week != email_day:

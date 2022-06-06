@@ -12,7 +12,7 @@ from numbers_and_letters import COMBINED_LIST
 import random
 import requests
 from datetime import datetime
-# import os
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
@@ -42,6 +42,7 @@ class User(UserMixin, db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(50))
+    join_type = db.Column(db.String(50))
     confirmation_token = db.Column(db.String(300))
     confirmed = db.Column(db.Boolean)
     reset_token = db.Column(db.String(100))
@@ -564,9 +565,9 @@ def login():
     return render_template("login.html", form=form, page_title=page_title)
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    page_title = "Register"
+@app.route('/create_an_account/<join_type>', methods=['GET', 'POST'])
+def create_an_account(join_type):
+    page_title = "Create an Account"
     form = RegisterForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -588,6 +589,7 @@ def register():
 
         user = User(email=email,
                     password=salted_hashbrowns,
+                    join_type=join_type,
                     confirmed=False,
                     confirmation_token=confirmation_string,
                     name=form.name.data)

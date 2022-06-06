@@ -63,7 +63,7 @@
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('register') }}">Join</a>
+                        <a class="nav-link" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -222,7 +222,7 @@
                             <li>Set Price Ceilings</li>
                             <li>Get Free Deals</li>
                         </ul>
-                        <a type="button" href="{{ url_for('register') }}" class="w-100 btn btn-lg btn-custom-outline">Get started</a>
+                        <a type="button" href="{{ url_for('create_an_account', join_type='basic') }}" class="w-100 btn btn-lg btn-custom-outline">Get started</a>
                     </div>
                 </div>
             </div>
@@ -238,7 +238,7 @@
                             <li>Fancier Name</li>
                             <li>Best Option</li>
                         </ul>
-                        <a type="button" href="{{ url_for('register') }}" class="w-100 btn btn-lg btn-custom">Get started</a>
+                        <a type="button" href="{{ url_for('create_an_account', join_type='pro') }}" class="w-100 btn btn-lg btn-custom">Get started</a>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,7 @@
     <br>
     <div class="container">
 
-        <a type="button" href="{{ url_for('register') }}" class="w-100 btn btn-lg btn-custom btn-mega"><span class="text-mega">Join The Flight Club Family!</span><br><span
+        <a type="button" href="{{ url_for('create_an_account', join_type='mega') }}" class="w-100 btn btn-lg btn-custom btn-mega"><span class="text-mega">Join The Flight Club Family!</span><br><span
                 class="text-mega-small">(It's not everyday you get to click a button this big)</span></a>
         <br>
     </div>
