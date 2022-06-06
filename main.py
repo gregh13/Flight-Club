@@ -528,6 +528,14 @@ def update_preferences():
     # Grabs the user's current preferences
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
     # Pass prefs as obj into form: populates the form with the current user's preferences
+    print(prefs.email_frequency)
+    # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
+    if prefs.email_frequency == 3:
+        prefs.email_frequency = 2
+    if prefs.email_frequency in (5, 6, 7):
+        prefs.email_frequency = 4
+
+    print(prefs.email_frequency)
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
 
@@ -549,7 +557,9 @@ def update_preferences():
             "search_length": form.search_length.data, "specific_search_end_date": form.specific_search_end_date.data
         }
 
-        prefs.update(updated_preferences)
+        Preferences.query.filter_by(user_pref_id=current_user.id).update(updated_preferences)
+
+        db.session.commit()
 
         # prefs.email = form.email.data
         # prefs.email_frequency = form.email_frequency.data
@@ -568,7 +578,7 @@ def update_preferences():
         # prefs.search_length = form.search_length.data
         # prefs.specific_search_end_date = form.specific_search_end_date.data
 
-        db.session.commit()
+
         flash("Your preferences have been successfully updated.")
         return redirect(url_for('my_preferences'))
     return render_template("update_preferences.html", form=form, page_title=page_title)

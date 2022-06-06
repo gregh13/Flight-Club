@@ -361,9 +361,6 @@ for u in all_users:
         else:
             passengers += f", {user_preferences_dict['num_infants']} Infants"
 
-    # home_airport = [iata_code for iata_code, home in all_cities_international.items() if home == user_destinations_dict["home_airport"]][0]
-    # print(home_airport)
-
     list_of_dicts = []
     for x in range(1, 11):
         dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
@@ -380,7 +377,7 @@ for u in all_users:
         # 'Surprise Me' choice
         if destination["iata"] == "???":
             # While loop protects against randomly getting "???" again or same as home airport
-            while destination["iata"] == "???" or destination["iata"] == home_airport:
+            while destination["iata"] == "???" or destination["iata"] == user_destinations_dict["home_airport"]:
                 destination["iata"] = random.choice(list(all_cities_international))
 
         city_name = all_cities_international[destination["iata"]]
