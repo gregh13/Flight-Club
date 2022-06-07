@@ -397,3 +397,20 @@ input[type="date"]::-webkit-inner-spin-button {
  }
 
 /* ---------------------------------------------------- */
+
+.tooltip-inner {
+    max-width: 70% !important;
+    margin: 0 auto;
+    background-color: #1C16BD;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #f2f2f2;
+}
+
+.tooltip.show {
+    opacity: 1 !important;
+}
+
+/*------------------------------------------------*/
+

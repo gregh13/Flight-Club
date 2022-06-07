@@ -3,6 +3,7 @@
 {% block content %}
 {% include "header.html" %}
 
+
 <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto content">
@@ -21,15 +22,28 @@
                   <br>{{ form.email_day(style="width:40%") }}
                   <br><br>
                   <strong>{{ form.min_nights.label(style="margin-bottom: 6px;") }}</strong>
+                         <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="The minimum length of time spent at your travel destination."
+                       >
                   <br>{{ form.min_nights(style="width:17%") }}
                   <br><br>
-                  <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }}</strong>
+                  <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }} </strong>
+                  <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="The maximum length of time spent at your travel destination.
+                        Actual trip duration might be somewhere in-between the min and max nights" >
+
                   <br>{{ form.max_nights(style="width:17%;") }}
                   <br><br>
                   <strong>{{ form.cabin_class.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.cabin_class(style="width:55%") }}
                   <br><br>
                   <strong>{{ form.exclude_airlines.label(style="margin-bottom: 6px;") }}</strong>
+                       <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="Excludes airlines rated lowest in safety, service, claims processing, and punctuality
+                              from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)" >
                   <br>{{ form.exclude_airlines(style="width:80%") }}
                   <br><br>
                   <strong>{{ form.max_stops.label(style="margin-bottom: 6px;") }}</strong>
@@ -48,15 +62,34 @@
                   <br>{{ form.num_infants(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.search_start_date.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    title="Note: This is a rolling date range, meaning it will move as time passes.
+                           Since Flight Club searches flights weekly, this is better than a specific date range." >
                   <br>{{ form.search_start_date(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.specific_search_start_date.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    title="Note: This is a fixed date which will not move as time passes.
+                            Choose this if you only have specific date ranges available to travel
+                            (holidays, summer, etc.)" >
                   <br>{{ form.specific_search_start_date(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.search_length.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    title="Note: This is also a rolling date range, meaning it will move as time passes.
+                            For example, if it begins looking for flights 'One month' out and has a date range of
+                            '3 months', then if it searches on June 10th, it would look for all flights between
+                            July 10th and October 10th." >
                   <br>{{ form.search_length(style="width:50%") }}
                   <br><br>
                   <strong>{{ form.specific_search_end_date.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    title="Note: This is a fixed date which will not move as time passes. Choose this if you only have
+                            specific date ranges available to travel (holidays, summer, etc.)" >
                   <br>{{ form.specific_search_end_date(style="width:50%") }}
                   <br><br><br>
                   <div style="text-align: center">
@@ -71,5 +104,12 @@
   </div>
 <br>
 <br><br>
+
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
 {% include "footer.html" %}
 {% endblock %}
