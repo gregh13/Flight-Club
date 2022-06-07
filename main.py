@@ -438,7 +438,8 @@ def update_destinations():
         home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
         print(f"Home Airport: {home_airport}")
 
-        destinations_update_dict = {}
+        destinations_update_dict = {"home_airport": home_airport, "currency": form.currency.data}
+
         for x in range(1, 11):
             destinations_update_dict[f"city{x}"] = None
             destinations_update_dict[f"price{x}"] = None
@@ -446,11 +447,11 @@ def update_destinations():
         destinations = form.destinations.entries
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
-            destinations_update_dict[f"city{x}"] = [iata_code for iata_code, city_name in city_options.items()
+            destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
                                                     if city_name == dest_dict['city']][0]
-            destinations_update_dict[f"price{x}"] = dest_dict['price_ceiling']
+            destinations_update_dict[f"price{x + 1}"] = dest_dict['price_ceiling']
 
-        user_des.update(destinations_update_dict)
+        Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
 
         db.session.commit()
 

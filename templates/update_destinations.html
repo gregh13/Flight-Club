@@ -13,6 +13,16 @@
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
       rel="stylesheet" type="text/css"/>
 <br>
+{% if form.errors %}
+<div class="form-container" style="margin: 0 auto; width: 80%; text-align: center; background-color: #FFCCCC;">
+<h6>**Please select one of the options as you type**</h6>
+    <br>
+<p>If you don't see a city (with an airport) that you believe should be available: <br>
+<a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+    </div>
+<br>
+<br>
+{% endif %}
 <div class="container">
     <div class="row">
         <div class="col-lg-6 col-md-8 mx-auto" style="">
@@ -25,8 +35,15 @@
                     </div>
                     <hr>
                     <div style="padding: 3% 0;">
+                        {% set home_style = "" %}
+                        {% if form.errors %}
+                        {% if "home_airport" in form.errors: %}
+                        {% set home_style = "background-color: #FFCCCC;" %}
+                        {% endif %}
+                        {% endif %}
+
                     <h4>{{form.home_airport.label}}</h4>
-                    {{ form.home_airport(size=35) }}
+                    {{ form.home_airport(size=35, style=home_style) }}
                     <p>(where you will fly out from)</p>
                     </div>
                     <hr>
@@ -42,18 +59,19 @@
                     <table  id="destinations" style="display: table; width: 100%;">
 
                         {% for x in range(0, form.destinations|length): %}
-                        <tr>
-                            <th style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style="width: 100%")}}</th>
-                            <th>$</th>
-                            <th style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style="width: 100%;") }}</th>
-                        </tr>
+                        {% set style = "width: 100%" %}
                         {% if form.errors %}
+                        {% if "destinations" in form.errors: %}
                         {% if form.errors["destinations"][x]: %}
-                        <tr>
-                            <td colspan="3">{{ form.errors["destinations"][x]["city"][0] }}</td>
+                        {% set style = "width: 100%; background-color: #FFCCCC;" %}
+                        {% endif %}
+                        {% endif %}
+                        {% endif %}
+                        <tr class="user-row-data">
+                            <td style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style=style)}}</td>
+                            <td><strong>$</strong></td>
+                            <td style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style="width: 100%;") }}</td>
                         </tr>
-                        {% endif %}
-                        {% endif %}
                         {% endfor %}
                     </table>
                     <br>
@@ -126,13 +144,16 @@
             let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
             let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
             allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<tr>
-            <td style="padding-right: 22px;">
+            <td style="padding: 6px 15px 6px 0px;">
                 <input id="${newCityFieldName}" name="${newCityFieldName}" type="text"
                 required="" class="ui-autocomplete-input" autocomplete="off"
-                role="textbox" aria-autocomplete="list" aria-haspopup="true">
+                role="textbox" aria-autocomplete="list" aria-haspopup="true" style="width: 100%">
             </td>
-            <td>$</td>
-            <td><input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required="" type="number" value=""></td>
+            <td><strong>$</strong></td>
+            <td style="width: 22%; text-align: left;">
+                <input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required=""
+                type="number" value="" style="width: 100%">
+                </td>
             </tr>
             `);
 
@@ -168,7 +189,7 @@
             e.preventDefault();
             let allDestinationsFieldWrapper = document.getElementById('destinations');
             let allDestinationsField = allDestinationsFieldWrapper.getElementsByTagName('tr');
-            if(allDestinationsField.length <= 4) {
+            if(allDestinationsField.length <= 3) {
                 alert('Sorry, you can\'t have fewer than 3 destinations.');
                 return;
             }

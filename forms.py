@@ -71,7 +71,7 @@ class CityPriceForm(Form):
                                    AnyOf(values=city_list,
                                          message="Please select one of the choices shown as you type.")])
 
-    price_ceiling = IntegerField("Price Ceiling", validators=[DataRequired()])
+    price_ceiling = IntegerField("Price Ceiling", validators=[InputRequired(), NumberRange(min=1)])
 
 
 class DestinationForm(FlaskForm):
