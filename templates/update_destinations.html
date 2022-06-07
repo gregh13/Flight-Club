@@ -12,19 +12,25 @@
 
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
       rel="stylesheet" type="text/css"/>
-
+<br>
 <div class="container">
     <div class="row">
         <div class="col-lg-6 col-md-8 mx-auto" style="">
             <div class="form-container">
                 <form method="POST" action="">
                     {{ form.csrf_token }}
+                    <div style="padding: 3% 0;">
+                    <h4>Currency</h4>
+                    {{ form.currency(style="font-size: 1rem; font-weight: bold;") }}
+                    </div>
+                    <hr>
+                    <div style="padding: 3% 0;">
                     <h4>{{form.home_airport.label}}</h4>
                     {{ form.home_airport(size=35) }}
                     <p>(where you will fly out from)</p>
+                    </div>
                     <hr>
-                    <h5>Currency: {{ form.currency(style="font-size: 1rem;") }}</h5>
-                    <hr>
+                    <div style="padding: 3% 0;">
                     <h4>Your Travel Destinations</h4><br>
                     <table style="display: table; width: 100%;">
                         <tr>
@@ -37,7 +43,7 @@
 
                         {% for x in range(0, form.destinations|length): %}
                         <tr>
-                            <th style="padding: 5px 15px 5px 0px;">{{ form.destinations[x].city(style="width: 100%")}}</th>
+                            <th style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style="width: 100%")}}</th>
                             <th>$</th>
                             <th style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style="width: 100%;") }}</th>
                         </tr>
@@ -60,9 +66,12 @@
                     <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">
                         Remove Last Row
                     </button>
-                    <br><br><br>
+                        <br>
+                    </div>
+                        <hr>
+                    <br>
                     <button class="w-50 btn btn-lg btn-custom" type="submit">Save Changes</button>
-
+                    <br><br>
                 </form>
             </div>
         </div>
