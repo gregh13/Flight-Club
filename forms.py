@@ -45,7 +45,7 @@ class LoginForm(FlaskForm):
 
 
 class SendResetEmail(FlaskForm):
-    email = EmailField("Email", validators=[DataRequired()])
+    email = EmailField("Email Address", validators=[DataRequired()])
     submit = SubmitField("Send Reset Email")
 
 

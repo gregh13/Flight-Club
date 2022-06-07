@@ -239,7 +239,7 @@ def confirm_your_account(confirm_string):
 @app.route('/reset_your_password', methods=["GET", "POST"])
 def reset_your_password():
     form = SendResetEmail()
-    page_title = "Send Password Reset Email"
+    page_title = "Reset Your Password"
     if form.validate_on_submit():
         timestamp = datetime.today()
         print(timestamp)
@@ -280,7 +280,7 @@ def reset_your_password():
                   "url_for": None}
         return render_template("action_successful.html", page_title="Reset Email Sent!", params=params)
 
-    return render_template("reset_password.html", page_title=page_title, form=form)
+    return render_template("send_reset_email.html", page_title=page_title, form=form)
 
 
 @app.route('/itsokfriendweforgiveyou/<user_recovery_string>', methods=["GET", "POST"])

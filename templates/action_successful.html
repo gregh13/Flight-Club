@@ -12,7 +12,10 @@
            <br>
   <p>{{ params.body1 }}</p>
              <br>
+ {% if params.body2 %}
   <p>{{ params.body2 }}</p>
+ {% endif %}
+
     {% if params.button_text %}
     <br>
     <a type="button" href="{{ url_for(params.url_for) }}" class="w-33 btn btn-sm btn-custom">{{params.button_text}}</a>
