@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask import Flask, render_template, redirect, url_for, flash, abort, request, session
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +11,7 @@ from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
 import random
 import requests
+import ast
 from datetime import datetime
 
 
@@ -207,8 +208,24 @@ def landing_page():
     return render_template("index.html", page_title="")
 
 
+@app.route('/redirect/<params>/<page_title>/<action>')
+def action_successful_redirect(params, page_title, action):
+    parameters = ast.literal_eval(params)
+    session['params'] = parameters
+    session['page_title'] = page_title
+    return redirect(url_for('action_success', action=action))
+
+
+@app.route('/<action>')
+def action_success(action):
+    params = session.get('params', None)
+    page_title = session.get('page_title', None)
+    return render_template("action_successful.html", params=params, page_title=page_title)
+
+
 @app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
 def confirm_your_account(confirm_string):
+    print(f"confirm string: {confirm_string}")
     page_title = "Confirm Your Account"
     params = {"heading": "Your account has been confirmed!",
               "body1": "You've climbed the ladder, said the secret password, "
@@ -218,20 +235,25 @@ def confirm_your_account(confirm_string):
               "url_for": "user_home"}
     all_users = User.query.all()
     for user in all_users:
+
         if user.confirmed:
             if user.confirmation_token == confirm_string:
-                return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
+                return redirect(url_for('action_successful_redirect', params=params, page_title="Account Confirmed!",
+                                        action="confirmation_success"))
+                # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
             else:
                 continue
         # Since tokens are unique, we can confirm without checking which user is confirming
-        if user.confirmation_token == confirm_string:
+        elif user.confirmation_token == confirm_string:
             user.confirmed = True
             db.session.commit()
 
             login_user(user)
-
-            return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
-        return render_template("confirm_your_account.html", page_title=page_title)
+            return redirect(url_for('action_successful_redirect', params=params, page_title="Account Confirmed!",
+                                    action="confirmation_success"))
+            # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
+        else:
+            continue
 
     return render_template("confirm_your_account.html", page_title=page_title)
 
@@ -278,7 +300,9 @@ def reset_your_password():
                   "body2": None,
                   "button_text": None,
                   "url_for": None}
-        return render_template("action_successful.html", page_title="Reset Email Sent!", params=params)
+        return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
+                                action="reset_email_sent"))
+        # return render_template("action_successful.html", page_title="Reset Email Sent!", params=params)
 
     return render_template("send_reset_email.html", page_title=page_title, form=form)
 
@@ -340,7 +364,9 @@ def authenticate_reset_password(user_recovery_string):
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
 
-            return render_template("action_successful.html", params=params, page_title="Password Reset Successfully!")
+            return redirect(url_for('action_successful_redirect', params=params, page_title="Password Reset Successfully!",
+                                    action="password_reset_success"))
+            # return render_template("action_successful.html", params=params, page_title="Password Reset Successfully!")
 
         return redirect(url_for('landing_page'))
 
@@ -362,12 +388,13 @@ def submit_ticket():
         params = {"heading": "Your issue has been successfully reported",
                   "body1": "An email has been sent to Flight Club about your concern. "
                            "You have also been sent an email with the details of your report.",
-                  "body2":"Flight Club will try to respond to this concern in a timely manner. "
+                  "body2": "Flight Club will try to respond to this concern in a timely manner."
                            "Thank you for your patience",
                   "button_text": "Return to Home",
                   "url_for": 'user_home'}
-
-        return render_template('action_successful.html', params=params, page_title="Report Submitted!")
+        return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
+                                action="report_submitted"))
+        # return render_template('action_successful.html', params=params, page_title="Report Submitted!")
 
     return render_template('submit_ticket.html', form=form, page_title=page_title)
 
@@ -683,8 +710,16 @@ def create_an_account(join_type):
         db.session.add(flight_deals)
         db.session.commit()
 
-        # flash("Account created successfully. Please confirm your account.")
-        return render_template("confirm_your_account.html", page_title=page_title)
+        params = {"heading": "Please check your email to confirm your account",
+                  "body1": "If you don't see an email from us in your inbox, check your spam folder.",
+                  "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                           "so that our other emails (and your deals!) don't get sent there as well.",
+                  "button_text": None,
+                  "url_for": None}
+
+        return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
+                                action="confirmation_email_sent"))
+        # return render_template("confirm_your_account.html", page_title=page_title)
     return render_template('register.html', form=form, page_title=page_title)
 
 
