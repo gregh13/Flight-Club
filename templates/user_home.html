@@ -3,21 +3,64 @@
 {% block content %}
 {% include "header.html" %}
 
-<div class="container form-padding">
-<h3>Welcome to Flight Club!</h3><br>
-    <h5>Go ahead and update your destinations</h5>
-    <h5>so that you can start getting awesome</h5>
-    <h5>personalized weekly flight deals :D</h5>
-<br>
-    {% if current_user.id == 1: %}
-    <a href="{{ url_for('secret') }}">The Seeks</a>
-    <br>
-    {% endif %}
+ <div class="container">
+    <div class="row">
+      <div class="col-lg-6 col-md-8 mx-auto content">
+        <div class="form-container" style="text-align: center;">
+<h3>Prepare for Takeoff !</h3>
+            <br>
+<table style="width: 100%;">
+    <thead>
+    <td></td>
+    <td></td>
+    <td></td>
+    </thead>
+    <tbody>
+     <tr>
+<td style="padding: 11px 5px;"><a type="button" href="{{ url_for('my_destinations') }}" style="width: 100%;" class="btn btn-md btn-custom-outline">My Destinations</a></td>
+<td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
+  <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('my_preferences') }}" style="width: 100%;" class="btn btn-md btn-custom-outline">My Preferences</a></td>
+   </tr>
+
+  <tr>
+<td style="padding: 11px 5px;"><a type="button" href="{{ url_for('update_destinations') }}" style="width: 100%; padding: 6px 2px;" class="btn btn-md btn-custom-outline">Update Destinations</a></td>
+<td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
+  <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('update_preferences') }}" style="width: 100%; padding: 6px 2px;" class="btn btn-md btn-custom-outline">Update Preferences</a></td>
+
+
+  <tr>
+<td style="padding: 11px 5px;"><a type="button" href="{{ url_for('my_deals') }}" style="width: 100%;" class="w-40 btn btn-md btn-custom-outline">My Deals</a></td>
+<td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
+  <td style="padding: 11px 5px;"><a type="button" href="https://www.lonelyplanet.com/" target="_blank" style="width: 100%;" class="btn btn-md btn-custom-outline">Explore</a></td>
+
+
+<tr>
+ <td style="padding: 11px 5px;"> <a type="button" href="{{ url_for('my_account') }}" style="width: 100%;" class="w-33 btn btn-md btn-custom-outline">My Account</a></td>
+<td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
+<td style="padding: 11px 5px;"><a type="button" href="{{ url_for('logout') }}" style="width: 100%;" class="btn btn-md btn-custom-outline">Logout</a></td>
+
+
+</tbody>
+</table>
+          <br>
+          <hr>
+
+          <br>
+          <h6>~~~ Daily Travel Quote ~~~</h6>
+            <br>
+            <p>"Place daily travel quote here, hopefully auto rotating through a nice list" - Sleepy Greg</p>
+
+            <br>
+          <hr>
+
+          <br>
+          <h6>~~~ Monthly World Festival List ~~~</h6>
+            <br>
+            <p>"Somehow put the sweet content about the various festivals that are happening around the world during the month, hopefully auto rotating through a nice list" - Future Goyo</p>
+            </div>
+          <br><br>
 </div>
-<div class="container center-item">
-<a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">View My Destinations</a>
-    <br><br><br><br><br>
-<!--    <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-sm btn-custom">Preferences</a><br><br><br>-->
+</div>
 </div>
     {% include "footer.html" %}
 {% endblock %}

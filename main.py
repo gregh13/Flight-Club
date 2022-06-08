@@ -226,12 +226,13 @@ def action_success(action):
 
 @app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
 def confirm_your_account(confirm_string):
-    print(f"confirm string: {confirm_string}")
-    page_title = "Confirm Your Account"
+
+    page_title = "Account Confirmed!"
     params = {"heading": "Your account has been confirmed!",
               "body1": "You've climbed the ladder, said the secret password, "
                        "and the wooden door has opened for you.",
               "body2": "Welcome to the club, my friend!",
+              "body3": None,
               "button_text": "Go to My Account",
               "url_for": "user_home"}
     all_users = User.query.all()
@@ -239,7 +240,7 @@ def confirm_your_account(confirm_string):
 
         if user.confirmed:
             if user.confirmation_token == confirm_string:
-                return redirect(url_for('action_successful_redirect', params=params, page_title="Account Confirmed!",
+                return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
                                         action="confirmation_success"))
                 # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
             else:
@@ -250,13 +251,22 @@ def confirm_your_account(confirm_string):
             db.session.commit()
 
             login_user(user)
-            return redirect(url_for('action_successful_redirect', params=params, page_title="Account Confirmed!",
+            return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
                                     action="confirmation_success"))
             # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
         else:
             continue
 
-    return render_template("confirm_your_account.html", page_title=page_title)
+    params = {"heading": "Please check your email to confirm your account",
+              "body1": "If you don't see an email from us in your inbox, check your spam folder.",
+              "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                       "so that our other emails (and your deals!) don't get sent there as well.",
+              "body3": None,
+              "button_text": None,
+              "url_for": None}
+
+    return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
+                            action="confirmation_email_sent"))
 
 
 @app.route('/reset_your_password', methods=["GET", "POST"])
@@ -299,6 +309,7 @@ def reset_your_password():
         params = {"heading": "An email has been sent to help you reset your password.",
                   "body1": "Please check your email and follow the instructions provided.",
                   "body2": None,
+                  "body3": None,
                   "button_text": None,
                   "url_for": None}
         return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
@@ -362,6 +373,7 @@ def authenticate_reset_password(user_recovery_string):
             params = {"heading": "Your password has been reset to your new password",
                       "body1": "Please login to your account.",
                       "body2": None,
+                      "body3": None,
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
 
@@ -391,6 +403,7 @@ def submit_ticket():
                            "You have also been sent an email with the details of your report.",
                   "body2": "Flight Club will try to respond to this concern in a timely manner."
                            "Thank you for your patience",
+                  "body3": None,
                   "button_text": "Return to Home",
                   "url_for": 'user_home'}
         return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
@@ -404,7 +417,7 @@ def submit_ticket():
 @login_required
 def user_home():
     user_name = current_user.name
-    page_title = f"Hello, {user_name}"
+    page_title = f"Welcome Aboard, {user_name}"
     return render_template("user_home.html", page_title=page_title)
 
 
@@ -448,6 +461,7 @@ def change_email():
                       "body1": "Again, if you don't see an email from us in your inbox, check your spam folder.",
                       "body2": "And if it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
                                "so that our other emails (and your deals!) don't get sent there as well.",
+                      "body3": None,
                       "button_text": None,
                       "url_for": None}
 
@@ -479,11 +493,12 @@ def change_password():
             params = {"heading": "Your password has been successfully changed",
                       "body1": "Please login to your account again.",
                       "body2": None,
+                      "body3": None,
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
 
             return redirect(
-                url_for('action_successful_redirect', params=params, page_title="Password Changed Successfully!",
+                url_for('action_successful_redirect', params=params, page_title="Password Changed!",
                         action="change_password_success"))
         else:
             flash("Sorry, your current password was incorrect.")
@@ -708,7 +723,16 @@ def login():
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('login'))
         if not user.confirmed:
-            return render_template("confirm_your_account.html", page_title="Confirm Your Account")
+            params = {"heading": "Please check your email to confirm your account",
+                      "body1": "If you don't see an email from us in your inbox, check your spam folder.",
+                      "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                               "so that our other emails (and your deals!) don't get sent there as well.",
+                      "body3": None,
+                      "button_text": None,
+                      "url_for": None}
+
+            return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
+                                    action="confirmation_email_sent"))
         if check_password_hash(user.password, password):
             # flash("Login Successful")
             login_user(user)
@@ -790,6 +814,7 @@ def create_an_account(join_type):
                   "body1": "If you don't see an email from us in your inbox, check your spam folder.",
                   "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
                            "so that our other emails (and your deals!) don't get sent there as well.",
+                  "body3": None,
                   "button_text": None,
                   "url_for": None}
 
@@ -805,6 +830,16 @@ def secret():
     # Placeholder location for now
     # Will add admin features according to the needs of the projects (once users become active and problems arise)
     return render_template('secret.html')
+
+
+@app.route('/serious_report')
+@login_required
+def serious_report():
+    # Placeholder location for now
+    # Will add admin features according to the needs of the projects (once users become active and problems arise)
+    return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+
+
 
 
 @app.route('/logout')
