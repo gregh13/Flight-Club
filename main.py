@@ -5,7 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword, SubmitTicketForm
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, \
+                    ResetPassword, SubmitTicketForm, ChangeEmailForm, ChangePasswordForm
 from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
@@ -411,8 +412,83 @@ def user_home():
 @login_required
 def my_account():
     page_title = "Account Settings"
-
     return render_template("my_account.html", page_title=page_title)
+
+
+@app.route('/my_account/change_email', methods=["GET", "POST"])
+@login_required
+def change_email():
+    page_title = "Change Your Email"
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(id=current_user.id).first()
+        current_password = form.password.data
+        if User.query.filter_by(email=form.email.data).first():
+            flash(f"An account for '{form.email.data}' already exists. Please try a different email address")
+            return redirect(url_for('change_email'))
+        if check_password_hash(user.password, current_password):
+            all_users = User.query.all()
+            confirmation_string = create_random_string()
+            # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
+            all_confirmations_tokens = [user.confirmation_token for user in all_users]
+            while confirmation_string in all_confirmations_tokens:
+                confirmation_string = create_random_string()
+            user.email = form.email.data
+            user.confirmation_token = confirmation_string
+            user.confirmed = False
+            db.session.commit()
+            logout_user()
+            # email_params = {"confirmation_token": confirmation_string, "name": user.name}
+            # send_email(company_email=company_email, company_name=company_name,
+            #            user_name=user.name, user_email=user.email,
+            #            subject="Account Confirmation", params=email_params,
+            #            template_id=5, api_key=api_key)
+
+            params = {"heading": "Please check your email to confirm your change of email address",
+                      "body1": "Again, if you don't see an email from us in your inbox, check your spam folder.",
+                      "body2": "And if it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                               "so that our other emails (and your deals!) don't get sent there as well.",
+                      "button_text": None,
+                      "url_for": None}
+
+            return redirect(url_for('action_successful_redirect', params=params, page_title="Confirm Your New Email",
+                                    action="confirmation_email_sent"))
+        else:
+            flash("Sorry, your current password was incorrect.")
+            return redirect(url_for('change_email'))
+    return render_template("change_email.html", page_title=page_title, form=form)
+
+
+@app.route('/my_account/change_password', methods=["GET", "POST"])
+@login_required
+def change_password():
+    page_title = "Change Your Password"
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(id=current_user.id).first()
+        current_password = form.password.data
+        if check_password_hash(user.password, current_password):
+            new_password = form.new_password.data
+            salted_hashbrowns = generate_password_hash(
+                password=new_password,
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+            user.password = salted_hashbrowns
+            db.session.commit()
+            params = {"heading": "Your password has been successfully changed",
+                      "body1": "Please login to your account again.",
+                      "body2": None,
+                      "button_text": "Go to Login Page",
+                      "url_for": 'login'}
+
+            return redirect(
+                url_for('action_successful_redirect', params=params, page_title="Password Changed Successfully!",
+                        action="change_password_success"))
+        else:
+            flash("Sorry, your current password was incorrect.")
+            return redirect(url_for('change_password'))
+    return render_template("change_password.html", page_title=page_title, form=form)
 
 
 @app.route('/my_deals')
@@ -662,7 +738,7 @@ def create_an_account(join_type):
         )
         all_users = User.query.all()
         confirmation_string = create_random_string()
-        # check existing tokens, makes sure no one has the same token (even thoough the odds are insanely small)
+        # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
         all_confirmations_tokens = [user.confirmation_token for user in all_users]
         while confirmation_string in all_confirmations_tokens:
             confirmation_string = create_random_string()

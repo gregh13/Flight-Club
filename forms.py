@@ -45,6 +45,24 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
+class ChangeEmailForm(FlaskForm):
+    email = EmailField("New Email Address", validators=[InputRequired()])
+    confirm_email = EmailField("Confirm New Email", validators=[InputRequired(),
+                                                                EqualTo('email', message='Emails must match')])
+    password = PasswordField("Current Password", validators=[InputRequired()])
+    submit = SubmitField("Send Confirmation Email")
+
+
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField("Current Password", validators=[InputRequired(), Length(min=8, max=22)])
+    new_password = PasswordField("New Password", validators=[InputRequired(), Length(min=8, max=22)])
+    confirm_password = PasswordField("Confirm New Password",
+                                     validators=[InputRequired(),
+                                                 Length(min=8, max=22),
+                                                 EqualTo('new_password', message='Passwords must match')])
+    submit = SubmitField("Change Password")
+
+
 class SendResetEmail(FlaskForm):
     email = EmailField("Email Address", validators=[InputRequired()])
     submit = SubmitField("Send Reset Email")

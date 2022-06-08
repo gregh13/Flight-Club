@@ -4,14 +4,14 @@
 {% include "header.html" %}
 
 <div class="container form-padding">
-<h3>My Account</h3><br>
+<h3>My Account</h3>
 
 </div>
 <div class="container center-item">
   <hr>
-<a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">Change Email</a>
+<a type="button" href="{{ url_for('change_email') }}" class="w-33 btn btn-md btn-custom">Change Email</a>
   <hr>
-  <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">Change Email</a>
+  <a type="button" href="{{ url_for('change_password') }}" class="w-33 btn btn-md btn-custom">Change Password</a>
     <br><br>
 </div>
     {% include "footer.html" %}
