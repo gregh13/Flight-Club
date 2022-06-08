@@ -7,29 +7,35 @@
   <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto form-container">
         <div>
-
-          <h5>Home Airport: </h5><h5><strong>{{ city_options[des.home_airport] }}</strong></h5>
+          <div style="padding: 1% 0;">
+          <h5 style="padding-bottom: .2%;">Currency</h5><h5 style="color: #1C16BD"><strong>{{ des["currency"] }}</strong></h5>
+              </div>
           <hr>
-          <h6>Currency:  <strong>{{ des["currency"] }}</strong></h6>
+            <div style="padding: 3% 0;">
+          <h5 style="padding-bottom: 2%;">Home Airport: </h5><h5 style="color: #1C16BD"><strong>{{ city_options[des.home_airport] }}</strong></h5>
+                </div>
           <hr>
-          <table style="border-collapse: collapse; margin: 10px auto;">
-            <thead>
-            <th style="text-align: right; padding-right: 7px;">Price Ceiling</th>
-            <th> </th>
-            <th style="text-align: left; padding-left: 22px;">Destination</th>
+            <div style="padding: 3% 0;">
+          <h5 style="padding-bottom: 2%;">Price Ceiling & Destination</h5>
+          <table style="border-collapse: collapse; margin: 10px auto; color: #1C16BD">
+<!--            <thead>-->
+<!--            <th style="text-align: right; padding: 5px 7px 5px 0px;">Price Ceiling</th>-->
+<!--            <th> </th>-->
+<!--            <th style="text-align: left; padding: 5px 0px 5px 7%;">Destination</th>-->
 
-            </thead>
+<!--            </thead>-->
             <tbody>
+<!--            <tr><td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td></tr>-->
              {% for x in range(1, 11): %}
 
             {% if des['city' + x|string]: %}
 
             <tr>
-              <td style="text-align: right; width: 122px;">
+              <td style="text-align: right; width: 122px; padding: 6px 0px;">
                   <strong>${{ "{:,}".format(des["price" + x|string]) }}</strong> - - -
               </td>
-              <td>- - -</td>
-              <td style="text-align: left;">
+              <td></td>
+              <td style="text-align: left;  padding: 6px 0px 6px 5px;">
                 <strong>{{ city_options[des["city" + x|string]] }}</strong>
               </td>
             </tr>
@@ -41,9 +47,12 @@
             {% endfor %}
             </tbody>
             </table>
+                </div>
+            <hr>
         </div>
         <br>
         <a type="button" href="{{ url_for('update_destinations') }}" class="w-33 btn btn-md btn-custom">Update Destinations</a>
+      <br><br>
       </div>
     </div>
     <br><br>
