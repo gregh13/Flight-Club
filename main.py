@@ -411,7 +411,7 @@ def user_home():
 @app.route('/my_account')
 @login_required
 def my_account():
-    page_title = "Account Settings"
+    page_title = "My Account"
     return render_template("my_account.html", page_title=page_title)
 
 

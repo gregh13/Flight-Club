@@ -8,7 +8,7 @@
       <div class="col-lg-6 col-md-8 mx-auto content">
 
                 <p>You will be sent a confirmation email to the new email address you submit.
-                    You will need to confirm your account again via the link in that email.</p>
+                    You will need to verify your new email via the link sent in that email.</p>
                 <br>
         <div class="form-container" style="text-align: left;">
             <div style="margin: 0% 10%;">
@@ -16,16 +16,16 @@
           <form method="POST" action="">
                     {{ form.csrf_token }}
               <br>
-              <h5><strong>{{ form.email.label }}</strong></h5>
+              <strong>{{ form.email.label }}</strong>
               {{ form.email(style="width:100%") }}
               <br><br>
-              <h5><strong>{{ form.confirm_email.label }}</strong></h5>
+              <strong>{{ form.confirm_email.label }}</strong>
               {{ form.confirm_email(style="width:100%") }}
               <br><br>
-              <h5><strong>{{ form.password.label }}</strong></h5>
+              <strong>{{ form.password.label }}</strong>
               {{ form.password(style="width:100%") }}
               <br><br><br>
-              <button class="w-22 btn btn-md btn-custom" type="submit">Send Confirmation Email</button>
+              <button class="w-22 btn btn-md btn-custom" type="submit">Send Verification Email</button>
 
           </form>
                 </div>

@@ -10,10 +10,10 @@
           <form method="POST" action="">
                     {{ form.csrf_token }}
               <br>
-              <h5><strong>{{ form.issue_subject.label }}</strong></h5>
+              <strong>{{ form.issue_subject.label }}</strong>
               {{ form.issue_subject(style="width:100%") }}
               <br><br>
-              <h5><strong>{{ form.issue_description.label }}</strong></h5>
+              <strong>{{ form.issue_description.label }}</strong>
               {{ form.issue_description(style="width:100%", rows="6") }}
               <br><br><br>
 
