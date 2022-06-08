@@ -70,7 +70,7 @@ h2 {
 }
 
 .container-fluid {
-  padding: 2.2% 10%;
+  padding: 10px 0 0 22px;
   background-image: url("../images/flipflops_horizontal.jpg");
   background-size: cover;
 }
@@ -88,6 +88,7 @@ h2 {
 .navbar-brand {
   font-family: 'Ubuntu', sans-serif;
   font-size: 1.8rem;
+  padding: 9px 0px;
 }
 
 .nav-item {
@@ -414,3 +415,15 @@ input[type="date"]::-webkit-inner-spin-button {
 
 /*------------------------------------------------*/
 
+.dropdown-toggle::after {
+    content: none;
+}
+
+
+.menu-icon {
+    opacity: 0.60
+}
+
+.menu-icon:hover {
+    opacity: 1.0
+}
