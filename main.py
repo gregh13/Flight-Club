@@ -380,6 +380,14 @@ def user_home():
     return render_template("user_home.html", page_title=page_title)
 
 
+@app.route('/my_account')
+@login_required
+def my_account():
+    page_title = "Account Settings"
+
+    return render_template("my_account.html", page_title=page_title)
+
+
 @app.route('/my_deals')
 @login_required
 def my_deals():

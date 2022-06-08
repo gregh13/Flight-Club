@@ -1,0 +1,18 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+{% include "header.html" %}
+
+<div class="container form-padding">
+<h3>My Account</h3><br>
+
+</div>
+<div class="container center-item">
+  <hr>
+<a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">Change Email</a>
+  <hr>
+  <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">Change Email</a>
+    <br><br>
+</div>
+    {% include "footer.html" %}
+{% endblock %}
