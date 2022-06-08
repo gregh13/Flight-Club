@@ -6,41 +6,33 @@
 
 <div class="container">
     <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto content">
+      <div class="col-lg-6 col-md-8 col-sm-10 mx-auto content">
         <div class="form-container" style="text-align: left;">
             <div style="margin: 0% 10%;">
               <form method="POST" action="">
                         {{ form.csrf_token }}
-                  <br>
+
+
+                  <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Email Settings</h4>
+
                   <strong>{{ form.email.label(style="margin-bottom: 6px;") }}</strong>
-                  <br>{{ form.email(style="width:90%") }}
+                  <br>{{ form.email(style="width:80%") }}
                   <br><br>
                   <strong>{{ form.email_frequency.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.email_frequency(style="width:70%") }}
                   <br><br>
                   <strong>{{ form.email_day.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.email_day(style="width:40%") }}
-                  <br><br>
-                  <strong>{{ form.min_nights.label(style="margin-bottom: 6px;") }}</strong>
-                         <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                       title="The minimum length of time spent at your travel destination."
-                       >
-                  <br>{{ form.min_nights(style="width:17%") }}
-                  <br><br>
-                  <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }} </strong>
-                  <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                       title="The maximum length of time spent at your travel destination.
-                        Actual trip duration might be somewhere in-between the min and max nights" >
+                  <br>
+                  <br>
+                  <hr>
+                  <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Flight Settings</h4>
 
-                  <br>{{ form.max_nights(style="width:17%;") }}
-                  <br><br>
                   <strong>{{ form.cabin_class.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.cabin_class(style="width:55%") }}
                   <br><br>
                   <strong>{{ form.exclude_airlines.label(style="margin-bottom: 6px;") }}</strong>
-                       <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                       <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
                        src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
                        title="Excludes airlines rated lowest in safety, service, claims processing, and punctuality
                               from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)" >
@@ -51,7 +43,12 @@
                   <br><br>
                   <strong>{{ form.max_flight_time.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.max_flight_time(style="width:17%") }}
-                  <br><br>
+                  <br>
+                  <br>
+                  <hr>
+                  <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Number of Passengers</h4>
+
+
                   <strong>{{ form.num_adults.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.num_adults(style="width:17%") }}
                   <br><br>
@@ -60,41 +57,71 @@
                   <br><br>
                   <strong>{{ form.num_infants.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.num_infants(style="width:17%") }}
+                  <br>
+                  <br>
+                  <hr>
+                  <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Search Settings</h4>
+
+                  <strong>{{ form.min_nights.label(style="margin-bottom: 6px;") }}</strong>
+                         <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="The minimum possible length of time spent at your travel destination.
+                        Actual trip duration might be somewhere between your min and max nights"
+                       >
+                  <br>{{ form.min_nights(style="width:17%") }}
+                  <br><br>
+                  <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }} </strong>
+                  <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="The maximum possible length of time spent at your travel destination.
+                        Actual trip duration might be somewhere between your min and max nights" >
+
+                  <br>{{ form.max_nights(style="width:17%;") }}
                   <br><br>
                   <strong>{{ form.search_start_date.label(style="margin-bottom: 6px;") }}</strong>
-                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
                     src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                    title="Note: This is a rolling date range, meaning it will move as time passes.
-                           Since Flight Club searches flights weekly, this is better than a specific date range." >
+                    title="This is a rolling date, meaning it will move as time passes.
+                            For example: If you choose 'two weeks', then if the flight search occurs on March 10th,
+                            it will look for flights starting from March 24th onwards." >
                   <br>{{ form.search_start_date(style="width:50%") }}
                   <br><br>
-                  <strong>{{ form.specific_search_start_date.label(style="margin-bottom: 6px;") }}</strong>
-                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                  <strong>{{ form.search_length.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
                     src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                    title="Note: This is a fixed date which will not move as time passes.
-                            Choose this if you only have specific date ranges available to travel
-                            (holidays, summer, etc.)" >
+                    title="This is a rolling date range, meaning it will move as time passes.
+                            For example, if you have a lead time of  '1 month'  and a time window of
+                             '3 months' , then if it searches on September 10th, it would look for all flights from
+                            October 10th to January 10th." >
+                  <br>{{ form.search_length(style="width:50%") }}
+                  <br>
+                  <br>
+                  <hr>
+                  <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Specific Dates (Optional)</h4>
+
+                   <strong>{{ form.specific_search_start_date.label(style="margin-bottom: 6px;") }}</strong>
+                    <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    title="This is a fixed date which will not move as time passes.
+                            Choose this if you have a specific date range available to travel
+                            (holidays, summer vacation, etc.), otherwise leave blank." >
                   <br>{{ form.specific_search_start_date(style="width:50%") }}
                   <br><br>
-                  <strong>{{ form.search_length.label(style="margin-bottom: 6px;") }}</strong>
-                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
-                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                    title="Note: This is also a rolling date range, meaning it will move as time passes.
-                            For example, if it begins looking for flights 'One month' out and has a date range of
-                            '3 months', then if it searches on June 10th, it would look for all flights between
-                            July 10th and October 10th." >
-                  <br>{{ form.search_length(style="width:50%") }}
-                  <br><br>
                   <strong>{{ form.specific_search_end_date.label(style="margin-bottom: 6px;") }}</strong>
-                    <img data-toggle="tooltip" style="width: 4%; margin: 0 0 4px 10px;"
+                    <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
                     src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
-                    title="Note: This is a fixed date which will not move as time passes. Choose this if you only have
-                            specific date ranges available to travel (holidays, summer, etc.)" >
+                    title="This is a fixed date which will not move as time passes.
+                            Choose this if you have a specific date range available to travel
+                            (holidays, summer vacation, etc.), otherwise leave blank." >
                   <br>{{ form.specific_search_end_date(style="width:50%") }}
-                  <br><br><br>
+                  <br>
+                  <br>
+                  <hr>
+                  <br>
                   <div style="text-align: center">
                   <button class="w-22 btn btn-md btn-custom" type="submit">Save Preferences</button>
                     </div>
+                  <br>
               </form>
             </div>
         </div>

@@ -6,28 +6,36 @@
 <div class="container">
   <div class="row">
       <div class="col-lg-6 col-md-8 mx-auto form-container">
-        <div>
-          <table>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Your Email:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.email }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Email Frequency:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.email_freq[prefs.email_frequency] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Email Sent On:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.email_day[prefs.email_day] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Min Nights:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.min_nights }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Max Nights:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.max_nights }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Cabin Class:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.cabin_class[prefs.cabin_class] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Airlines:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.exclude_airlines[prefs.exclude_airlines] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Max Stops:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.max_stops }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Max Flight Time:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.max_flight_time }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Num Adults:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.num_adults }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Num Children:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.num_children }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Num Infants:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ prefs.num_infants }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Lead Time for Searching:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.lead_time_start[prefs.search_start_date] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Search Length:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.search_length[prefs.search_length] }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Specific Search Start Date:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.start_specific }}</strong></td></tr>
-            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Specific Search End Date:</strong></td><td style="color: #1C16BD; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.end_specific }}</strong></td></tr>
-            </table>
+        <div style="margin: 0% 2%;">
+          <table style="width: 100%">
+            <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 10px 0px 2px 0px;"><h4>Email Settings</h4></td> </tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Your Email:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.email }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Email Frequency:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.email_freq[prefs.email_frequency] }}</strong></td></tr>
+            <tr class="bordered"><td style="text-align: right; padding: 5px 0px 22px 8px;"><strong>Email Sent On:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ pref_dict.email_day[prefs.email_day] }}</strong></td></tr>
+            <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 30px 0px 2px 0px;"><h4>Flight Settings</h4></td> </tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Cabin Class:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.cabin_class[prefs.cabin_class] }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Airlines:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.exclude_airlines[prefs.exclude_airlines] }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Max Stops:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.max_stops }}</strong></td></tr>
+            <tr class="bordered"><td style="text-align: right; padding: 5px 0px 22px 8px;"><strong>Max Flight Time:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ prefs.max_flight_time }}</strong></td></tr>
+           <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 30px 0px 2px 0px;"><h4>Number of Passengers</h4></td> </tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Num Adults:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.num_adults }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Num Children:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.num_children }}</strong></td></tr>
+            <tr class="bordered"><td style="text-align: right; padding: 5px 0px 22px 8px;"><strong>Num Infants:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ prefs.num_infants }}</strong></td></tr>
+            <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 30px 0px 2px 0px;"><h4>Search Settings</h4></td> </tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Min Nights:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.min_nights }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Max Nights:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ prefs.max_nights }}</strong></td></tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Lead Time:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.lead_time_start[prefs.search_start_date] }}</strong></td></tr>
+            <tr class="bordered"><td style="text-align: right; padding: 5px 0px 22px 8px;"><strong>Time Window:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ pref_dict.search_length[prefs.search_length] }}</strong></td></tr>
+            <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 30px 0px 2px 0px;"><h4>Specific Dates (Optional)</h4></td> </tr>
+            <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Search Start Date:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.start_specific }}</strong></td></tr>
+            <tr class="bordered"><td style="text-align: right; width: 50%; padding: 5px 0px 22px 8px;"><strong>Search End Date:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ pref_dict.end_specific }}</strong></td></tr>
+
+          </table>
         </div>
         <br>
+          <br>
         <a type="button" href="{{ url_for('update_preferences') }}" class="w-33 btn btn-md btn-custom">Update Preferences</a>
+      <br><br>
       </div>
     </div>
     <br><br>
