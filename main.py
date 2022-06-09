@@ -399,8 +399,11 @@ def authenticate_reset_password(user_recovery_string):
 
 
 @app.route('/submit_ticket', methods=["GET", "POST"])
-@login_required
 def submit_ticket():
+    print(session)
+    if not current_user.is_authenticated:
+        flash("You need to login before you can report an issue.")
+        return redirect(url_for('login'))
     page_title = "Have A Concern?"
     form = SubmitTicketForm()
     if form.validate_on_submit():
@@ -518,13 +521,14 @@ def change_password():
             )
             user.password = salted_hashbrowns
             db.session.commit()
+
+            logout_user()
             params = {"heading": "Your password has been successfully changed",
                       "body1": "Please login to your account again.",
                       "body2": None,
                       "body3": None,
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
-
             return redirect(
                 url_for('action_successful_redirect', params=params, page_title="Password Changed!",
                         action="change_password_success"))
@@ -873,12 +877,11 @@ def serious_report():
     return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 
-
-
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return render_template('logout.html')
 
 
