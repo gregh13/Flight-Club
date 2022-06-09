@@ -544,6 +544,10 @@ def my_deals():
     page_title = "My Flight Deals"
     user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
     print(user_deals)
+
+    if not user_deals["flight_search_date"]:
+        user_deals["flight_search_date"] = date.today().strftime('%a, %B %-d, %Y')
+
     return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
 
 
