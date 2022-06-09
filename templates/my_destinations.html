@@ -7,6 +7,16 @@
   <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto form-container">
         <div>
+             {% if not des['city1']: %}
+            <div style="margin: 0 11%;">
+            <h3>So Much Empty!</h3>
+            <br>
+            <p>Let's get that taken care of right now.</p>
+            <p>Update your destinations so you have places to go and our flight search can work its magic!</p>
+                <br>
+                </div>
+            {% else: %}
+
           <div style="padding: 1% 0;">
           <h5 style="padding-bottom: .2%;">Currency</h5><h5 style="color: #1C16BD"><strong>{{ des["currency"] }}</strong></h5>
               </div>
@@ -48,6 +58,9 @@
             </tbody>
             </table>
                 </div>
+
+
+            {% endif %}
             <hr>
         </div>
         <br>
@@ -55,11 +68,14 @@
       <br><br>
       </div>
       <br>
-          <div  class="col-lg-8 col-md-10 mx-auto" style="text-align: center;">
+          <div class="col-lg-8 col-md-10 mx-auto" style="text-align: center;">
               <br>
-   <p style="font-size: 0.8rem">Want to see what people around the world are celebrating this month? <br>
-       <a href="https://www.wanderlust.co.uk/content/world-festivals/#{{ current_month }}" target="_blank">Check this out!</a></p>
-</div>
+              <div style="margin: 0 10%;">
+   <p style="font-size: 0.8rem">Want to see what people around the world are celebrating this month?
+   <a href="https://www.wanderlust.co.uk/content/world-festivals/#{{ current_month }}" style="text-decoration: none;"
+      target="_blank">Check it out!</a></p>
+        </div>
+              </div>
     </div>
     <br><br>
 </div>

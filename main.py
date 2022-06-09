@@ -558,6 +558,9 @@ def my_destinations():
     city_options = all_cities_international
     des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
     month = date.today().strftime("%B").lower()
+    if not des["currency"]:
+        des["currency"] = ""
+
     return render_template("my_destinations.html", page_title=page_title, des=des,
                            city_options=city_options, current_month=month)
 

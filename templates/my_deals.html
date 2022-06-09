@@ -16,9 +16,12 @@
             <br>
               <h4>Hang tight!</h4>
               <br>
+              <div style="margin: 0 11%;">
               <p>Your deals will be landing shortly. You'll receive an email when your flight results are ready to view.</p>
-               <p>While you wait, would you care to browse our wonderful <a href="https://skymall.com/" target="_blank">in-flight catalog</a>? </p>
-            {% endif %}
+               <p>While you wait, would you care to browse our wonderful
+               <a href="https://skymall.com/" style="text-decoration: none;" target="_blank">in-flight catalog</a>? </p>
+                </div>
+                  {% endif %}
 
              {% for x in range(1, 11): %}
                 {% if user_deals['place' + x|string]: %}
