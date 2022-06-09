@@ -10,10 +10,11 @@ from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, Send
 from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
+from travel_quotes import quote_dictionary
 import random
 import requests
 import ast
-from datetime import datetime
+from datetime import datetime, date
 
 
 app = Flask(__name__)
@@ -42,14 +43,15 @@ Base = declarative_base()
 class User(UserMixin, db.Model, Base):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(50))
     join_type = db.Column(db.String(50))
-    confirmation_token = db.Column(db.String(300))
+    confirmation_token = db.Column(db.String(100))
     confirmed = db.Column(db.Boolean)
     reset_token = db.Column(db.String(100))
     reset_timestamp = db.Column(db.String(100))
-    name = db.Column(db.String(100))
+    quote_string = db.Column(db.String(500))
     preferences = relationship('Preferences', back_populates="user_pref")
     destinations = relationship('Destinations', back_populates="user_dest")
     flight_deals = relationship('FlightDeals', back_populates="user_deals")
@@ -151,7 +153,7 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-# db.create_all()
+db.create_all()
 
 
 def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
@@ -180,13 +182,24 @@ def send_email(company_email, company_name, user_name, user_email, subject, para
 
 
 def create_random_string():
-    seq_len = random.randint(75, 97)
+    seq_len = random.randint(78, 97)
     print(seq_len)
     random_string = ""
     for x in range(0, seq_len):
         random_string += random.choice(COMBINED_LIST)
     print(random_string)
     return random_string
+
+
+def travel_quote_string():
+    string = ""
+    for x in range(1, 78):
+        if x == 77:
+            string += str(x)
+        else:
+            string += f"{x},"
+    print(string)
+    return string
 
 
 def admin_only(function):
@@ -401,9 +414,9 @@ def submit_ticket():
         params = {"heading": "Your issue has been successfully reported",
                   "body1": "An email has been sent to Flight Club about your concern. "
                            "You have also been sent an email with the details of your report.",
-                  "body2": "Flight Club will try to respond to this concern in a timely manner."
-                           "Thank you for your patience",
-                  "body3": None,
+                  "body2": "Flight Club will try to respond to this concern in a timely manner. "
+                           ,
+                  "body3": "Thank you for your patience.",
                   "button_text": "Return to Home",
                   "url_for": 'user_home'}
         return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
@@ -418,7 +431,23 @@ def submit_ticket():
 def user_home():
     user_name = current_user.name
     page_title = f"Welcome Aboard, {user_name}"
-    return render_template("user_home.html", page_title=page_title)
+    user = User.query.filter_by(id=current_user.id).first()
+    quote_list = user.quote_string.split(",")
+    print(quote_list)
+    random_num = random.choice(quote_list)
+    print(random_num)
+    quote_list.remove(random_num)
+    print(quote_list)
+    if len(quote_list) == 0:
+        new_quote_string = travel_quote_string()
+    else:
+        new_quote_string = ",".join(quote_list)
+    user.quote_string = new_quote_string
+    db.session.commit()
+
+    quote = quote_dictionary[random_num]
+
+    return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
 
 @app.route('/my_account')
@@ -521,7 +550,9 @@ def my_destinations():
     page_title = "My Destinations"
     city_options = all_cities_international
     des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
-    return render_template("my_destinations.html", page_title=page_title, des=des, city_options=city_options)
+    month = date.today().strftime("%B").lower()
+    return render_template("my_destinations.html", page_title=page_title, des=des,
+                           city_options=city_options, current_month=month)
 
 
 @app.route('/update_destinations', methods=['GET', 'POST'])
@@ -767,12 +798,16 @@ def create_an_account(join_type):
         while confirmation_string in all_confirmations_tokens:
             confirmation_string = create_random_string()
 
-        user = User(email=email,
+        starting_string = travel_quote_string()
+
+        user = User(name=form.name.data,
+                    email=email,
                     password=salted_hashbrowns,
                     join_type=join_type,
                     confirmed=False,
                     confirmation_token=confirmation_string,
-                    name=form.name.data)
+                    quote_string=starting_string,
+                    )
         db.session.add(user)
         db.session.commit()
 

@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-lg-6 col-md-8 mx-auto content">
         <div class="form-container" style="text-align: center;">
-<h3>Prepare for Takeoff !</h3>
+<h3><span style="padding-right: 11px;"></span>Ready for takeoff<span style="padding: 2.2px;"></span>?</h3>
             <br>
 <table style="width: 100%;">
     <thead>
@@ -25,17 +25,17 @@
   <tr>
 <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('update_destinations') }}" style="width: 100%; padding: 6px 2px;" class="btn btn-md btn-custom-outline">Update Destinations</a></td>
 <td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
-  <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('update_preferences') }}" style="width: 100%; padding: 6px 2px;" class="btn btn-md btn-custom-outline">Update Preferences</a></td>
+  <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('update_preferences') }}" style="width: 100%; padding: 6px 2px;" class="btn btn-md btn-custom-outline">Update Preferences<span style="visibility: hidden">s</span></a></td>
 
 
   <tr>
 <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('my_deals') }}" style="width: 100%;" class="w-40 btn btn-md btn-custom-outline">My Deals</a></td>
 <td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
-  <td style="padding: 11px 5px;"><a type="button" href="https://www.lonelyplanet.com/" target="_blank" style="width: 100%;" class="btn btn-md btn-custom-outline">Explore</a></td>
+ <td style="padding: 11px 5px;"> <a type="button" href="{{ url_for('my_account') }}" style="width: 100%;" class="w-33 btn btn-md btn-custom-outline">My Account</a></td>
 
 
 <tr>
- <td style="padding: 11px 5px;"> <a type="button" href="{{ url_for('my_account') }}" style="width: 100%;" class="w-33 btn btn-md btn-custom-outline">My Account</a></td>
+  <td style="padding: 11px 5px;"><a type="button" href="https://www.lonelyplanet.com/" target="_blank" style="width: 100%;" class="btn btn-md btn-custom-outline">Discover</a></td>
 <td style="padding: 11px 8px;"><span style="padding: 0;"></span></td>
 <td style="padding: 11px 5px;"><a type="button" href="{{ url_for('logout') }}" style="width: 100%;" class="btn btn-md btn-custom-outline">Logout</a></td>
 
@@ -46,17 +46,16 @@
           <hr>
 
           <br>
-          <h6>~~~ Daily Travel Quote ~~~</h6>
+          <h6>~~~ Wandering Wisdom ~~~</h6>
             <br>
-            <p>"Place daily travel quote here, hopefully auto rotating through a nice list" - Sleepy Greg</p>
+            <p>{{ travel_quote }}</p>
+            <br>
+<!--          <hr>-->
+<!--          <br>-->
+<!--          <h6>~~~ Monthly World Festival List ~~~</h6>-->
+<!--            <br>-->
+<!--            <p>"Somehow put the sweet content about the various festivals that are happening around the world during the month, hopefully auto rotating through a nice list" - Future Goyo</p>-->
 
-            <br>
-          <hr>
-
-          <br>
-          <h6>~~~ Monthly World Festival List ~~~</h6>
-            <br>
-            <p>"Somehow put the sweet content about the various festivals that are happening around the world during the month, hopefully auto rotating through a nice list" - Future Goyo</p>
             </div>
           <br><br>
 </div>
