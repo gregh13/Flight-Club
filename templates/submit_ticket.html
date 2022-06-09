@@ -9,10 +9,10 @@
           {% if form.errors %}
 <div class="form-container" style="background-color: #FFCCCC;">
 {% for error in form.issue_subject.errors: %}
-    <p>Subject field can't be blank</p>
+    <p>{{ error }}</p>
 {% endfor %}
 {% for error in form.issue_description.errors: %}
-    <p>Description field can't be blank</p>
+    <p>{{ error }}</p>
 {% endfor %}
 </div>
  <br>

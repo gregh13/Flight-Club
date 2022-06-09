@@ -14,7 +14,7 @@
     <p>{{ error }}</p>
 {% endfor %}
 {% for error in form.password.errors: %}
-    <p>Password field can't be blank</p>
+    <p>{{ error }}</p>
 {% endfor %}
 </div>
           <br>

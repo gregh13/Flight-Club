@@ -10,12 +10,9 @@
 
           {% if form.errors %}
 <div class="form-container" style="background-color: #FFCCCC;">
-{% for error in form.specific_search_start_date.errors: %}
-    <p>{{ error }}</p>
-{% endfor %}
-{% for error in form.specific_search_end_date.errors: %}
-    <p>{{ error }}</p>
-{% endfor %}
+        {% for error in form.errors: %}
+    <p>{{ form.errors[error][0] }}</p>
+    {% endfor %}
 </div>
           <br>
     {% endif %}

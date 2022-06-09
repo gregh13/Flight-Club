@@ -5,6 +5,26 @@
 <div class="container">
     <div class="row">
       <div class="col-lg-6 col-md-8 mx-auto content">
+
+          {% if form.errors %}
+<div class="form-container" style="background-color: #FFCCCC;">
+    {% for error in form.name.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+{% for error in form.email.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+{% for error in form.password.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+    {% for error in form.confirm_password.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+</div>
+          <br>
+    {% endif %}
+
+
         <div class="form-container" style="text-align: left;">
             <div style="margin: 0% 10%;">
           <form method="POST" action="">

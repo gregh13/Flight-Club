@@ -12,20 +12,75 @@
 
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
       rel="stylesheet" type="text/css"/>
-<br>
-{% if form.errors %}
-<div class="form-container" style="margin: 0 auto; width: 80%; text-align: center; background-color: #FFCCCC;">
-<h6>**Please select one of the options as you type**</h6>
-    <br>
-<p>If you don't see a city (with an airport) that you believe should be available: <br>
-<a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
-    </div>
-<br>
-<br>
-{% endif %}
+
+
 <div class="container">
     <div class="row">
-        <div class="col-lg-6 col-md-8 mx-auto" style="">
+        <div class="col-lg-6 col-md-8 mx-auto content">
+
+            {% if form.errors: %}
+                <div class="form-container" style="background-color: #FFCCCC;">
+                {% if "destinations" in form.errors: %}
+                    {% set vars = {"city_issue": False} %}
+                    {% for error in form.errors["destinations"]: %}
+                        {% if "city" in error: %}
+                            {% if vars.update({"city_issue": True}) %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if vars.city_issue: %}
+                        <h6>**Please select one of the options as you type**</h6>
+                            <br>
+                        <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
+                        <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                        <hr>
+                    {% else: %}
+                        {% if "home_airport" in form.errors: %}
+                            <h6>**Please select one of the options as you type**</h6><br>
+                            <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
+                            <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                            <hr>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                {% if not "destinations" in form.errors and "home_airport" in form.errors: %}
+                    <h6>**Please select one of the options as you type**</h6><br>
+                    <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
+                    <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                    <hr>
+                {% endif %}
+
+                {% for error in form.errors: %}
+                    {% if error == "destinations": %}
+                        {% set vars1 = {"dest_city_issue": False} %}
+                        {% set vars2 = {"dest_price_issue": False} %}
+                        {% for destination_error in form.errors.destinations: %}
+                            {% if "city" in destination_error: %}
+                                {% if vars1.update({"dest_city_issue": True,
+                                                    "message": destination_error.city}) %}
+                                {% endif %}
+                            {% endif %}
+                            {% if "price_ceiling" in destination_error: %}
+                                {% if vars2.update({"dest_price_ceiling_issue": True,
+                                                    "message": destination_error.price_ceiling}) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if vars1.dest_city_issue %}
+                        <p>{{ vars1.message[0] }}</p>
+                        {% endif %}
+                         {% if vars2.dest_price_ceiling_issue %}
+                        <p>{{ vars2.message[0] }}</p>
+                        {% endif %}
+                    {% else: %}
+                        <p>{{ form.errors[error][0] }}</p>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                <br>
+            {% endif %}
+
             <div class="form-container">
                 <form method="POST" action="">
                     {{ form.csrf_token }}
@@ -59,18 +114,24 @@
                     <table  id="destinations" style="display: table; width: 100%;">
 
                         {% for x in range(0, form.destinations|length): %}
-                        {% set style = "width: 100%" %}
+                        {% set style1 = "width: 100%" %}
+                        {% set style2 = "width: 100%" %}
                         {% if form.errors %}
                         {% if "destinations" in form.errors: %}
                         {% if form.errors["destinations"][x]: %}
-                        {% set style = "width: 100%; background-color: #FFCCCC;" %}
+                                {% if "city" in form.errors["destinations"][x]: %}
+                                {% set style1 = "width: 100%; background-color: #FFCCCC;" %}
+                                {% endif %}
+                                {% if "price_ceiling" in form.errors["destinations"][x]: %}
+                                {% set style2 = "width: 100%; background-color: #FFCCCC;" %}
+                                {% endif %}
                         {% endif %}
                         {% endif %}
                         {% endif %}
                         <tr class="user-row-data">
-                            <td style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style=style)}}</td>
+                            <td style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style=style1)}}</td>
                             <td><strong>$</strong></td>
-                            <td style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style="width: 100%;") }}</td>
+                            <td style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style=style2) }}</td>
                         </tr>
                         {% endfor %}
                     </table>
