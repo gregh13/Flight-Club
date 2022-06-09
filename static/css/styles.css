@@ -438,3 +438,7 @@ tr.bordered {
     border-color: #D9D9D9;
     border-width: 50%;
 }
+
+.dropdown-item:active {
+    background: #261EFF;
+}

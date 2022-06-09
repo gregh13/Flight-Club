@@ -18,10 +18,6 @@
  {% if params.body3 %}
   <p>{{ params.body3 }}</p>
  {% endif %}
- {% if page_title == "Report Submitted!" %}
-             <br>
-   <p>If you are still not satisfied and want to take further action, <a href="{{ url_for('serious_report') }}">report it here</a></p>
- {% endif %}
              <hr>
 
     {% if params.button_text %}
@@ -29,8 +25,13 @@
     <a type="button" href="{{ url_for(params.url_for) }}" class="w-33 btn btn-sm btn-custom">{{params.button_text}}</a>
              <br><br>
     {% endif %}
-
           </div>
+    {% if page_title == "Report Submitted!" %}
+             <br>
+          <div style="text-align: center; margin: 0% 10%;">
+   <p style="font-size: 0.7rem">If you are still not satisfied and want to take further action, <br> <a href="{{ url_for('serious_report') }}">Report it here</a></p>
+</div>
+             {% endif %}
         </div>
       </div>
 </div>
