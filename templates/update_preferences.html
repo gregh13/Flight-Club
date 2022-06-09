@@ -35,6 +35,12 @@
                   <strong>{{ form.cabin_class.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.cabin_class(style="width:55%") }}
                   <br><br>
+                  <strong>{{ form.max_stops.label(style="margin-bottom: 6px;") }}</strong>
+                  <br>{{ form.max_stops(style="width:17%") }}
+                  <br><br>
+                  <strong>{{ form.max_flight_time.label(style="margin-bottom: 6px;") }}</strong>
+                  <br>{{ form.max_flight_time(style="width:17%") }}
+                  <br><br>
                   <strong>{{ form.exclude_airlines.label(style="margin-bottom: 6px;") }}</strong>
                        <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
                        src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
@@ -42,13 +48,15 @@
                               from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)" >
                   <br>{{ form.exclude_airlines(style="width:80%") }}
                   <br><br>
-                  <strong>{{ form.max_stops.label(style="margin-bottom: 6px;") }}</strong>
-                  <br>{{ form.max_stops(style="width:17%") }}
+                  <strong>{{ form.ret_to_diff_airport.label(style="margin-bottom: 6px;") }}</strong>
+                        <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       title="Choose whether or not to include flights in your results that return to a different airport than the one
+                                from where you departed. For example, leaving JFK airport in
+                                New York City and returning home to LGA in New York City." >
+                  <br>{{ form.ret_to_diff_airport(style="width:45%") }}
                   <br><br>
-                  <strong>{{ form.max_flight_time.label(style="margin-bottom: 6px;") }}</strong>
-                  <br>{{ form.max_flight_time(style="width:17%") }}
-                  <br>
-                  <br>
+
                   <hr>
                   <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Number of Passengers</h4>
 

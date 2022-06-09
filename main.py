@@ -104,7 +104,7 @@ class Preferences(db.Model, Base):
     exclude_airlines = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
     max_flight_time = db.Column(db.Integer)
-    diff_airports_okay = db.Column(db.String(100))
+    ret_to_diff_airport = db.Column(db.String(100))
     num_adults = db.Column(db.Integer, nullable=False)
     num_children = db.Column(db.Integer, nullable=False)
     num_infants = db.Column(db.Integer, nullable=False)
@@ -662,6 +662,7 @@ def my_preferences():
     email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
     exclude_airlines_dict = {'true': 'Exclude Lowest Rated', 'false': 'Include All Airlines'}
+    ret_to_diff_airport_dict = {'false': 'Don\'t Include', 'true': 'Include'}
     lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
                       60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
     search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
@@ -676,6 +677,7 @@ def my_preferences():
 
     preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
                               "cabin_class": cabin_class_dict, "exclude_airlines": exclude_airlines_dict,
+                              "ret_to_diff_airport": ret_to_diff_airport_dict,
                               "lead_time_start": lead_time_dict, "search_length": search_length_dict,
                               "start_specific": start_specific, "end_specific": end_specific}
 
@@ -827,10 +829,10 @@ def create_an_account(join_type):
             min_nights=2,
             max_nights=7,
             cabin_class='M',
-            exclude_airlines='True',
+            exclude_airlines='false',
             max_stops=2,
             max_flight_time=35,
-            diff_airports_okay="True",
+            ret_to_diff_airport="false",
             num_adults=1,
             num_children=0,
             num_infants=0,

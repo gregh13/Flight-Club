@@ -133,14 +133,19 @@ class PreferenceForm(FlaskForm):
     cabin_class = SelectField("Cabin Class", choices=[('M', 'Economy'), ('W', 'Premium Economy'),
                                                       ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
     exclude_airlines = SelectField("Exclude Lowest Rated Airlines?",
-                                   choices=[("", "Select Option"), ('true', 'Exclude Lowest Rated Airlines'),
-                                            ('false', 'Include All Airlines')],
+                                   choices=[('false', 'Include All Airlines'),
+                                            ('true', 'Exclude Lowest Rated Airlines')],
                                    validators=[Optional()],
                                    description="Excludes airlines rated lowest in safety, service, claims processing, "
                                                "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
                                                "Lion Air, China Eastern, Spirit, etc.)")
     max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, message="'Max Stops' can't be less than 0")])
     max_flight_time = IntegerField("Max Flight Duration", validators=[Optional(), NumberRange(min=1, message="'Max Flight Duration' must be greater than 0")])
+    ret_to_diff_airport = SelectField("Different Airport Returns?",
+                                   choices=[('false', 'Don\'t Include'),
+                                            ('true', 'Include')],
+                                   validators=[Optional()],
+                                      description="Choose whether or not to include flights that return to a different airport than the one from where you departed in your flight results. For example, leaving JFK airport in New York City and returning home to LGA in New York City.")
     num_adults = IntegerField("Adults", validators=[InputRequired(message="'Adults' field is required"), NumberRange(min=1, max=6, message="Number of 'Adult' passengers must be between 1 and 6.")])
     num_children = IntegerField("Children (Age 2-11)", validators=[InputRequired(message="'Children' field is required"), NumberRange(min=0, max=4, message="Number of 'Child' passengers must be between 0 and 4.")])
     num_infants = IntegerField("Infants (Age < 2)", validators=[InputRequired(message="'Infants' field is required"), NumberRange(min=0, max=3, message="Number of 'Infant' passengers must be between 0 and 3.")])
