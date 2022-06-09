@@ -30,7 +30,7 @@ def date_range_check(form, field):
 # # WTForm
 class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[InputRequired()])
-    email = EmailField("Email", validators=[InputRequired()])
+    email = EmailField("Email", validators=[InputRequired(), Email(granular_message=True, check_deliverability=True)])
     password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=22)])
     confirm_password = PasswordField("Confirm Password",
                                      validators=[InputRequired(),
@@ -40,13 +40,13 @@ class RegisterForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = EmailField("Email", validators=[InputRequired()])
+    email = EmailField("Email", validators=[InputRequired(), Email(granular_message=True)])
     password = PasswordField("Password", validators=[InputRequired()])
     submit = SubmitField("Login")
 
 
 class ChangeEmailForm(FlaskForm):
-    email = EmailField("New Email Address", validators=[InputRequired()])
+    email = EmailField("New Email Address", validators=[InputRequired(), Email(granular_message=True, check_deliverability=True)])
     confirm_email = EmailField("Confirm New Email", validators=[InputRequired(),
                                                                 EqualTo('email', message='Emails must match')])
     password = PasswordField("Current Password", validators=[InputRequired()])
@@ -106,7 +106,6 @@ class DestinationForm(FlaskForm):
 
 
 class PreferenceForm(FlaskForm):
-    email = EmailField("Email", validators=[InputRequired()])
     email_frequency = SelectField("Email Frequency", choices=[(1, "Once a week"), (2, "Once every two weeks"),
                                                               (4, "Once a month")], validators=[InputRequired()])
     email_day = SelectField("Day of Week to Receive Email",

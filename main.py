@@ -96,7 +96,6 @@ class Preferences(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True)
     user_pref_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user_pref = relationship("User", back_populates="preferences")
-    email = db.Column(db.String(100), nullable=False)
     email_frequency = db.Column(db.Integer)
     email_day = db.Column(db.Integer)
     min_nights = db.Column(db.Integer, nullable=False)
@@ -705,7 +704,7 @@ def update_preferences():
         # Only the things the user wants to change will get changed.
 
         updated_preferences = {
-            "email": form.email.data, "email_frequency": form.email_frequency.data, "email_day": form.email_day.data,
+            "email_frequency": form.email_frequency.data, "email_day": form.email_day.data,
             "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
             "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
             "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
@@ -736,8 +735,8 @@ def update_preferences():
         # prefs.search_length = form.search_length.data
         # prefs.specific_search_end_date = form.specific_search_end_date.data
 
-
         flash("Your preferences have been successfully updated.")
+
         return redirect(url_for('my_preferences'))
     return render_template("update_preferences.html", form=form, page_title=page_title)
 
@@ -819,7 +818,6 @@ def create_an_account(join_type):
 
         preferences = Preferences(
             user_pref=user,
-            email=user.email,
             email_frequency=1,
             email_day=4,
             min_nights=2,

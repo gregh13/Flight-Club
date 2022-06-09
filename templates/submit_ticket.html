@@ -5,6 +5,20 @@
  <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto content">
+
+          {% if form.errors %}
+<div class="form-container" style="background-color: #FFCCCC;">
+{% for error in form.issue_subject.errors: %}
+    <p>Subject field can't be blank</p>
+{% endfor %}
+{% for error in form.issue_description.errors: %}
+    <p>Description field can't be blank</p>
+{% endfor %}
+</div>
+ <br>
+    {% endif %}
+
+
         <div class="form-container" style="text-align: left;">
             <div style="margin: 0% 10%;">
           <form method="POST" action="">

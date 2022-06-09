@@ -7,17 +7,24 @@
 <div class="container">
     <div class="row">
       <div class="col-lg-6 col-md-8 col-sm-10 mx-auto content">
+
+          {% if form.errors %}
+<div class="form-container" style="background-color: #FFCCCC;">
+{% for error in form.specific_search_start_date.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+{% for error in form.specific_search_end_date.errors: %}
+    <p>{{ error }}</p>
+{% endfor %}
+</div>
+          <br>
+    {% endif %}
+
         <div class="form-container" style="text-align: left;">
             <div style="margin: 0% 10%;">
               <form method="POST" action="">
                         {{ form.csrf_token }}
-
-
                   <h4 style="padding: 5px 0 10px 0; color: #1C16BD;">Email Settings</h4>
-
-                  <strong>{{ form.email.label(style="margin-bottom: 6px;") }}</strong>
-                  <br>{{ form.email(style="width:80%") }}
-                  <br><br>
                   <strong>{{ form.email_frequency.label(style="margin-bottom: 6px;") }}</strong>
                   <br>{{ form.email_frequency(style="width:70%") }}
                   <br><br>
