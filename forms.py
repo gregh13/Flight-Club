@@ -47,7 +47,7 @@ class RegisterForm(FlaskForm):
                                      validators=[InputRequired(message="'Confirm Password' field is required"),
                                                  Length(min=8, max=22, message="Password must be between 8 "
                                                                                "and 22 characters"),
-                                                 EqualTo('password', message='Error: The passwords didn\'t match')])
+                                                 EqualTo('password', message='The passwords must match exactly')])
     submit = SubmitField("Register")
 
 
@@ -61,7 +61,7 @@ class ChangeEmailForm(FlaskForm):
     email = EmailField("New Email Address", validators=[InputRequired(message="'New Email Address' field is required"), Email(granular_message=True,
                                                                                check_deliverability=True)])
     confirm_email = EmailField("Confirm New Email", validators=[InputRequired(message="'Confirm New Email' field is required"),
-                                                                EqualTo('email', message='Error: The emails didn\'t match')])
+                                                                EqualTo('email', message='The email addresses must match exactly')])
     password = PasswordField("Current Password", validators=[InputRequired(message="'Current Password' field is required")])
     submit = SubmitField("Send Confirmation Email")
 
@@ -75,7 +75,7 @@ class ChangePasswordForm(FlaskForm):
                                      validators=[InputRequired(message="'Confirm New Password' field is required"),
                                                  Length(min=8, max=22, message="Password must be between 8 "
                                                                                "and 22 characters"),
-                                                 EqualTo('new_password', message='Error: The passwords didn\'t match')])
+                                                 EqualTo('new_password', message='The passwords must match exactly')])
     submit = SubmitField("Change Password")
 
 
@@ -93,7 +93,7 @@ class ResetPassword(FlaskForm):
                                      validators=[InputRequired(message="'Confirm Password' field is required"),
                                                  Length(min=8, max=22, message="Password must be between 8 "
                                                                                "and 22 characters"),
-                                                 EqualTo('password', message='Error: The passwords didn\'t match')])
+                                                 EqualTo('password', message='Passwords must match exactly')])
     submit = SubmitField("Send Reset Email")
 
 
