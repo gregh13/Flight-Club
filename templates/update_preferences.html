@@ -36,21 +36,29 @@
                   <br>{{ form.cabin_class(style="width:55%") }}
                   <br><br>
                   <strong>{{ form.max_stops.label(style="margin-bottom: 6px;") }}</strong>
+                  <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
+                       title="If you have destinations that are remote or quite far from your home airport
+                            (overseas, islands, rural cities, etc.), direct flights might not be available." >
                   <br>{{ form.max_stops(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.max_flight_time.label(style="margin-bottom: 6px;") }}</strong>
+                  <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
+                       title="If you have destinations that are remote or quite far from your home airport
+                            (overseas, islands, rural cities, etc.), short flight times might not be available." >
                   <br>{{ form.max_flight_time(style="width:17%") }}
                   <br><br>
                   <strong>{{ form.exclude_airlines.label(style="margin-bottom: 6px;") }}</strong>
                        <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                        title="Excludes airlines rated lowest in safety, service, claims processing, and punctuality
                               from your flight search (e.g. Ryan Air, EasyJet, Lion Air, China Eastern, Spirit, etc.)" >
                   <br>{{ form.exclude_airlines(style="width:80%") }}
                   <br><br>
                   <strong>{{ form.ret_to_diff_airport.label(style="margin-bottom: 6px;") }}</strong>
                         <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                        title="Choose whether or not to include flights in your results that return to a different airport than the one
                                 from where you departed. For example, leaving JFK airport in
                                 New York City and returning home to LGA in New York City." >
@@ -76,7 +84,7 @@
 
                   <strong>{{ form.min_nights.label(style="margin-bottom: 6px;") }}</strong>
                          <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                        title="The minimum possible length of time spent at your travel destination.
                         Actual trip duration might be somewhere between your min and max nights"
                        >
@@ -84,7 +92,7 @@
                   <br><br>
                   <strong>{{ form.max_nights.label(style="margin-bottom: 6px;") }} </strong>
                   <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                       src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                       src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                        title="The maximum possible length of time spent at your travel destination.
                         Actual trip duration might be somewhere between your min and max nights" >
 
@@ -92,7 +100,7 @@
                   <br><br>
                   <strong>{{ form.search_start_date.label(style="margin-bottom: 6px;") }}</strong>
                     <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                     title="This is a rolling date, meaning it will move as time passes.
                             For example: If you choose 'two weeks', then if the flight search occurs on March 10th,
                             it will look for flights starting from March 24th onwards." >
@@ -100,7 +108,7 @@
                   <br><br>
                   <strong>{{ form.search_length.label(style="margin-bottom: 6px;") }}</strong>
                     <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                     title="This is a rolling date range, meaning it will move as time passes.
                             For example, if you have a lead time of  '1 month'  and a time window of
                              '3 months' , then if it searches on September 10th, it would look for all flights from
@@ -113,7 +121,7 @@
 
                    <strong>{{ form.specific_search_start_date.label(style="margin-bottom: 6px;") }}</strong>
                     <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                     title="This is a fixed date which will not move as time passes.
                             Choose this if you have a specific date range available to travel
                             (holidays, summer vacation, etc.), otherwise leave blank." >
@@ -121,7 +129,7 @@
                   <br><br>
                   <strong>{{ form.specific_search_end_date.label(style="margin-bottom: 6px;") }}</strong>
                     <img data-toggle="tooltip" style="width: 18px; margin: 0 0 4px 10px;"
-                    src={{ url_for('static', filename='images/info_icon.png') }} alt="info"
+                    src={{ url_for('static', filename='images/info_icon22.png') }} alt="info"
                     title="This is a fixed date which will not move as time passes.
                             Choose this if you have a specific date range available to travel
                             (holidays, summer vacation, etc.), otherwise leave blank." >
