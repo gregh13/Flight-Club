@@ -153,7 +153,7 @@ class FlightDeals(db.Model, Base):
     link10 = db.Column(db.String(1000))
 
 
-# db.create_all()
+db.create_all()
 
 
 def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
