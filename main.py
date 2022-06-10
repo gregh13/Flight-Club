@@ -22,6 +22,7 @@ app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
 api_key = "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"
 company_email = "flightclubdeals@gmail.com"
 company_name = "Flight Club"
+MAIN_URL = "http://127.0.0.1:5000/"
 Bootstrap(app)
 
 # LATER, during Heroku stage
@@ -227,7 +228,6 @@ def not_found(error):
               "url_for": "landing_page"}
     return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
                             action="page_not_found"))
-    return render_template('action.html'), 404
 
 
 @app.route('/')
@@ -317,20 +317,11 @@ def reset_your_password():
         db.session.commit()
 
         # send email to user with a link with string at end
-        subject = "Password Reset Request"
-        email_params = {"reset_token": reset_string, "notify": "notify_link_ADD LATER"}
-        template_id = 4
-        email_status = send_email(company_email=company_email,
-                                  company_name=company_name,
-                                  user_name=user.name,
-                                  user_email=user.email,
-                                  subject=subject,
-                                  params=email_params,
-                                  template_id=template_id,
-                                  api_key=api_key)
+        email_params = {"reset_token": f"{MAIN_URL}itsokfriendweforgiveyou/{reset_string}",
+                        "notify": f"{MAIN_URL}report_issue", "header_link": MAIN_URL}
 
-        if email_status == "good":
-            pass
+        send_email(company_email=company_email, company_name=company_name, user_name=user.name,user_email=user.email,
+                   subject="Password Reset Request", params=email_params, template_id=4, api_key=api_key)
 
         params = {"heading": "An email has been sent to help you reset your password.",
                   "body1": "Please check your email and follow the instructions provided.",
@@ -394,7 +385,10 @@ def authenticate_reset_password(user_recovery_string):
             user.reset_token = None
             db.session.commit()
 
-            # send email to user noting that they changed their password
+            email_params = {"header_link": MAIN_URL}
+            send_email(company_email=company_email, company_name=company_name, user_name=user.name,
+                       user_email=user.email,
+                       subject="Password Change Notice XXX", params=email_params, template_id=8, api_key=api_key)
 
             params = {"heading": "Your password has been reset to your new password",
                       "body1": "Please login to your account.",
@@ -414,7 +408,6 @@ def authenticate_reset_password(user_recovery_string):
 
 @app.route('/report_issue', methods=["GET", "POST"])
 def report_issue():
-    print(session)
     if not current_user.is_authenticated:
         flash("You need to login before you can report an issue.")
         return redirect(url_for('login'))
@@ -422,15 +415,33 @@ def report_issue():
     form = SubmitTicketForm()
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
-        print(user.email)
-        # send email to user as a copy of their ticket
-        # send email to FlightClub to notify of a ticket submission
-        print("Success")
+
+        # sends email to user as a copy of their reported issue
+        email_params1 = {"issue_subject": form.issue_subject.data,
+                         "issue_description": form.issue_description.data,
+                         "header_link": MAIN_URL}
+
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=user.name, user_email=user.email,
+                   subject="Details of Reported Issue XXXXXX", params=email_params1,
+                   template_id=6, api_key=api_key)
+
+        # send email to FlightClub to notify of a reported issue
+        email_params2 = {"issue_subject": form.issue_subject.data,
+                         "issue_description": form.issue_description.data,
+                         "email": user.email,
+                         "name": user.name,
+                         "header_link": MAIN_URL}
+
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=company_name, user_email=company_email,
+                   subject=f"Issue Reported by {user.name}", params=email_params2,
+                   template_id=7, api_key=api_key)
 
         params = {"heading": "Your issue has been successfully reported",
                   "body1": "An email has been sent to Flight Club about your concern. "
                            "You have also been sent an email with the details of your report.",
-                  "body2": "Flight Club will try to respond to this concern in a timely manner. "
+                  "body2": "Flight Club will try to respond to this issue in a timely manner. "
                            ,
                   "body3": "Thank you for your patience.",
                   "button_text": "Return to Home",
@@ -496,11 +507,13 @@ def change_email():
             user.confirmed = False
             db.session.commit()
             logout_user()
-            # email_params = {"confirmation_token": confirmation_string, "name": user.name}
-            # send_email(company_email=company_email, company_name=company_name,
-            #            user_name=user.name, user_email=user.email,
-            #            subject="Account Confirmation", params=email_params,
-            #            template_id=5, api_key=api_key)
+            email_params = {"confirmation_token": f"{MAIN_URL}confirm_your_account/{confirmation_string}",
+                            "name": user.name,
+                            "header_link": MAIN_URL}
+            send_email(company_email=company_email, company_name=company_name,
+                       user_name=user.name, user_email=user.email,
+                       subject="Account Confirmation", params=email_params,
+                       template_id=5, api_key=api_key)
 
             params = {"heading": "Please check your email to confirm your change of email address",
                       "body1": "Again, if you don't see an email from us in your inbox, check your spam folder.",
@@ -537,6 +550,10 @@ def change_password():
             db.session.commit()
 
             logout_user()
+
+            # send email to user saying they've changed their password
+
+
             params = {"heading": "Your password has been successfully changed",
                       "body1": "Please login to your account again.",
                       "body2": None,
@@ -837,11 +854,13 @@ def create_an_account(join_type):
         db.session.add(user)
         db.session.commit()
 
-        # params = {"confirmation_token": confirmation_string, "name": user.name}
-        # send_email(company_email=company_email, company_name=company_name,
-        #            user_name=user.name, user_email=user.email,
-        #            subject="Account Confirmation", params=params,
-        #            template_id=5, api_key=api_key)
+        params = {"confirmation_token": f"{MAIN_URL}confirm_your_account/{confirmation_string}",
+                  "name": user.name,
+                  "header_link": MAIN_URL}
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=user.name, user_email=user.email,
+                   subject="Account Confirmation", params=params,
+                   template_id=5, api_key=api_key)
 
         preferences = Preferences(
             user_pref=user,

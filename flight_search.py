@@ -1,4 +1,3 @@
-import time
 from urllib.error import HTTPError
 from datetime import datetime, timedelta, date
 from main import User, Preferences, FlightDeals, db
@@ -8,10 +7,11 @@ import requests
 import base64
 import urllib.parse
 import random
+import time
 
 
 day_of_week = datetime.today().weekday()
-
+MAIN_URL = "http://127.0.0.1:5000/"
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
 FLIGHT_API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
@@ -259,7 +259,7 @@ def process_flight_info(flight_data):
     return flight_data_dict
 
 
-def send_email(user_name, user_email, email_flight_deal_list, template_id):
+def send_email(user_name, user_email, params: dict, template_id):
     url = "https://api.sendinblue.com/v3/smtp/email"
     payload = {
         "sender": {
@@ -270,10 +270,8 @@ def send_email(user_name, user_email, email_flight_deal_list, template_id):
             "email": user_email,
             "name": user_name
         }],
-        "subject": "The results for your flight search are here! Come check it out",
-        "params": {
-            "destinations": email_flight_deal_list
-        },
+        "subject": "The results for your flight search are here! CHECK IT",
+        "params": params,
         "templateId": template_id
     }
     headers = {
@@ -468,23 +466,24 @@ for u in all_users:
 
     FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
     db.session.commit()
-    #
-    # if email_flight_deal_list:
-    #     template_id = 1
-    #     send_email(user_name=user_name,
-    #                user_email=user_email,
-    #                email_flight_deal_list=email_flight_deal_list,
-    #                template_id=template_id)
-    #     print("Flight Deal List:")
-    #     print(email_flight_deal_list)
-    #     print(f"\nNo flight info for: {bad_codes}")
-    # else:
-    #     template_id = 3
-    #     send_email(user_name=user_name,
-    #                user_email=user_email,
-    #                email_flight_deal_list=email_flight_deal_list,
-    #                template_id=template_id)
-    #     print("No flight deals found this time around :(")
-    #     print(f"\nNo flight info for: {bad_codes}")
+
+    if email_flight_deal_list:
+        deals_found_params = {"destinations": email_flight_deal_list,
+                              "header_link": MAIN_URL, "login_link": f"{MAIN_URL}login"}
+        send_email(user_name=user_name,
+                   user_email=user_email,
+                   params=deals_found_params,
+                   template_id=1)
+        print("Flight Deal List:")
+        print(email_flight_deal_list)
+        print(f"\nNo flight info for: {bad_codes}")
+    else:
+        no_deals_params = {"login_link": f"{MAIN_URL}login", "header_link": MAIN_URL}
+        send_email(user_name=user_name,
+                   user_email=user_email,
+                   params=no_deals_params,
+                   template_id=3)
+        print("No flight deals found this time around :(")
+        print(f"\nNo flight info for: {bad_codes}")
 
     print("FINISHED")
