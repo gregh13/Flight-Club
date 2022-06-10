@@ -847,7 +847,6 @@ def create_an_account(join_type):
             confirmation_string = create_random_string()
 
         starting_string = travel_quote_string()
-
         user = User(name=form.name.data,
                     email=email,
                     password=salted_hashbrowns,
