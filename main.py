@@ -474,7 +474,6 @@ def user_home():
     db.session.commit()
 
     quote = quote_dictionary[random_num]
-
     return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
 
