@@ -920,8 +920,7 @@ def secret():
 @app.route('/serious_report')
 @login_required
 def serious_report():
-    # Placeholder location for now
-    # Will add admin features according to the needs of the projects (once users become active and problems arise)
+    # For users who reported an issue and want to take further action.
     return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 
