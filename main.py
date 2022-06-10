@@ -388,7 +388,7 @@ def authenticate_reset_password(user_recovery_string):
             email_params = {"header_link": MAIN_URL}
             send_email(company_email=company_email, company_name=company_name, user_name=user.name,
                        user_email=user.email,
-                       subject="Password Change Notice XXX", params=email_params, template_id=8, api_key=api_key)
+                       subject="Password Change Notice", params=email_params, template_id=8, api_key=api_key)
 
             params = {"heading": "Your password has been reset to your new password",
                       "body1": "Please login to your account.",
@@ -401,7 +401,8 @@ def authenticate_reset_password(user_recovery_string):
                                     action="password_reset_success"))
             # return render_template("action_successful.html", params=params, page_title="Password Reset Successfully!")
 
-        return redirect(url_for('landing_page'))
+        flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
+        return redirect(url_for("reset_your_password"))
 
     return render_template("reset_password.html", page_title=page_title, form=form)
 
@@ -423,7 +424,7 @@ def report_issue():
 
         send_email(company_email=company_email, company_name=company_name,
                    user_name=user.name, user_email=user.email,
-                   subject="Details of Reported Issue XXXXXX", params=email_params1,
+                   subject="Details of Reported Issue", params=email_params1,
                    template_id=6, api_key=api_key)
 
         # send email to FlightClub to notify of a reported issue
@@ -517,7 +518,7 @@ def change_email():
 
             params = {"heading": "Please check your email to confirm your change of email address",
                       "body1": "Again, if you don't see an email from us in your inbox, check your spam folder.",
-                      "body2": "And if it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                      "body2": "And if it ended up in the spam folder, make sure to mark it as 'Not Spam' "
                                "so that our other emails (and your deals!) don't get sent there as well.",
                       "body3": None,
                       "button_text": None,
@@ -552,7 +553,10 @@ def change_password():
             logout_user()
 
             # send email to user saying they've changed their password
-
+            email_params = {"header_link": MAIN_URL}
+            send_email(company_email=company_email, company_name=company_name, user_name=user.name,
+                       user_email=user.email,
+                       subject="Password Change Notice", params=email_params, template_id=8, api_key=api_key)
 
             params = {"heading": "Your password has been successfully changed",
                       "body1": "Please login to your account again.",
@@ -787,6 +791,8 @@ def update_preferences():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('user_home'))
     page_title = "Login"
     form = LoginForm()
     if form.validate_on_submit():
@@ -891,7 +897,7 @@ def create_an_account(join_type):
 
         params = {"heading": "Please check your email to confirm your account",
                   "body1": "If you don't see an email from us in your inbox, check your spam folder.",
-                  "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                  "body2": "If it did end up in the spam folder, make sure to mark it as 'Not Spam' "
                            "so that our other emails (and your deals!) don't get sent there as well.",
                   "body3": None,
                   "button_text": None,
