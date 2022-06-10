@@ -21,24 +21,29 @@
                <p>While you wait, would you care to browse our wonderful
                <a href="https://skymall.com/" style="text-decoration: none;" target="_blank">in-flight catalog</a>? </p>
                 </div>
-                  {% endif %}
+            {% endif %}
 
              {% for x in range(1, 11): %}
                 {% if user_deals['place' + x|string]: %}
                     <tr><td><br></td></tr>
                     <tr>
-                      <td style="text-align: center"><strong>{{ user_deals["place" + x|string] }}</strong></td>
+                      <td style="text-align: center; padding-bottom: 11px"><strong>{{ user_deals["place" + x|string] }}</strong></td>
                     </tr>
 
                       {% if user_deals["link" + x|string]: %}
                         <tr>
-                        <td style="text-align: left; padding: 0.5% 22% 0%;">{{ user_deals["message" + x|string] }}</td></tr>
-                         <tr><td><a type="button" class="w-33 btn btn-tiny btn-custom-outline-form"
+                        <td style="text-align: left; padding: 0.5% 22% 0%;">{{ user_deals["message" + x|string] }}</td>
+                        </tr>
+                         <tr>
+                             <td style="padding-top: 11px;"><a type="button" class="w-33 btn btn-tiny btn-custom-outline-form"
                                     href='{{ user_deals["link" + x|string] }}' target="_blank">View Details</a></td>
+                             </tr>
                       {% else: %}
+                         <tr>
                           <td style="text-align: left; padding: 0.5% 22% 0%;">{{ user_deals["message" + x|string] }}</td>
+                         </tr>
                       {% endif %}
-                    </tr>
+
                     <tr><td><br></td></tr>
                     <tr><td><span>- - - - - - - - - - - - - - - - - - - - - - -</span></td></tr>
                 {% endif %}

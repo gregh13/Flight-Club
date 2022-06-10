@@ -139,8 +139,17 @@ class PreferenceForm(FlaskForm):
                                    description="Excludes airlines rated lowest in safety, service, claims processing, "
                                                "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
                                                "Lion Air, China Eastern, Spirit, etc.)")
-    max_stops = IntegerField("Max Number of Stops (One Way)", validators=[Optional(), NumberRange(min=0, message="'Max Stops' can't be less than 0")])
-    max_flight_time = IntegerField("Max Flight Duration", validators=[Optional(), NumberRange(min=1, message="'Max Flight Duration' must be greater than 0")])
+    max_stops = IntegerField("Max Number of Stops (one-way)",
+                             validators=[Optional(), NumberRange(min=0, message="'Max Stops' can't be less than 0")],
+                             description="If you have destinations that are remote or quite far from your home airport "
+                                         "(overseas, islands, rural cities, etc.), "
+                                         "direct flights might not be available.")
+    max_flight_time = IntegerField("Max Flight Duration (one-way)",
+                                   validators=[Optional(), NumberRange(min=1, message="'Max Flight Duration' "
+                                                                                      "must be greater than 0")],
+                                   description="If you have destinations that are remote or quite far from your "
+                                               "home airport (overseas, islands, rural cities, etc.), "
+                                               "short flight times might not be available.")
     ret_to_diff_airport = SelectField("Different Airport Returns?",
                                    choices=[('false', 'Don\'t Include'),
                                             ('true', 'Include')],

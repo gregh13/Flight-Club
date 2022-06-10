@@ -10,6 +10,7 @@
              <br>
 <h4>{{ params.heading }}</h4>
            <br>
+             <div style="margin: 0 11%";>
   <p>{{ params.body1 }}</p>
              <br>
  {% if params.body2 %}
@@ -25,6 +26,7 @@
     <a type="button" href="{{ url_for(params.url_for) }}" class="w-33 btn btn-sm btn-custom">{{params.button_text}}</a>
              <br><br>
     {% endif %}
+                 </div>
           </div>
     {% if page_title == "Report Submitted!" %}
              <br>

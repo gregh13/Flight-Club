@@ -216,12 +216,26 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+@app.errorhandler(404)
+def not_found(error):
+    page_title = "Flight GPS not working?"
+    params = {"heading": "404 - Page Not Found",
+              "body1": "Oh no! Something's not right with the url. We couldn't find a page for you, sorry about that.",
+              "body2": "Click the button below to return to the main page.",
+              "body3": None,
+              "button_text": "Return to Main Page",
+              "url_for": "landing_page"}
+    return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
+                            action="page_not_found"))
+    return render_template('action.html'), 404
+
+
 @app.route('/')
 def landing_page():
     return render_template("index.html", page_title="")
 
 
-@app.route('/redirect/<params>/<page_title>/<action>')
+@app.route('/redirectionwrap/<params>/<page_title>/<action>')
 def action_successful_redirect(params, page_title, action):
     parameters = ast.literal_eval(params)
     session['params'] = parameters
@@ -229,7 +243,7 @@ def action_successful_redirect(params, page_title, action):
     return redirect(url_for('action_success', action=action))
 
 
-@app.route('/<action>')
+@app.route('/redirect/<action>')
 def action_success(action):
     params = session.get('params', None)
     page_title = session.get('page_title', None)
@@ -398,8 +412,8 @@ def authenticate_reset_password(user_recovery_string):
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
-@app.route('/submit_ticket', methods=["GET", "POST"])
-def submit_ticket():
+@app.route('/report_issue', methods=["GET", "POST"])
+def report_issue():
     print(session)
     if not current_user.is_authenticated:
         flash("You need to login before you can report an issue.")
@@ -425,7 +439,7 @@ def submit_ticket():
                                 action="report_submitted"))
         # return render_template('action_successful.html', params=params, page_title="Report Submitted!")
 
-    return render_template('submit_ticket.html', form=form, page_title=page_title)
+    return render_template('report_issue.html', form=form, page_title=page_title)
 
 
 @app.route('/home')
@@ -838,7 +852,7 @@ def create_an_account(join_type):
             cabin_class='M',
             exclude_airlines='false',
             max_stops=2,
-            max_flight_time=35,
+            max_flight_time=24,
             ret_to_diff_airport="false",
             num_adults=1,
             num_children=0,

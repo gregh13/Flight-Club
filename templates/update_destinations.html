@@ -32,13 +32,13 @@
                         <h6>**Please select one of the options as you type**</h6>
                             <br>
                         <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
-                        <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                        <a class="button" style="text-decoration: none;" href="{{ url_for('report_issue') }}"> Report it here</a></p>
                         <hr>
                     {% else: %}
                         {% if "home_airport" in form.errors: %}
                             <h6>**Please select one of the options as you type**</h6><br>
                             <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
-                            <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                            <a class="button" style="text-decoration: none;" href="{{ url_for('report_issue') }}"> Report it here</a></p>
                             <hr>
                         {% endif %}
                     {% endif %}
@@ -47,7 +47,7 @@
                 {% if not "destinations" in form.errors and "home_airport" in form.errors: %}
                     <h6>**Please select one of the options as you type**</h6><br>
                     <p>If you don't see a city (with an airport) that you believe should be available as an option: <br>
-                    <a class="button" style="text-decoration: none;" href="{{ url_for('submit_ticket') }}"> Report it here</a></p>
+                    <a class="button" style="text-decoration: none;" href="{{ url_for('report_issue') }}"> Report it here</a></p>
                     <hr>
                 {% endif %}
 
