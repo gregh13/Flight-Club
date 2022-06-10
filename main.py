@@ -855,6 +855,8 @@ def create_an_account(join_type):
                     confirmed=False,
                     confirmation_token=confirmation_string,
                     quote_string=starting_string,
+                    reset_token="",
+                    reset_timestamp=""
                     )
         db.session.add(user)
         db.session.commit()
