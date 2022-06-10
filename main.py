@@ -22,7 +22,7 @@ app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
 api_key = "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"
 company_email = "flightclubdeals@gmail.com"
 company_name = "Flight Club"
-MAIN_URL = "http://127.0.0.1:5000/"
+MAIN_URL = "https://flightclubdeals.herokuapp.com/"
 Bootstrap(app)
 
 # LATER, during Heroku stage

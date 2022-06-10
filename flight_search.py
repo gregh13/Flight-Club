@@ -11,7 +11,7 @@ import time
 
 
 day_of_week = datetime.today().weekday()
-MAIN_URL = "http://127.0.0.1:5000/"
+MAIN_URL = "https://flightclubdeals.herokuapp.com/"
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
 FLIGHT_API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
