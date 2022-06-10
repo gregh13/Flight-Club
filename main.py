@@ -922,6 +922,20 @@ def serious_report():
 @app.route('/logout')
 @login_required
 def logout():
+    user = User.query.filter_by(id=current_user.id).first()
+    user_dest_object = Destinations.query.filter_by(user_dest_id=user.destinations[0].user_dest_id).first()
+    if user_dest_object.city1 is None:
+        page_title = "Takeoff Delayed"
+        return render_template("no_destinations_logout.html", page_title=page_title)
+
+    logout_user()
+    session.clear()
+    return render_template('logout.html')
+
+
+@app.route('/logout-anyway')
+@login_required
+def logout_anyway():
     logout_user()
     session.clear()
     return render_template('logout.html')
