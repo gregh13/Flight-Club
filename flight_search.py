@@ -270,7 +270,7 @@ def send_email(user_name, user_email, params: dict, template_id):
             "email": user_email,
             "name": user_name
         }],
-        "subject": "The results for your flight search are here! CHECK IT",
+        "subject": "The results for your flight search are here!",
         "params": params,
         "templateId": template_id
     }
@@ -414,7 +414,7 @@ for u in all_users:
 
                 price_with_commas = "{:,}".format(flight_dict["price"])
                 price_formatted = str(price_with_commas) + f" {destination['currency']}"
-                # image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
+                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
                 # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
                 print(flight_dict["routes"])
@@ -439,7 +439,7 @@ for u in all_users:
                         "nights": flight_dict["nights_at_destination"],
                         "date1": depart_day,
                         "date2": back_home_day,
-                        "image": "image_link",
+                        "image": image_link,
                         "num_passengers": total_passengers,
                         "passengers": passengers,
                         "link": flight_link
