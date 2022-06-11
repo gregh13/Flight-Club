@@ -826,6 +826,8 @@ def login():
 
 @app.route('/create_an_account/<join_type>', methods=['GET', 'POST'])
 def create_an_account(join_type):
+    if current_user.is_authenticated:
+        return redirect(url_for('user_home'))
     page_title = "Create an Account"
     form = RegisterForm()
     if form.validate_on_submit():
