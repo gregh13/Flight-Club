@@ -293,7 +293,7 @@ h2 {
 
 @media (max-width: 800px) and (min-width: 561px) {
   .container-fluid {
-    background-image: url("../images/flipflops_horizontal_mid.jpg");
+    background-image: url("../images/flipflops-full-resized.jpg");
     background-size: cover;
   }
   h1 {
@@ -306,7 +306,7 @@ h2 {
 
 @media (max-width: 560px) {
   .container-fluid {
-    background-image: url("../images/flipflops_horizontal_small.jpg");
+    background-image: url("../images/flipflops-full-resized.jpg");
     background-size: cover;
   }
   h1 {
