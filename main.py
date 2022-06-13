@@ -26,12 +26,12 @@ MAIN_URL = "https://flightclubdeals.herokuapp.com/"
 Bootstrap(app)
 
 # LATER, during Heroku stage
-# uri = os.getenv("DATABASE_URL")
-# if uri and uri.startswith("postgres://"):
-#     uri = uri.replace("postgres://", "postgresql://", 1)
-# app.config['SQLALCHEMY_DATABASE_URI'] = uri
+uri = os.getenv("DATABASE_URL")
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///club-users.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///club-users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
