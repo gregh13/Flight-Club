@@ -60,7 +60,7 @@
                   </tbody>
                   </table>
               <br>
-              <div class="g-recaptcha" data-callback="enableRegister" data-sitekey="6Le4JGcgAAAAABwMM5UdpaSXnHJ_Oqk_N2w94umd"></div>
+              <div class="g-recaptcha" data-expired-callback="verifyAgain" data-callback="enableRegister" data-sitekey="6Le4JGcgAAAAABwMM5UdpaSXnHJ_Oqk_N2w94umd"></div>
                 <br>
           </form>
                 </div>
@@ -76,6 +76,9 @@
 <script>
     function enableRegister(){
         document.getElementById("register_submit").disabled = false;
+    }
+        function verifyAgain(){
+        document.getElementById("register_submit").disabled = true;
     }
 </script>
 {% include "footer.html" %}

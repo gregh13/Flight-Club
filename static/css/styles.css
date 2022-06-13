@@ -501,3 +501,9 @@ tr.bordered {
     padding: 7px 24px;
     color: #1C16BD;
 }
+
+#show_password {
+    float: right;
+    padding-top: 7px;
+    font-size: 0.7rem
+}

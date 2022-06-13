@@ -27,8 +27,9 @@
               <strong>{{ form.email.label }}</strong>
               {{ form.email(class_="form-control", style="width:100%") }}
               <br>
-              <strong>{{ form.password.label }}</strong>
-              {{ form.password(class_="form-control", style="width:100%") }}
+              <strong>{{ form.password.label }}</strong> <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show Password</span>
+              {{ form.password(id="passwordInput", class_="form-control", style="width:100%") }}
+
               <br><br>
               <table  style="display: table; width: 100%;">
                   <tbody style="display: table; width: 100%;">
@@ -51,6 +52,23 @@
     </div>
   </div>
 <br><br>
+
+<script>
+function togglePassword()
+{
+  var toggle = document.getElementById("show_password");
+  var password = document.getElementById("passwordInput");
+  if(toggle.title == 'Show'){
+      password.type = "text";
+      toggle.title = 'Hide';
+      toggle.textContent = "Hide Password";}
+  else if(toggle.title == 'Hide'){
+      password.type = "password";
+      toggle.title = 'Show';
+      toggle.textContent = "Show Password";}
+}
+</script>
+
 
 
 {% include "footer.html" %}
