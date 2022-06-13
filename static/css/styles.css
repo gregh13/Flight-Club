@@ -3,6 +3,7 @@
 /* Color1: #287AD7 */
 
 /* main-teal: #0BAAB0 */
+/* form-gray: #f2f2f2*/
 /* main-purple: #1C16BD */
 /* hover-purple: #261EFF */
 
@@ -491,4 +492,12 @@ tr.bordered {
 
 .dropdown-item:active {
     background: #261EFF;
+}
+.dropdown-item {
+    padding: 7px 24px;
+    color: #1C16BD;
+}
+
+.dropdown-menu {
+  background-color: #f2f2f2;
 }
