@@ -114,7 +114,7 @@
                     <table  id="destinations" style="display: table; width: 100%;">
 
                         {% for x in range(0, form.destinations|length): %}
-                        {% set style1 = "width: 100%" %}
+                        {% set style1 = "width: 100%;" %}
                         {% set style2 = "width: 58px; font-size: 0.85rem; padding: 6px;" %}
                         {% if form.errors %}
                         {% if "destinations" in form.errors: %}
@@ -130,7 +130,7 @@
                         {% endif %}
                         <tr class="user-row-data">
                             <td style="padding: 8px 15px 8px 0px;">{{ form.destinations[x].city(class_="form-control", style=style1)}}</td>
-                            <td><strong>$</strong></td>
+                            <td><strong style="font-size: 0.85rem;">$</strong></td>
                             <td style="text-align: left;">{{ form.destinations[x].price_ceiling(class_="form-control", style=style2) }}</td>
                         </tr>
                         {% endfor %}

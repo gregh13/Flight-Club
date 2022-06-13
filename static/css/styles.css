@@ -304,16 +304,16 @@ h2 {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 420px) {
   .container-fluid {
     background-image: url("../images/flipflops-full-resized.jpg");
     background-size: cover;
   }
   h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
   h2 {
-    font-size: 2.7rem;
+    font-size: 2.2rem;
   }
 }
 
@@ -369,20 +369,21 @@ input[type="date"] {
     position: relative;
 }
 
-/* create a new arrow, because we are going to mess up the native one
-see "List of symbols" below if you want another, you could also try to add a font-awesome icon.. */
-input[type="date"]:after {
+/* create a new arrow, because we are going to mess up the native one */
+/*input[type="date"]:after {
     content: "\25BC";
     color: #555;
     padding: 0 5px;
 }
+*/
 
 /* change color of symbol on hover */
-input[type="date"]:hover:after {
+/*input[type="date"]:hover:after {
     color: #1C16BD;
 }
-
-/* make the native arrow invisible and stretch it over the whole field so you can click anywhere in the input field to trigger the native datepicker*/
+*/
+/* make the native arrow invisible and stretch it over the whole field
+so you can click anywhere in the input field to trigger the native datepicker*/
 input[type="date"]::-webkit-calendar-picker-indicator {
     position: absolute;
     top: 0;
