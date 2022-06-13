@@ -39,11 +39,11 @@
               {{ form.email(class_="form-control", style="width:100%") }}
               <br>
               <strong>{{ form.password.label(style="margin-bottom: 6px;") }}</strong>
-               <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show Password</span>
+               <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show</span>
               {{ form.password(id="passwordInput", class_="form-control", style="width:100%") }}
               <br>
               <strong>{{ form.confirm_password.label(style="margin-bottom: 6px;") }}</strong>
-               <span id="show_password_2" class="btn" onclick="togglePassword_2()" title="Show">Show Password</span>
+               <span id="show_password_2" class="btn" onclick="togglePassword_2()" title="Show">Show</span>
               {{ form.confirm_password(id="passwordInput_2", class_="form-control", style="width:100%") }}
               <br>
 
@@ -82,11 +82,11 @@
       if(toggle.title == 'Show'){
           password.type = "text";
           toggle.title = 'Hide';
-          toggle.textContent = "Hide Password";}
+          toggle.textContent = "Hide";}
       else if(toggle.title == 'Hide'){
           password.type = "password";
           toggle.title = 'Show';
-          toggle.textContent = "Show Password";}
+          toggle.textContent = "Show";}
     }
 
     function togglePassword_2()
@@ -96,11 +96,11 @@
       if(toggle2.title == 'Show'){
           password2.type = "text";
           toggle2.title = 'Hide';
-          toggle2.textContent = "Hide Password";}
+          toggle2.textContent = "Hide";}
       else if(toggle2.title == 'Hide'){
           password2.type = "password";
           toggle2.title = 'Show';
-          toggle2.textContent = "Show Password";}
+          toggle2.textContent = "Show";}
     }
 
     function enableRegister(){

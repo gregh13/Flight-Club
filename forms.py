@@ -71,7 +71,7 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField("New Password", validators=[InputRequired(message="'New Password' field is required"),
                                                              Length(min=8, max=22, message="Password must be between 8 "
                                                                                            "and 22 characters")])
-    confirm_password = PasswordField("Confirm New Password",
+    confirm_password = PasswordField("Confirm Password",
                                      validators=[InputRequired(message="'Confirm New Password' field is required"),
                                                  Length(min=8, max=22, message="Password must be between 8 "
                                                                                "and 22 characters"),
