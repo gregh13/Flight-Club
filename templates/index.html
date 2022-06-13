@@ -38,19 +38,20 @@
     <div class="container-fluid">
         <!-- Nav Bar -->
         <nav class="navbar navbar-expand navbar-dark">
-            <a style="" class="navbar-brand" href="{{ url_for('landing_page') }}">Flight Club <img src={{ url_for('static',
+            <a style="" class="navbar-brand" href="{{ url_for('landing_page') }}">Flight Club
+                <img class="logged-out-plane" style="width: 27%; padding-top: 4px;" src={{ url_for('static',
                 filename="images/plane-icon3.png") }} alt="logo"></a>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     {% if not current_user.is_authenticated: %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('create_an_account', join_type='normal') }}">Sign Up</a>
+                        <a id="signUp" class="nav-link logged-out" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
                     </li>
-                    <li class="nav-item active">
-                        <a class="nav-link btn btn-md btn-custom" href="{{ url_for('login') }}">Login</a>
+                    <li class="nav-item active logged-out">
+                        <a class="nav-link btn btn-sm btn-custom" href="{{ url_for('login') }}">Login</a>
                     </li>
-                    <li><span style="padding-right: 22px;"></span></li>
+                    <li><span class="logged-out-indent"></span></li>
                     {% else: %}
                   <li class="nav-item dropdown active">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -134,25 +135,25 @@
                 <h2>These deals make me mad. And jealous. They're just so good.</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/jeff_bezos.png") }}
                 alt="bezos">
-                <em>Jeff, New Mexico</em>
+                <em class="testimonials-details">Jeff, New Mexico</em>
             </div>
             <div class="carousel-item">
                 <h2>Great site, looking forward to the partnership with SpaceX!</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/elon_musk.jpeg") }}
                 alt="musk">
-                <em>Elon, Pretoria</em>
+                <em class="testimonials-details">Elon, Pretoria</em>
             </div>
             <div class="carousel-item">
                 <h2>The last honest flight deal finder around. And I know a thing or two about honesty.</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/abraham.jpeg") }}
                 alt="abraham">
-                <em>Abe, Kentucky</em>
+                <em class="testimonials-details">Abe, Kentucky</em>
             </div>
             <div class="carousel-item">
                 <h2>Simply brilliant!</h2><br>
                 <img class="testimonials-image" src={{ url_for('static', filename="images/einstein.jpeg") }}
                 alt="einstein">
-                <em>Bertie, Ulm</em>
+                <em class="testimonials-details">Bertie, Ulm</em>
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls" data-slide="prev">
@@ -164,8 +165,8 @@
             <span class="sr-only">Next</span>
         </button>
     </div>
-</section>
 
+</section>
 <!-- Press -->
 
 <section id="press">

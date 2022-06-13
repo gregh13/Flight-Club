@@ -107,6 +107,9 @@ h2 {
   font-size:
 }
 
+.logged-out-indent {
+  padding-right: 22px;
+}
 
 /* Features */
 
@@ -157,17 +160,17 @@ h2 {
 #press {
   background-color: #0BAAB0;
   text-align: center;
-  padding-bottom: 3%;
+  padding-bottom: 2%;
 }
 
 .press-image {
   width: 17%;
-  padding: 1.5% 2.2% 5%;
+  padding: 3% 2.2% 2%;
 }
 
 .press-image-piper {
   width: 22%;
-  padding: 1.5% 2.2% 5%;
+  padding: 3% 2.2% 2%;
 }
 
 .make-smaller {
@@ -309,11 +312,52 @@ h2 {
     background-image: url("../images/flipflops-full-resized.jpg");
     background-size: cover;
   }
+  .container-fluid-header {
+    padding: 10px 0 0 22px;
+    background-image: url("../images/header-snippet.jpg");
+  }
+  #signUp {
+    padding: auto;
+    text-align: right;
+  }
+
   h1 {
     font-size: 2.5rem;
   }
   h2 {
     font-size: 2.2rem;
+  }
+  h3 {
+    font-size: 1.50rem;
+  }
+
+  #testimonials h2 {
+    font-size: 1.3rem;
+  }
+
+  .testimonials-details {
+    font-size: 0.7rem;
+  }
+  .testimonials-image {
+    width: 50px;
+  }
+
+  .text-mega-small {
+    font-size: 0.7rem;
+  }
+
+  .navbar-brand {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 1.7rem;
+  padding: 8px 0px;
+}
+  .logged-out {
+  font-size: 1rem;
+  }
+  .logged-out-plane {
+  }
+  .logged-out-indent {
+  padding-right: 8px;
   }
 }
 

@@ -38,7 +38,7 @@ def date_range_check(form, field):
 
 # # WTForm
 class RegisterForm(FlaskForm):
-    name = StringField("Name", validators=[InputRequired(message="'Name' field is required")])
+    name = StringField("First Name", validators=[InputRequired(message="'Name' field is required")])
     email = EmailField("Email", validators=[InputRequired(message="'Email' field is required"), Email(granular_message=True, check_deliverability=True)])
     password = PasswordField("Password", validators=[InputRequired(message="'Password' field is required"),
                                                      Length(min=8, max=22, message="Password must be between 8 "
