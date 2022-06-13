@@ -29,31 +29,22 @@
             <div style="padding: 3% 0;">
           <h5 style="padding-bottom: 2%;">Price Ceiling & Destination</h5>
           <table style="border-collapse: collapse; margin: 10px auto; color: #1C16BD">
-<!--            <thead>-->
-<!--            <th style="text-align: right; padding: 5px 7px 5px 0px;">Price Ceiling</th>-->
-<!--            <th> </th>-->
-<!--            <th style="text-align: left; padding: 5px 0px 5px 7%;">Destination</th>-->
 
-<!--            </thead>-->
             <tbody>
-<!--            <tr><td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td></tr>-->
              {% for x in range(1, 11): %}
 
             {% if des['city' + x|string]: %}
 
             <tr>
-              <td style="text-align: right; width: 122px; padding: 6px 0px;">
+              <td style="text-align: right; width: 122px; padding: 8px 0px;">
                   <strong>${{ "{:,}".format(des["price" + x|string]) }}</strong> - - -
               </td>
               <td></td>
-              <td style="text-align: left;  padding: 6px 0px 6px 5px;">
+              <td style="text-align: left;  padding: 8px 0px 8px 5px;">
                 <strong>{{ city_options[des["city" + x|string]] }}</strong>
               </td>
             </tr>
-<!--            <tr>-->
-<!--              <td style="text-align: right;">- - - - - - - - - - - - - - - - - - - - - - - </td>-->
-<!--              <td style="text-align: left;"> - - - - - - -  </td>-->
-<!--            </tr>-->
+
             {% endif %}
             {% endfor %}
             </tbody>

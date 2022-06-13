@@ -132,13 +132,6 @@ class PreferenceForm(FlaskForm):
 
     cabin_class = SelectField("Cabin Class", choices=[('M', 'Economy'), ('W', 'Premium Economy'),
                                                       ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    exclude_airlines = SelectField("Exclude Bad Airlines?",
-                                   choices=[('false', 'Include All Airlines'),
-                                            ('true', 'Exclude Lowest Rated Airlines')],
-                                   validators=[Optional()],
-                                   description="Excludes airlines rated lowest in safety, service, claims processing, "
-                                               "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
-                                               "Lion Air, China Eastern, Spirit, etc.)")
     max_stops = IntegerField("Max Stops (1-way)",
                              validators=[Optional(), NumberRange(min=0, message="'Max Stops' can't be less than 0")],
                              description="Max number of stops for one-way of the trip. If you have destinations that are remote or quite far from your home airport "
@@ -150,6 +143,13 @@ class PreferenceForm(FlaskForm):
                                    description="Max number of hours for one-way trip duration. Trip duration includes layovers and stops. If you have destinations that are remote or quite far from your "
                                                "home airport (overseas, islands, rural cities, etc.), "
                                                "short flight times might not be available.")
+    exclude_airlines = SelectField("Exclude Bad Airlines?",
+                                   choices=[('false', 'Include All Airlines'),
+                                            ('true', 'Exclude Bad Airlines')],
+                                   validators=[Optional()],
+                                   description="Excludes airlines rated lowest in safety, service, claims processing, "
+                                               "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
+                                               "Lion Air, China Eastern, Spirit, etc.)")
     ret_to_diff_airport = SelectField("Diff Airport Return?",
                                    choices=[('false', 'Don\'t Include'),
                                             ('true', 'Include')],
