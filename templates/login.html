@@ -27,10 +27,10 @@
               <strong>{{ form.email.label }}</strong>
               {{ form.email(class_="form-control", style="width:100%") }}
               <br>
-              <strong>{{ form.password.label }}</strong> <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show Password</span>
+              <strong>{{ form.password.label }}</strong> <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show</span>
               {{ form.password(id="passwordInput", class_="form-control", style="width:100%") }}
 
-              <br><br>
+              <br>
               <table  style="display: table; width: 100%;">
                   <tbody style="display: table; width: 100%;">
                   <tr>
@@ -46,6 +46,7 @@
                   </tbody>
                   </table>
           </form>
+                <br>
                 </div>
         </div>
       </div>
@@ -61,11 +62,11 @@ function togglePassword()
   if(toggle.title == 'Show'){
       password.type = "text";
       toggle.title = 'Hide';
-      toggle.textContent = "Hide Password";}
+      toggle.textContent = "Hide";}
   else if(toggle.title == 'Hide'){
       password.type = "password";
       toggle.title = 'Show';
-      toggle.textContent = "Show Password";}
+      toggle.textContent = "Show";}
 }
 </script>
 
