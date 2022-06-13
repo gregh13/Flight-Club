@@ -39,10 +39,12 @@
               {{ form.email(class_="form-control", style="width:100%") }}
               <br>
               <strong>{{ form.password.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.password(class_="form-control", style="width:100%") }}
+               <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show Password</span>
+              {{ form.password(id="passwordInput", class_="form-control", style="width:100%") }}
               <br>
               <strong>{{ form.confirm_password.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.confirm_password(class_="form-control", style="width:100%") }}
+               <span id="show_password_2" class="btn" onclick="togglePassword_2()" title="Show">Show Password</span>
+              {{ form.confirm_password(id="passwordInput_2", class_="form-control", style="width:100%") }}
               <br>
 
               <table  style="display: table; width: 100%;">
@@ -72,8 +74,35 @@
 
 <br><br>
 
-
 <script>
+    function togglePassword()
+    {
+      var toggle = document.getElementById("show_password");
+      var password = document.getElementById("passwordInput");
+      if(toggle.title == 'Show'){
+          password.type = "text";
+          toggle.title = 'Hide';
+          toggle.textContent = "Hide Password";}
+      else if(toggle.title == 'Hide'){
+          password.type = "password";
+          toggle.title = 'Show';
+          toggle.textContent = "Show Password";}
+    }
+
+    function togglePassword_2()
+    {
+      var toggle2 = document.getElementById("show_password_2");
+      var password2 = document.getElementById("passwordInput_2");
+      if(toggle2.title == 'Show'){
+          password2.type = "text";
+          toggle2.title = 'Hide';
+          toggle2.textContent = "Hide Password";}
+      else if(toggle2.title == 'Hide'){
+          password2.type = "password";
+          toggle2.title = 'Show';
+          toggle2.textContent = "Show Password";}
+    }
+
     function enableRegister(){
         document.getElementById("register_submit").disabled = false;
     }
