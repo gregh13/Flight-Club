@@ -86,19 +86,19 @@
                     {{ form.csrf_token }}
                     <div style="padding: 3% 0;">
                     <h4>Currency</h4>
-                    {{ form.currency(style="font-size: 1rem; font-weight: bold;") }}
+                    {{ form.currency(class_="form-control", style="font-size: 1rem; font-weight: bold; width: 90px; margin: 0 auto;") }}
                     </div>
                     <hr>
                     <div style="padding: 3% 0;">
-                        {% set home_style = "" %}
+                        {% set home_style = "width: 85%; margin: 0 auto;" %}
                         {% if form.errors %}
                         {% if "home_airport" in form.errors: %}
-                        {% set home_style = "background-color: #FFCCCC;" %}
+                        {% set home_style = "background-color: #FFCCCC; width: 85%; margin: 0 auto;" %}
                         {% endif %}
                         {% endif %}
 
                     <h4>{{form.home_airport.label}}</h4>
-                    {{ form.home_airport(size=35, style=home_style) }}
+                    {{ form.home_airport(class_="form-control", style=home_style) }}
                     <p>(where you will fly out from)</p>
                     </div>
                     <hr>
@@ -108,7 +108,7 @@
                         <tr>
                             <th style="padding-right: 22px;"> City Name</th>
                             <th></th>
-                            <th style="width: 26%; text-align: left;"> Price Ceiling</th>
+                            <th style="width: 26%; text-align: left; padding-left: 22px;">Price Ceiling</th>
                         </tr>
                         </table>
                     <table  id="destinations" style="display: table; width: 100%;">
@@ -129,27 +129,27 @@
                         {% endif %}
                         {% endif %}
                         <tr class="user-row-data">
-                            <td style="padding: 6px 15px 6px 0px;">{{ form.destinations[x].city(style=style1)}}</td>
+                            <td style="padding: 8px 15px 8px 0px;">{{ form.destinations[x].city(class_="form-control", style=style1)}}</td>
                             <td><strong>$</strong></td>
-                            <td style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(style=style2) }}</td>
+                            <td style="width: 22%; text-align: left;">{{ form.destinations[x].price_ceiling(class_="form-control", style=style2) }}</td>
                         </tr>
                         {% endfor %}
                     </table>
                     <br>
 
-                    <button id="add-destination-field" class="btn btn-sm btn-custom-outline" type="button">
-                        Add Another Row
+                    <button id="add-destination-field" class="btn btn-sm btn-custom-outline" style="border-radius: 22px; width: 30%;" type="button">
+                        Add
                     </button>
 
                     <span style="padding: 0 3%;"></span>
-                    <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" type="button">
-                        Remove Last Row
+                    <button id="remove-destination-field" class="btn btn-sm btn-outline-danger" style="border-radius: 22px; width: 30%;" type="button">
+                        Remove
                     </button>
                         <br>
                     </div>
                         <hr>
                     <br>
-                    <button class="w-50 btn btn-lg btn-custom" type="submit">Save Changes</button>
+                    <button class="w-80 btn btn-lg btn-custom" type="submit">Save Changes</button>
                     <br><br>
                 </form>
             </div>
@@ -205,15 +205,15 @@
             let newCityFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-city`;
             let newPriceCeilingFieldName = `destinations-${Math.max(...destinationInputIds) + 1}-price_ceiling`;
             allDestinationsFieldWrapper.insertAdjacentHTML('beforeend',`<tr>
-            <td style="padding: 6px 15px 6px 0px;">
+            <td style="padding: 8px 15px 8px 0px;">
                 <input id="${newCityFieldName}" name="${newCityFieldName}" type="text"
-                required="" class="ui-autocomplete-input" autocomplete="off"
+                required="" class="form-control ui-autocomplete-input" autocomplete="off"
                 role="textbox" aria-autocomplete="list" aria-haspopup="true" style="width: 100%">
             </td>
             <td><strong>$</strong></td>
             <td style="width: 22%; text-align: left;">
                 <input id="${newPriceCeilingFieldName}" name="${newPriceCeilingFieldName}" min="1" required=""
-                type="number" value="" style="width: 100%">
+                type="number" value="" class="form-control" style="width: 100%">
                 </td>
             </tr>
             `);

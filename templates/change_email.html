@@ -30,14 +30,14 @@
                     {{ form.csrf_token }}
               <br>
               <strong>{{ form.email.label }}</strong>
-              {{ form.email(style="width:100%") }}
-              <br><br>
+              {{ form.email(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.confirm_email.label }}</strong>
-              {{ form.confirm_email(style="width:100%") }}
-              <br><br>
+              {{ form.confirm_email(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.password.label }}</strong>
-              {{ form.password(style="width:100%") }}
-              <br><br><br>
+              {{ form.password(class_="form-control", style="width:100%") }}
+              <br><br>
               <button class="w-22 btn btn-md btn-custom" type="submit">Send Verification Email</button>
 
           </form>

@@ -31,16 +31,16 @@
                     {{ form.csrf_token }}
               <br>
               <strong>{{ form.name.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.name(style="width:100%") }}
-              <br><br>
+              {{ form.name(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.email.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.email(style="width:100%") }}
-              <br><br>
+              {{ form.email(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.password.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.password(style="width:100%") }}
-              <br><br>
+              {{ form.password(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.confirm_password.label(style="margin-bottom: 6px;") }}</strong>
-              {{ form.confirm_password(style="width:100%") }}
+              {{ form.confirm_password(class_="form-control", style="width:100%") }}
               <br><br>
               <table  style="display: table; width: 100%;">
                   <tbody style="display: table; width: 100%;">

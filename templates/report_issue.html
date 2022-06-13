@@ -25,11 +25,11 @@
                     {{ form.csrf_token }}
               <br>
               <strong>{{ form.issue_subject.label }}</strong>
-              {{ form.issue_subject(style="width:100%") }}
-              <br><br>
+              {{ form.issue_subject(class_="form-control", style="width:100%") }}
+              <br>
               <strong>{{ form.issue_description.label }}</strong>
-              {{ form.issue_description(style="width:100%", rows="6") }}
-              <br><br><br>
+              {{ form.issue_description(class_="form-control", style="width:100%", rows="6") }}
+              <br><br>
 
              <button class="w-22 btn btn-md btn-custom" type="submit">Report Issue</button></td>
 

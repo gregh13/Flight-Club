@@ -5,8 +5,9 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto form-container">
-        <div>
+      <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="form-container">
+
              {% if not des['city1']: %}
             <div style="margin: 0 11%;">
             <h3>So Much Empty!</h3>
@@ -62,9 +63,10 @@
 
             {% endif %}
             <hr>
-        </div>
+
         <br>
-        <a type="button" href="{{ url_for('update_destinations') }}" class="w-33 btn btn-md btn-custom">Update Destinations</a>
+
+        <a type="button"href="{{ url_for('update_destinations') }}" class="w-33 btn btn-md btn-custom-outline">Update Destinations</a>
       <br><br>
       </div>
       <br>
@@ -76,6 +78,7 @@
       target="_blank">Check it out!</a></p>
         </div>
               </div>
+       </div>
     </div>
     <br><br>
 </div>

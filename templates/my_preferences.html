@@ -5,8 +5,8 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-lg-6 col-md-8 mx-auto form-container">
-        <div style="margin: 0% 2%;">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <div class="form-container" style="margin: 0% 2%;">
           <table style="width: 100%">
             <tr><td colspan="2" style="color: #1C16BD; text-align: center; padding: 10px 0px 2px 0px;"><h4>Email Settings</h4></td> </tr>
             <tr><td style="text-align: right; padding: 5px 0px 5px 8px;"><strong>Email Frequency:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px;"><strong>{{ pref_dict.email_freq[prefs.email_frequency] }}</strong></td></tr>
@@ -31,11 +31,11 @@
             <tr class="bordered"><td style="text-align: right; width: 50%; padding: 5px 0px 22px 8px;"><strong>Search End Date:</strong></td><td style="color: #261EFF; text-align: left; padding: 5px 8px 22px 8px;"><strong>{{ pref_dict.end_specific }}</strong></td></tr>
 
           </table>
-        </div>
         <br>
           <br>
-        <a type="button" href="{{ url_for('update_preferences') }}" class="w-33 btn btn-md btn-custom">Update Preferences</a>
+        <a type="button" href="{{ url_for('update_preferences') }}" class="w-33 btn btn-md btn-custom-outline">Update Preferences</a>
       <br><br>
+        </div>
       </div>
     </div>
     <br><br>

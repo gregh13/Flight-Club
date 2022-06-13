@@ -132,25 +132,25 @@ class PreferenceForm(FlaskForm):
 
     cabin_class = SelectField("Cabin Class", choices=[('M', 'Economy'), ('W', 'Premium Economy'),
                                                       ('C', 'Business'), ('F', 'First Class')], validators=[Optional()])
-    exclude_airlines = SelectField("Exclude Lowest Rated Airlines?",
+    exclude_airlines = SelectField("Exclude Bad Airlines?",
                                    choices=[('false', 'Include All Airlines'),
                                             ('true', 'Exclude Lowest Rated Airlines')],
                                    validators=[Optional()],
                                    description="Excludes airlines rated lowest in safety, service, claims processing, "
                                                "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
                                                "Lion Air, China Eastern, Spirit, etc.)")
-    max_stops = IntegerField("Max Number of Stops (one-way)",
+    max_stops = IntegerField("Max Stops (1-way)",
                              validators=[Optional(), NumberRange(min=0, message="'Max Stops' can't be less than 0")],
-                             description="If you have destinations that are remote or quite far from your home airport "
+                             description="Max number of stops for one-way of the trip. If you have destinations that are remote or quite far from your home airport "
                                          "(overseas, islands, rural cities, etc.), "
-                                         "direct flights might not be available.")
-    max_flight_time = IntegerField("Max Flight Duration (one-way)",
+                                         "direct flights (i.e. 0 stops) might not be available.")
+    max_flight_time = IntegerField("Max Travel Time (1-way)",
                                    validators=[Optional(), NumberRange(min=1, message="'Max Flight Duration' "
                                                                                       "must be greater than 0")],
-                                   description="If you have destinations that are remote or quite far from your "
+                                   description="Max number of hours for one-way trip duration. Trip duration includes layovers and stops. If you have destinations that are remote or quite far from your "
                                                "home airport (overseas, islands, rural cities, etc.), "
                                                "short flight times might not be available.")
-    ret_to_diff_airport = SelectField("Different Airport Returns?",
+    ret_to_diff_airport = SelectField("Diff Airport Return?",
                                    choices=[('false', 'Don\'t Include'),
                                             ('true', 'Include')],
                                    validators=[Optional()],
@@ -158,13 +158,13 @@ class PreferenceForm(FlaskForm):
     num_adults = IntegerField("Adults", validators=[InputRequired(message="'Adults' field is required"), NumberRange(min=1, max=6, message="Number of 'Adult' passengers must be between 1 and 6.")])
     num_children = IntegerField("Children (Age 2-11)", validators=[InputRequired(message="'Children' field is required"), NumberRange(min=0, max=4, message="Number of 'Child' passengers must be between 0 and 4.")])
     num_infants = IntegerField("Infants (Age < 2)", validators=[InputRequired(message="'Infants' field is required"), NumberRange(min=0, max=3, message="Number of 'Infant' passengers must be between 0 and 3.")])
-    min_nights = IntegerField("Trip Duration: Min Nights", validators=[InputRequired(message="'Min Nights' field is required"), NumberRange(min=0, message="'Min Nights' can't be less than 0.")],
+    min_nights = IntegerField("Min Nights", validators=[InputRequired(message="'Min Nights' field is required"), NumberRange(min=0, message="'Min Nights' can't be less than 0.")],
                               description="The minimum possible length of time spent at your travel destination. "
                                           "Actual trip duration might be somewhere in-between the min and max nights")
-    max_nights = IntegerField("Trip Duration: Max Nights", validators=[InputRequired(message="'Max Nights' field is required"), NumberRange(min=0, message="'Max Nights' can't be less than 0."), invalid_max_nights],
+    max_nights = IntegerField("Max Nights", validators=[InputRequired(message="'Max Nights' field is required"), NumberRange(min=0, message="'Max Nights' can't be less than 0."), invalid_max_nights],
                               description="The maximum possible length of time spent at your travel destination. "
                                           "Actual trip duration might be somewhere in-between the min and max nights")
-    search_start_date = SelectField("Lead Time for Search", coerce=int,
+    search_start_date = SelectField("Search Lead Time", coerce=int,
                                     choices=[(1, 'One day'), (7, 'One week'),
                                              (14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
                                              (60, 'Two months'), (90, 'Three months')],
@@ -173,7 +173,7 @@ class PreferenceForm(FlaskForm):
                                                 "For example: If you choose 'two weeks', then if the flight search "
                                                 "occurs on March 10th, it will look for flights starting from "
                                                 "March 24th onwards.")
-    search_length = SelectField("Time Window for Search", coerce=int,
+    search_length = SelectField("Search Time Window", coerce=int,
                                 choices=[(14, 'Two weeks'), (21, 'Three weeks'), (30, 'One month'),
                                          (60, 'Two months'), (90, 'Three months'), (120, 'Four months'),
                                          (150, 'Five months'), (180, 'Six months')],
