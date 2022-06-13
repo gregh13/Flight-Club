@@ -360,6 +360,10 @@ h2 {
   .logged-out-indent {
   padding-right: 8px;
   }
+  .g-recaptcha {
+    transform:scale(0.73);
+    transform-origin:0 0;
+  }
 }
 
 .header-title {
