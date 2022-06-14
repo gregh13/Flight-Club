@@ -324,7 +324,7 @@ h2 {
 
 @media (max-width: 420px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized-mobile-cropped.png");
+    background-image: url("../images/flipflops-full-resized-mobile-cropped.jpg");
     background-size: cover;
   }
   .container-fluid-header {
