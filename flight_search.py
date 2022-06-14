@@ -219,7 +219,6 @@ def look_for_flights(user_prefs, destination):
         }
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
-        # search_response.raise_for_status()
     except HTTPError:
         return
     else:

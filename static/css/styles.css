@@ -244,7 +244,8 @@ h2 {
 
 .btn-custom-outline-logout:hover {
   color: #fff;
-  background-color: #CC6666;
+  background-color: #dc3545;
+  border-color: #dc3545;
 }
 
 .btn-custom-outline-form {

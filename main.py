@@ -455,7 +455,7 @@ def my_account():
     return render_template("my_account.html", page_title=page_title)
 
 
-@app.route('/change_name')
+@app.route('/change_name', methods=["GET", "POST"])
 @login_required
 def change_name():
     page_title = "Change Your Name"
@@ -477,7 +477,7 @@ def change_name():
     return render_template("change_name.html", form=form, page_title=page_title)
 
 
-@app.route('/delete_account')
+@app.route('/delete_account', methods=["GET", "POST"])
 @login_required
 def delete_account():
     page_title = "Delete Your Account"
