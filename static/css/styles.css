@@ -76,7 +76,7 @@ h2 {
 
 .container-fluid {
   padding: 10px 0 0 22px;
-  background-image: url("../images/flipflops-full-resized-smaller.jpg");
+  background-image: url("../images/flipflops-full-resized.jpg");
   background-size: cover;
 }
 .container-fluid-header {
@@ -311,7 +311,7 @@ h2 {
 
 @media (max-width: 800px) and (min-width: 561px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized-smaller.jpg");
+    background-image: url("../images/flipflops-full-resized.jpg");
     background-size: cover;
   }
   h1 {
@@ -324,7 +324,7 @@ h2 {
 
 @media (max-width: 420px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized-mobile.png");
+    background-image: url("../images/flipflops-full-resized-mobile-cropped.png");
     background-size: cover;
   }
   .container-fluid-header {
@@ -432,19 +432,6 @@ input[type="date"] {
     position: relative;
 }
 
-/* create a new arrow, because we are going to mess up the native one */
-/*input[type="date"]:after {
-    content: "\25BC";
-    color: #555;
-    padding: 0 5px;
-}
-*/
-
-/* change color of symbol on hover */
-/*input[type="date"]:hover:after {
-    color: #1C16BD;
-}
-*/
 /* make the native arrow invisible and stretch it over the whole field
 so you can click anywhere in the input field to trigger the native datepicker*/
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -484,6 +471,20 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .tooltip.show {
     opacity: 1 !important;
+}
+
+/*------------------------------------------------*/
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /*------------------------------------------------*/
