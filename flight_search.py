@@ -8,16 +8,17 @@ import base64
 import urllib.parse
 import random
 import time
+import os
 
 
 day_of_week = datetime.today().weekday()
-MAIN_URL = "https://flightclubdeals.herokuapp.com/"
+MAIN_URL = os.getenv("MAIN_URL")
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
-FLIGHT_API_KEY = "Xr_BF4Uyg4T9g8Hiv75bVXbulMuIca9w"
+FLIGHT_API_KEY = os.getenv("FL_APIKEY")
 
-GOAT_ACCESS_KEY = "e1d1a17cc2722373422ab8cbd9ec51ef"
-GOAT_SECRET_KEY = "ab3b07cb5f9b54eb249b495d6da62e67"
+GOAT_ACCESS_KEY = os.getenv("GO_ACCESSKEY")
+GOAT_SECRET_KEY = os.getenv("GO_SECRETKEY")
 headers = {
     "apikey": FLIGHT_API_KEY
 }

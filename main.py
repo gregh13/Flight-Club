@@ -18,11 +18,11 @@ from datetime import datetime, date
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
-api_key = "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"
-company_email = "flightclubdeals@gmail.com"
+app.config['SECRET_KEY'] = os.getenv("CONFIG_SECRET_KEY")
+api_key = os.getenv("SIB_APIKEY")
+company_email = os.getenv("COM_EMAIL")
 company_name = "Flight Club"
-MAIN_URL = "https://flightclubdeals.herokuapp.com/"
+MAIN_URL = os.getenv("MAIN_URL")
 Bootstrap(app)
 
 # LATER, during Heroku stage
