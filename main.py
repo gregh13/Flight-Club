@@ -718,21 +718,24 @@ def update_preferences():
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
     # Pass prefs as obj into form: populates the form with the current user's preferences
     original_freq = prefs.email_frequency
+    print(f"\n\nOriginal: {original_freq}")
     # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
     if prefs.email_frequency == 3:
         prefs.email_frequency = 2
     if prefs.email_frequency in (5, 6, 7):
         prefs.email_frequency = 4
-
+    print(f"Prefs put into form: {prefs.email_frequency}")
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
+        print(f"Updated: {updated_freq}")
         # If user doesn't change email_freq pref (default input), need to change back to original user value
         if original_freq == 3 and updated_freq == 2:
             updated_freq = original_freq
         if original_freq in (5, 6, 7) and updated_freq == 4:
             updated_freq = original_freq
 
+        print(f"Updated FINAL: {updated_freq}\n\n")
         updated_preferences = {
             "email_frequency": updated_freq, "email_day": form.email_day.data,
             "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
