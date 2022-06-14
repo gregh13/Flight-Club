@@ -78,11 +78,13 @@ h2 {
   padding: 10px 0 0 22px;
   background-image: url("../images/flipflops-full-resized.jpg");
   background-size: cover;
+  height: 800px;
 }
 .container-fluid-header {
   padding: 10px 0 0 22px;
   background-image: url("../images/header-snippet.jpg");
   background-size: cover;
+  height: 90px;
 }
 
 
