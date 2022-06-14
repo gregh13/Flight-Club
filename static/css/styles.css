@@ -2,6 +2,7 @@
 
 /* Color1: #287AD7 */
 
+/* logout-red: #CC6666 */
 /* main-teal: #0BAAB0 */
 /* form-gray: #f2f2f2*/
 /* main-purple: #1C16BD */
@@ -232,6 +233,18 @@ h2 {
 .btn-custom-outline:hover {
   color: #fff;
   background-color: #1C16BD;
+}
+
+.btn-custom-outline-logout {
+    @include button-variant(pink, red, red, #444, #333, red);
+    color: #1C16BD;
+    background-color: #fff;
+    border-color: #1C16BD;
+}
+
+.btn-custom-outline-logout:hover {
+  color: #fff;
+  background-color: #CC6666;
 }
 
 .btn-custom-outline-form {
