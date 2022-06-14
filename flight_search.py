@@ -65,8 +65,6 @@ def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_
         if user_pref["cabin_class"] == "F":
             flight_link_string += f"&cabinClass=FIRST_CLASS-true"
 
-    print(flight_link_string)
-
     return flight_link_string
 
 
@@ -134,12 +132,8 @@ def road_goat_image_search(city_name, country_to):
         }
         response = requests.get(url=url, headers=headers)
         res = response.json()
-        print("\nAutocomplete Data Results:")
-        print(res)
         return res
 
-    print(f"\nCountry: {country_to}\n")
-    print(f"City Name: {city_name}")
     city_name = city_name.split(" - ")[0]
     url_encoded_city_name = urllib.parse.quote(city_name)
     url_encoded_country_name = urllib.parse.quote(country_to)
@@ -147,13 +141,11 @@ def road_goat_image_search(city_name, country_to):
     results = send_api_request(query=url_encoded_city_name)
     if results["data"]:
         if results['data'][0]['relationships']['featured_photo']['data']:
-            print(results["included"])
             image_link = results["included"][0]["attributes"]["image"]["full"]
         else:
             results = send_api_request(query=url_encoded_country_name)
             if results["data"]:
                 if results['data'][0]['relationships']['featured_photo']['data']:
-                    print(results["included"])
                     image_link = results["included"][0]["attributes"]["image"]["full"]
                 else:
                     airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
@@ -167,7 +159,6 @@ def road_goat_image_search(city_name, country_to):
         results = send_api_request(query=url_encoded_country_name)
         if results["data"]:
             if results['data'][0]['relationships']['featured_photo']['data']:
-                print(results["included"])
                 image_link = results["included"][0]["attributes"]["image"]["full"]
             else:
                 airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
@@ -183,7 +174,6 @@ def road_goat_image_search(city_name, country_to):
 
 def look_for_flights(user_prefs, destination):
     flight_date_dict = figure_out_dates(user_prefs)
-    print(flight_date_dict)
 
     if user_prefs['exclude_airlines'] == "true":
         flight_parameters = {
@@ -203,6 +193,7 @@ def look_for_flights(user_prefs, destination):
             "selected_cabins": user_prefs["cabin_class"],
             "max_fly_duration": user_prefs["max_flight_time"],
             "max_sector_stopovers": user_prefs["max_stops"],
+            "ret_to_diff_airport": user_prefs["ret_to_diff_airport"],
             "select_airlines": bad_airline_string,
             "select_airlines_exclude": "true",
             "limit": 1000
@@ -223,14 +214,13 @@ def look_for_flights(user_prefs, destination):
             "selected_cabins": user_prefs["cabin_class"],
             "max_fly_duration": user_prefs["max_flight_time"],
             "max_sector_stopovers": user_prefs["max_stops"],
+            "ret_to_diff_airport": user_prefs["ret_to_diff_airport"],
             "limit": 1000
         }
-    print(flight_parameters)
     try:
         search_response = requests.get(url=FLIGHT_ENDPOINT, headers=headers, params=flight_parameters)
         # search_response.raise_for_status()
     except HTTPError:
-        print("Home airport code is messed up")
         return
     else:
         return search_response.json()
@@ -287,24 +277,23 @@ def send_email(sib_url, company_email, user_name, user_email, params: dict, temp
         "api-key": api_key
     }
     response = requests.post(url, json=payload, headers=headers)
-    print(response.text)
     return
 
 
 # Grab data from database
 all_users = User.query.all()
-print(all_users)
 for u in all_users:
     # # Helps slow down API calls to Tequila Kiwi Flight Search (100 requests per minute)
     time.sleep(11)
-    print(u.name)
+    print(f"\nUser Name: {u.name}")
+    print(f"User Email: {u.email}\n")
     email_day = u.preferences[0].email_day
     if day_of_week != email_day:
         print("Not today, my friend!")
         continue
     user_preference_object = Preferences.query.filter_by(user_pref_id=u.preferences[0].user_pref_id).first()
     email_freq = user_preference_object.email_frequency
-    # Find User Pref instead!!
+
     if email_freq != 1:
         if email_freq == 2:
             print("Biweekly, send")
@@ -339,12 +328,12 @@ for u in all_users:
         website_flight_deal_dict[f"link{x + 1}"] = None
     user_name = u.name
     user_email = u.email
-    print(f"{user_name}: {user_email}")
+    print(f"\n\nUser Name: {user_name}\nUser Email: {user_email}")
 
     user_preferences_dict = u.preferences[0].__dict__
     user_destinations_dict = u.destinations[0].__dict__
-    # print(f'Preferences: {user_preferences_dict}')
-    # print(f'Destinations: {user_destinations_dict}')
+    print(f'Preferences: {user_preferences_dict}')
+    print(f'Destinations: {user_destinations_dict}\n\n')
 
     total_passengers = (user_preferences_dict['num_adults']
                         + user_preferences_dict['num_children']
@@ -386,16 +375,15 @@ for u in all_users:
                 destination["iata"] = random.choice(list(all_cities_international))
 
         city_name = all_cities_international[destination["iata"]]
-        print(f"{city_name}: {destination['iata']}")
+        print(f"Destination: {city_name}")
         flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
         # When fly_to location code is bad or doesn't exist
         if 'Unprocessable Entity' in flight_data.values():
-            print("BAD AIRPORT CODE\n")
+            print("Unprovessable Entity\n")
             bad_codes.append(destination["iata"])
             message = "Error: Destination not recognized by flight search. Please change"
             website_flight_deal_dict[f"place{x + 1}"] = city_name
             website_flight_deal_dict[f"message{x + 1}"] = message
-            # print(message)
             continue
         elif len(flight_data["data"]) == 0:
             print(f"No flight data for destination: {destination['iata']}\n")
@@ -405,12 +393,9 @@ for u in all_users:
                       "or perhaps travel restrictions are currently in place."
             website_flight_deal_dict[f"place{x + 1}"] = city_name
             website_flight_deal_dict[f"message{x + 1}"] = message
-            # print(message)
             continue
         else:
             flight_dict = process_flight_info(flight_data=flight_data)
-            # searched_currency = flight_data["currency"]
-            # currency_rate_to_USD = flight_data["fx_rate"]
             price_ceiling = total_passengers * destination["price_ceiling"]
 
             if flight_dict["price"] <= price_ceiling:
@@ -424,7 +409,6 @@ for u in all_users:
                 image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
 
                 # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
-                print(flight_dict["routes"])
                 add_note = ""
                 if flight_dict["routes"][0][0] == flight_dict["routes"][1][1]:
                     flight_link = configure_flight_link(user_pref=user_preferences_dict,
@@ -436,9 +420,6 @@ for u in all_users:
                                f" and returning airport ({flight_dict['routes'][1][1]}) are not the same"
                     flight_link = flight_dict["deep_link"]
 
-                # flight_link = f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
-                #               f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
-                #               f"{flight_dict['leave_destination_date']}?sortBy=price"
                 email_flight_deal_list.append(
                     {
                         "city": flight_dict["city_to"],
@@ -459,17 +440,16 @@ for u in all_users:
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
                 website_flight_deal_dict[f"link{x + 1}"] = flight_link
-                # print(message)
+
                 print(f"\nHomebrew Link: {flight_link}")
                 print(f"\nDeep_link: {flight_dict['deep_link']}")
-                print("\n")
+                print("\n\n")
 
             else:
                 message = f"Flights available, but price wasn't lower than your limit " \
                           f"(${'{:,}'.format(destination['price_ceiling'])} {destination['currency']})"
                 website_flight_deal_dict[f"place{x + 1}"] = city_name
                 website_flight_deal_dict[f"message{x + 1}"] = message
-                # print(message)
 
     FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
     db.session.commit()
