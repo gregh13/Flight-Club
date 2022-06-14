@@ -729,6 +729,7 @@ def update_preferences():
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
         print(f"Updated: {updated_freq}")
+        print(f"Original After Submit: {original_freq}")
         # If user doesn't change email_freq pref (default input), need to change back to original user value
         if original_freq == 3 and updated_freq == 2:
             print("TRIGGERED 1")
