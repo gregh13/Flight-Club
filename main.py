@@ -732,7 +732,7 @@ def update_preferences():
     # Grabs the user's current preferences
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
     # Pass prefs as obj into form: populates the form with the current user's preferences
-    print(prefs.email_frequency)
+    original_freq = prefs.email_frequency
     # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
     if prefs.email_frequency == 3:
         prefs.email_frequency = 2
@@ -742,16 +742,15 @@ def update_preferences():
     print(prefs.email_frequency)
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
-
-        # POSSIBLE CLEAN SOLUTION TO UPDATING USER PREFERENCES!!
-        # form.populate_obj(prefs)
-        # ??????????????
-        # Now the form data updates the user's preferences.
-        # Since form was pre-populated with existing preferences, no bad data or blanks will get updated.
-        # Only the things the user wants to change will get changed.
+        updated_freq = form.email_frequency.data
+        # If user doesn't change email_freq pref (default input), need to change back to original user value
+        if original_freq == 3 and updated_freq == 2:
+            updated_freq = original_freq
+        if original_freq in (5, 6, 7) and updated_freq == 4:
+            updated_freq = original_freq
 
         updated_preferences = {
-            "email_frequency": form.email_frequency.data, "email_day": form.email_day.data,
+            "email_frequency": updated_freq, "email_day": form.email_day.data,
             "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
             "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
             "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
