@@ -76,7 +76,7 @@ h2 {
 
 .container-fluid {
   padding: 10px 0 0 22px;
-  background-image: url("../images/flipflops-full-resized.jpg");
+  background-image: url("../images/flipflops-full-resized-smaller.jpg");
   background-size: cover;
 }
 .container-fluid-header {
@@ -310,7 +310,7 @@ h2 {
 
 @media (max-width: 800px) and (min-width: 561px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized.jpg");
+    background-image: url("../images/flipflops-full-resized-smaller.jpg");
     background-size: cover;
   }
   h1 {
@@ -323,12 +323,12 @@ h2 {
 
 @media (max-width: 420px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized-mobile.jpg");
+    background-image: url("../images/flipflops-full-resized-mobile.png");
     background-size: cover;
   }
   .container-fluid-header {
     padding: 10px 0 0 22px;
-    background-image: url("../images/header-snippet-mobile.jpg");
+    background-image: url("../images/header-snippet-mobile.png");
   }
   #signUp {
     padding: auto;
