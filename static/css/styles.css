@@ -497,7 +497,7 @@ input[type=number] {
     color: #CC6666;
 }
 
-.dropdown-item.dropdown-item-logout:focus {
+.dropdown-item.dropdown-item-logout:active {
     color: #fff
     background-color: #CC6666
 }
