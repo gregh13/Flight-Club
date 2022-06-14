@@ -151,8 +151,8 @@ class PreferenceForm(FlaskForm):
                                                "and punctuality from your flight search (e.g. Ryan Air, EasyJet, "
                                                "Lion Air, China Eastern, Spirit, etc.)")
     ret_to_diff_airport = SelectField("Diff Airport Return?",
-                                   choices=[('false', 'Don\'t Include'),
-                                            ('true', 'Include')],
+                                   choices=[(0, 'Don\'t Include'),
+                                            (1, 'Include')],
                                    validators=[Optional()],
                                       description="Choose whether or not to include flights that return to a different airport than the one from where you departed in your flight results. For example, leaving JFK airport in New York City and returning home to LGA in New York City.")
     num_adults = IntegerField("Adults", validators=[InputRequired(message="'Adults' field is required"), NumberRange(min=1, max=6, message="Number of 'Adult' passengers must be between 1 and 6.")])

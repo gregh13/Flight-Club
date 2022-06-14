@@ -105,7 +105,7 @@ class Preferences(db.Model, Base):
     exclude_airlines = db.Column(db.String(100), nullable=False)
     max_stops = db.Column(db.Integer)
     max_flight_time = db.Column(db.Integer)
-    ret_to_diff_airport = db.Column(db.String(100))
+    ret_to_diff_airport = db.Column(db.Integer)
     num_adults = db.Column(db.Integer, nullable=False)
     num_children = db.Column(db.Integer, nullable=False)
     num_infants = db.Column(db.Integer, nullable=False)
@@ -632,7 +632,7 @@ def my_preferences():
     email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
     exclude_airlines_dict = {'true': 'Exclude Bad Airlines', 'false': 'Include All Airlines'}
-    ret_to_diff_airport_dict = {'false': 'Don\'t Include', 'true': 'Include'}
+    ret_to_diff_airport_dict = {0: 'Don\'t Include', 1: 'Include'}
     lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
                       60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
     search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
@@ -682,6 +682,7 @@ def update_preferences():
             "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
             "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
             "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
+            "ret_to_diff_airport": form.ret_to_diff_airport.data,
             "num_adults": form.num_adults.data, "num_children": form.num_children.data,
             "num_infants": form.num_infants.data, "search_start_date": form.search_start_date.data,
             "specific_search_start_date": form.specific_search_start_date.data,
@@ -785,7 +786,7 @@ def create_an_account(join_type):
             exclude_airlines='false',
             max_stops=2,
             max_flight_time=24,
-            ret_to_diff_airport="false",
+            ret_to_diff_airport=0,
             num_adults=1,
             num_children=0,
             num_infants=0,
