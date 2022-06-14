@@ -728,14 +728,16 @@ def update_preferences():
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
-        print(f"Updated: {updated_freq}")
-        print(f"Original After Submit: {original_freq}")
+        print(f"Updated: {updated_freq}, type: {type(updated_freq)}")
+        print(f"Original After Submit: {original_freq},  type: {type(updated_freq)}")
         # If user doesn't change email_freq pref (default input), need to change back to original user value
         if original_freq == 3:
+            print("inner 1")
             if updated_freq == 2:
                 print("TRIGGERED 1")
                 updated_freq = original_freq
         if original_freq in (5, 6, 7):
+            print("inner 2")
             if updated_freq == 4:
                 print("TRIGGERED 2")
                 updated_freq = original_freq
