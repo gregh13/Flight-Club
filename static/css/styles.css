@@ -492,12 +492,13 @@ input[type=number] {
     content: none;
 }
 
-.dropdown-item-logout {
+.dropdown-item.dropdown-item-logout {
     padding: 10px 24px;
     color: #CC6666;
 }
 
-.dropdown-item-logout::after {
+.dropdown-item.dropdown-item-logout:focus {
+    color: #fff
     background-color: #CC6666
 }
 
