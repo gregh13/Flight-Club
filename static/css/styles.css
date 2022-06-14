@@ -325,7 +325,6 @@ h2 {
   .container-fluid {
     background-image: url("../images/flipflops-full-resized-mobile-cropped.jpg");
     background-size: cover;
-    height: 780px;
   }
   .container-fluid-header {
     padding: 10px 0 0 22px;
