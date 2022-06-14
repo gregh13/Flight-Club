@@ -310,12 +310,12 @@ h2 {
 
 @media (max-width: 420px) {
   .container-fluid {
-    background-image: url("../images/flipflops-full-resized.jpg");
+    background-image: url("../images/flipflops-full-resized-mobile.jpg");
     background-size: cover;
   }
   .container-fluid-header {
     padding: 10px 0 0 22px;
-    background-image: url("../images/header-snippet.jpg");
+    background-image: url("../images/header-snippet-mobile.jpg");
   }
   #signUp {
     padding: auto;
