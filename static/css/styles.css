@@ -492,6 +492,14 @@ input[type=number] {
     content: none;
 }
 
+.dropdown-item-logout {
+    padding: 10px 24px;
+    color: #CC6666;
+}
+
+.dropdown-item-logout::after {
+    background-color: #CC6666
+}
 
 .menu-icon {
     opacity: 0.60
