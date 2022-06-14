@@ -50,8 +50,8 @@
               <table  style="display: table; width: 100%;">
                   <tbody style="display: table; width: 100%;">
                   <tr>
-                      <td><button class="w-22 btn btn-md btn-custom" id="register_submit" type="submit" disabled>
-                          <div onclick="notifyUser()">Register</div></button></td>
+                      <td><div style="width: 60%" onclick="notifyUser()"><button class="w-22 btn btn-md btn-custom" id="register_submit" type="submit" disabled>
+                          Register</button></div></td>
 
                 <td>
                     <table  style="text-align: right; display: table; width: 100%;">
@@ -114,15 +114,10 @@
     function notifyUser()
     {
       var register_btn = document.getElementById("register_submit");
-      if(register_btn.disabled == true){
-          alert("Please complete the reCaptcha before registering NEED ==")
-          }
       if(register_btn.disabled){
-      alert("Please complete the reCaptcha before registering - NO NEED ===")
+      alert("Please complete the reCaptcha before registering")
       }
     }
-
-
 
 </script>
 {% include "footer.html" %}

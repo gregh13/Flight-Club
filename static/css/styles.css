@@ -498,8 +498,8 @@ input[type=number] {
 }
 
 .dropdown-item.dropdown-item-logout:active {
-    color: #fff
-    background-color: #CC6666
+    color: #fff;
+    background-color: #CC6666;
 }
 
 .menu-icon {
