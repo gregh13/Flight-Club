@@ -51,11 +51,8 @@
 
             </table>
         <br>
-            {% if not user_deals['place1']: %}
-        <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom">My Destinations</a>
-            {% else: %}
             <a type="button" href="{{ url_for('my_destinations') }}" class="w-33 btn btn-md btn-custom-outline">My Destinations</a>
-            {% endif %}
+
             <br><br>
         </div>
       </div>
