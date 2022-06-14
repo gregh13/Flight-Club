@@ -15,12 +15,16 @@ day_of_week = datetime.today().weekday()
 MAIN_URL = os.getenv("MAIN_URL")
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
 FLIGHT_ENDPOINT = "https://tequila-api.kiwi.com/v2/search"
-FLIGHT_API_KEY = os.getenv("FL_APIKEY")
+FL_APIKEY = os.getenv("FL_APIKEY")
+
+SIB_URL = os.getenv("SIB_URL")
+SIB_APIKEY = os.getenv("SIB_APIKEY")
+COM_EMAIL = os.getenv("COM_EMAIL")
 
 GOAT_ACCESS_KEY = os.getenv("GO_ACCESSKEY")
 GOAT_SECRET_KEY = os.getenv("GO_SECRETKEY")
 headers = {
-    "apikey": FLIGHT_API_KEY
+    "apikey": FL_APIKEY
 }
 
 
@@ -166,10 +170,12 @@ def road_goat_image_search(city_name, country_to):
                 print(results["included"])
                 image_link = results["included"][0]["attributes"]["image"]["full"]
             else:
-                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
+                           "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
                 image_link = airplane
         else:
-            airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+            airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
+                       "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
             image_link = airplane
 
     return image_link
@@ -260,11 +266,11 @@ def process_flight_info(flight_data):
     return flight_data_dict
 
 
-def send_email(user_name, user_email, params: dict, template_id):
-    url = "https://api.sendinblue.com/v3/smtp/email"
+def send_email(sib_url, company_email, user_name, user_email, params: dict, template_id, api_key):
+    url = sib_url
     payload = {
         "sender": {
-            "email": "flightclubdeals@gmail.com",
+            "email": company_email,
             "name": "Flight Club"
         },
         "to": [{
@@ -278,7 +284,7 @@ def send_email(user_name, user_email, params: dict, template_id):
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "api-key": "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"
+        "api-key": api_key
     }
     response = requests.post(url, json=payload, headers=headers)
     print(response.text)
@@ -290,7 +296,7 @@ all_users = User.query.all()
 print(all_users)
 for u in all_users:
     # # Helps slow down API calls to Tequila Kiwi Flight Search (100 requests per minute)
-    # time.sleep(22)
+    time.sleep(11)
     print(u.name)
     email_day = u.preferences[0].email_day
     if day_of_week != email_day:
@@ -471,19 +477,25 @@ for u in all_users:
     if email_flight_deal_list:
         deals_found_params = {"destinations": email_flight_deal_list,
                               "header_link": MAIN_URL, "login_link": f"{MAIN_URL}login"}
-        send_email(user_name=user_name,
+        send_email(sib_url=SIB_URL,
+                   company_email=COM_EMAIL,
+                   user_name=user_name,
                    user_email=user_email,
                    params=deals_found_params,
-                   template_id=1)
+                   template_id=1,
+                   api_key=SIB_APIKEY)
         print("Flight Deal List:")
         print(email_flight_deal_list)
         print(f"\nNo flight info for: {bad_codes}")
     else:
         no_deals_params = {"login_link": f"{MAIN_URL}login", "header_link": MAIN_URL}
-        send_email(user_name=user_name,
+        send_email(sib_url=SIB_URL,
+                   company_email=COM_EMAIL,
+                   user_name=user_name,
                    user_email=user_email,
                    params=no_deals_params,
-                   template_id=3)
+                   template_id=3,
+                   api_key=SIB_APIKEY)
         print("No flight deals found this time around :(")
         print(f"\nNo flight info for: {bad_codes}")
 
