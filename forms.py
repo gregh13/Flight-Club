@@ -57,6 +57,17 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
+class DeleteAccountForm(FlaskForm):
+    email = EmailField("Email", validators=[InputRequired(message="'Email' field is required"), Email(granular_message=True)])
+    password = PasswordField("Password", validators=[InputRequired(message="'Password' field is required")])
+    submit = SubmitField("Delete Account")
+
+
+class ChangeNameForm(FlaskForm):
+    name = StringField("New Name", validators=[InputRequired(message="New Name field is required")])
+    submit = SubmitField("Update Name")
+
+
 class ChangeEmailForm(FlaskForm):
     email = EmailField("New Email Address", validators=[InputRequired(message="'New Email Address' field is required"), Email(granular_message=True,
                                                                                check_deliverability=True)])

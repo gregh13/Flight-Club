@@ -11,9 +11,6 @@
 {% for error in form.email.errors: %}
     <p>{{ error }}</p>
 {% endfor %}
-    {% for error in form.confirm_email.errors: %}
-    <p>{{ error }}</p>
-{% endfor %}
 {% for error in form.password.errors: %}
     <p>{{ error }}</p>
 {% endfor %}
@@ -21,8 +18,8 @@
  <br>
     {% endif %}
           <div style="margin: 0 10%;">
-                <p>You will be sent a confirmation email to the new email address you submit.
-                    You will need to verify your new email via the link sent in that email.</p>
+                <p>Attention! This action will permanently delete your account and all of your stored data.
+                    Please provide your account email and password for verification to delete your account.</p>
               </div>
                 <br>
         <div class="form-container" style="text-align: left;">
@@ -34,14 +31,11 @@
               <strong>{{ form.email.label }}</strong>
               {{ form.email(class_="form-control", style="width:100%") }}
               <br>
-              <strong>{{ form.confirm_email.label }}</strong>
-              {{ form.confirm_email(class_="form-control", style="width:100%") }}
-              <br>
               <strong>{{ form.password.label }}</strong>
               <span id="show_password" class="btn" onclick="togglePassword()" title="Show">Show</span>
               {{ form.password(id="passwordInput", class_="form-control", style="width:100%") }}
               <br>
-              <button class="w-22 btn btn-md btn-custom" type="submit">Send Verification Email</button>
+              <button class="w-22 btn btn-md btn-danger" type="submit">Delete Account</button>
                 <br><br>
           </form>
                 </div>

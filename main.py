@@ -5,8 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, \
-                    ResetPassword, SubmitTicketForm, ChangeEmailForm, ChangePasswordForm
+from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword, \
+                    SubmitTicketForm, ChangeEmailForm, ChangePasswordForm, ChangeNameForm, DeleteAccountForm
 from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
@@ -453,6 +453,62 @@ def user_home():
 def my_account():
     page_title = "My Account"
     return render_template("my_account.html", page_title=page_title)
+
+
+@app.route('/change_name')
+@login_required
+def change_name():
+    page_title = "Change Your Name"
+    form = ChangeNameForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(id=current_user.id).first()
+        user.name = form.name.data
+        db.session.commit()
+        params = {"heading": "Your name has been successfully changed",
+                  "body1": "You can view your name at the top of your dashboard or in your account settings",
+                  "body2": None,
+                  "body3": None,
+                  "button_text": "My Dashboard",
+                  "url_for": 'user_home'}
+        return redirect(
+            url_for('action_successful_redirect', params=params, page_title="Name Changed!",
+                    action="change_name_success"))
+
+    return render_template("change_name.html", form=form, page_title=page_title)
+
+
+@app.route('/delete_account')
+@login_required
+def delete_account():
+    page_title = "Delete Your Account"
+    form = DeleteAccountForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        user = User.query.filter_by(id=current_user.id).first()
+        if user.email != email:
+            flash("Sorry, the email address you entered is not this account's email address.")
+            return redirect(url_for('delete_account'))
+        if check_password_hash(user.password, password):
+            db.session.delete(user)
+            db.session.commit()
+            logout_user()
+            params = {"heading": "Your account and information have been permanently deleted",
+                      "body1": "We're sad to see you leave, but we understand how these things go. "
+                               "You can always make a new account with us if you change your mind",
+                      "body2": None,
+                      "body3": None,
+                      "button_text": "Go to Main Page",
+                      "url_for": 'landing_page'}
+            return redirect(
+                url_for('action_successful_redirect', params=params, page_title="Account Deleted!",
+                        action="delete_account_success"))
+
+        else:
+            flash("Sorry, the password you entered was incorrect")
+            return redirect(url_for('delete_account'))
+
+    return render_template("delete_account.html", form=form, page_title=page_title)
 
 
 @app.route('/my_account/change_email', methods=["GET", "POST"])
