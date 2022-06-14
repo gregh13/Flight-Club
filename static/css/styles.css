@@ -312,15 +312,12 @@ h2 {
 
 
 @media (max-width: 800px) and (min-width: 561px) {
-  .container-fluid {
-    background-image: url("../images/flipflops-full-resized.jpg");
-    background-size: cover;
-  }
+
   h1 {
-    font-size: 3rem;
+    font-size: 2.8rem;
   }
   h2 {
-    font-size: 2.7 rem;
+    font-size: 2.5 rem;
   }
 }
 
@@ -328,6 +325,7 @@ h2 {
   .container-fluid {
     background-image: url("../images/flipflops-full-resized-mobile-cropped.jpg");
     background-size: cover;
+    height: 780px;
   }
   .container-fluid-header {
     padding: 10px 0 0 22px;
