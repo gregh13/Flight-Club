@@ -3,6 +3,7 @@
 /* Color1: #287AD7 */
 
 /* logout-red: #CC6666 */
+/* danger-btn: #dc3545 */
 /* main-teal: #0BAAB0 */
 /* form-gray: #f2f2f2*/
 /* main-purple: #1C16BD */
@@ -492,6 +493,14 @@ input[type=number] {
     content: none;
 }
 
+.dropdown-item:active {
+    background: #261EFF;
+}
+.dropdown-item {
+    padding: 7px 24px;
+    color: #1C16BD;
+}
+
 .dropdown-item.dropdown-item-logout {
     padding: 10px 24px;
     color: #CC6666;
@@ -499,7 +508,7 @@ input[type=number] {
 
 .dropdown-item.dropdown-item-logout:active {
     color: #fff;
-    background-color: #CC6666;
+    background-color: #dc3545;
 }
 
 .menu-icon {
@@ -515,14 +524,6 @@ tr.bordered {
     border-bottom: 1px solid #000;
     border-color: #D9D9D9;
     border-width: 50%;
-}
-
-.dropdown-item:active {
-    background: #261EFF;
-}
-.dropdown-item {
-    padding: 7px 24px;
-    color: #1C16BD;
 }
 
 #show_password {
