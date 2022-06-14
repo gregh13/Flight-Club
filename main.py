@@ -177,17 +177,14 @@ def send_email(company_email, company_name, user_name, user_email, subject, para
         "api-key": api_key
     }
     response = requests.post(url, json=payload, headers=headers)
-    print(response.text)
     return response.text
 
 
 def create_random_string():
     seq_len = random.randint(78, 97)
-    print(seq_len)
     random_string = ""
     for x in range(0, seq_len):
         random_string += random.choice(COMBINED_LIST)
-    print(random_string)
     return random_string
 
 
@@ -198,7 +195,6 @@ def travel_quote_string():
             string += str(x)
         else:
             string += f"{x},"
-    print(string)
     return string
 
 
@@ -268,7 +264,6 @@ def confirm_your_account(confirm_string):
             if user.confirmation_token == confirm_string:
                 return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
                                         action="confirmation_success"))
-                # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
             else:
                 continue
         # Since tokens are unique, we can confirm without checking which user is confirming
@@ -279,7 +274,6 @@ def confirm_your_account(confirm_string):
             login_user(user)
             return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
                                     action="confirmation_success"))
-            # return render_template("action_successful.html", params=params, page_title="Account Confirmed!")
         else:
             continue
 
@@ -301,17 +295,12 @@ def reset_your_password():
     page_title = "Reset Your Password"
     if form.validate_on_submit():
         timestamp = datetime.today()
-        print(timestamp)
-        # Convert into string?
         email = form.email.data
         user = User.query.filter_by(email=email).first()
-        print(user)
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('reset_your_password'))
-
         reset_string = create_random_string()
-
         user.reset_token = reset_string
         user.reset_timestamp = timestamp
         db.session.commit()
@@ -331,8 +320,6 @@ def reset_your_password():
                   "url_for": None}
         return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
                                 action="reset_email_sent"))
-        # return render_template("action_successful.html", page_title="Reset Email Sent!", params=params)
-
     return render_template("send_reset_email.html", page_title=page_title, form=form)
 
 
@@ -345,7 +332,7 @@ def authenticate_reset_password(user_recovery_string):
         current_timestamp = datetime.today()
         email = form.email.data
         user = User.query.filter_by(email=email).first()
-        print(user)
+
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('authenticate_reset_password', user_recovery_string=user_recovery_string))
@@ -354,20 +341,12 @@ def authenticate_reset_password(user_recovery_string):
             flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
             return redirect(url_for("reset_your_password"))
 
-        print(user.reset_timestamp)
-        print(type(user.reset_timestamp))
         # reformat user.reset_timestamp into datetime
         timestamp_config = tuple([int(x) for x in user.reset_timestamp[:10].split('-')]) + \
                            tuple([int(float(x)) for x in user.reset_timestamp[11:].split(':')])
-        print(timestamp_config)
         reset_timestamp = datetime(*timestamp_config)
-
-        print(reset_timestamp)
-        print(current_timestamp)
         td = current_timestamp - reset_timestamp
-        print(td)
         time_difference_mins = int(round(td.total_seconds() / 60))
-        print(time_difference_mins)
 
         if time_difference_mins > 30:
             user.reset_token = None
@@ -399,11 +378,8 @@ def authenticate_reset_password(user_recovery_string):
 
             return redirect(url_for('action_successful_redirect', params=params, page_title="Password Reset Successfully!",
                                     action="password_reset_success"))
-            # return render_template("action_successful.html", params=params, page_title="Password Reset Successfully!")
-
         flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
         return redirect(url_for("reset_your_password"))
-
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
@@ -449,8 +425,6 @@ def report_issue():
                   "url_for": 'user_home'}
         return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
                                 action="report_submitted"))
-        # return render_template('action_successful.html', params=params, page_title="Report Submitted!")
-
     return render_template('report_issue.html', form=form, page_title=page_title)
 
 
@@ -461,11 +435,8 @@ def user_home():
     page_title = f"Welcome Aboard, {user_name}"
     user = User.query.filter_by(id=current_user.id).first()
     quote_list = user.quote_string.split(",")
-    print(quote_list)
     random_num = random.choice(quote_list)
-    print(random_num)
     quote_list.remove(random_num)
-    print(quote_list)
     if len(quote_list) == 0:
         new_quote_string = travel_quote_string()
     else:
@@ -577,7 +548,6 @@ def change_password():
 def my_deals():
     page_title = "My Flight Deals"
     user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
-    print(user_deals)
 
     if not user_deals["flight_search_date"]:
         user_deals["flight_search_date"] = date.today().strftime('%a, %B %-d, %Y')
@@ -610,7 +580,6 @@ def update_destinations():
     # instead, need to manually add the data from the user object and pass it as a list of dictionaries
     # to the SQL table variable that matches the name of the FieldList variable in the form (ex: 'destinations)
     user_data_dict = user_des.__dict__
-    print(user_data_dict)
     list_of_dicts = []
     for x in range(1, 11):
         if user_data_dict[f'city{x}'] is None:
@@ -628,24 +597,15 @@ def update_destinations():
     form = DestinationForm(obj=user_des)
 
     if form.validate_on_submit():
-        # destination entries are dynamic, meaning user chooses how many to enter (between 3 and 10)
-        # Since updating a row in SQLAlchemy requires a BaseQuery object, and it is unscriptable,
-        # We are unable to loop through the entries and update based on the length.
-        # Updates are manually entered with attributes, so since we can't predict how many, we have to update all
-        # Below is my very unelegant solution: Create a list of values equal to the total number of columns to update
-        # cycle through the entries and replace the default values, then update the list.
-        # need a step in the loop ('z') since entry has 2 nested values
 
         home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
-        print(f"Home Airport: {home_airport}")
-
         destinations_update_dict = {"home_airport": home_airport, "currency": form.currency.data}
-
         for x in range(1, 11):
             destinations_update_dict[f"city{x}"] = None
             destinations_update_dict[f"price{x}"] = None
 
         destinations = form.destinations.entries
+
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
             destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
@@ -655,37 +615,6 @@ def update_destinations():
         Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
 
         db.session.commit()
-
-
-        # Again, very lengthy since each update must be done manually.
-        # All this work so that users can dynamically choose number of destinations AND so when they go to update
-        # it will pre-populate the form so they see their older values while updating/editing.
-        # Small feature, big headache!
-
-        # user_des.home_airport = home_airport
-        # user_des.currency = form.currency.data
-        # user_des.city1 = update_list[0]
-        # user_des.price1 = update_list[1]
-        # user_des.city2 = update_list[2]
-        # user_des.price2 = update_list[3]
-        # user_des.city3 = update_list[4]
-        # user_des.price3 = update_list[5]
-        # user_des.city4 = update_list[6]
-        # user_des.price4 = update_list[7]
-        # user_des.city5 = update_list[8]
-        # user_des.price5 = update_list[9]
-        # user_des.city6 = update_list[10]
-        # user_des.price6 = update_list[11]
-        # user_des.city7 = update_list[12]
-        # user_des.price7 = update_list[13]
-        # user_des.city8 = update_list[14]
-        # user_des.price8 = update_list[15]
-        # user_des.city9 = update_list[16]
-        # user_des.price9 = update_list[17]
-        # user_des.city10 = update_list[18]
-        # user_des.price10 = update_list[19]
-
-        # db.session.commit()
 
         flash("Your destinations have been successfully updated.")
         return redirect(url_for('my_destinations'))
@@ -739,7 +668,6 @@ def update_preferences():
     if prefs.email_frequency in (5, 6, 7):
         prefs.email_frequency = 4
 
-    print(prefs.email_frequency)
     form = PreferenceForm(obj=prefs)
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
@@ -763,23 +691,6 @@ def update_preferences():
         Preferences.query.filter_by(user_pref_id=current_user.id).update(updated_preferences)
 
         db.session.commit()
-
-        # prefs.email = form.email.data
-        # prefs.email_frequency = form.email_frequency.data
-        # prefs.email_day = form.email_day.data
-        # prefs.min_nights = form.min_nights.data
-        # prefs.max_nights = form.max_nights.data
-        # prefs.cabin_class = form.cabin_class.data
-        # prefs.exclude_airlines = form.exclude_airlines.data
-        # prefs.max_stops = form.max_stops.data
-        # prefs.max_flight_time = form.max_flight_time.data
-        # prefs.num_adults = form.num_adults.data
-        # prefs.num_children = form.num_children.data
-        # prefs.num_infants = form.num_infants.data
-        # prefs.search_start_date = form.search_start_date.data
-        # prefs.specific_search_start_date = form.specific_search_start_date.data
-        # prefs.search_length = form.search_length.data
-        # prefs.specific_search_end_date = form.specific_search_end_date.data
 
         flash("Your preferences have been successfully updated.")
 
@@ -812,11 +723,8 @@ def login():
             return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
                                     action="confirmation_email_sent"))
         if check_password_hash(user.password, password):
-            # flash("Login Successful")
             login_user(user)
             return redirect(url_for('user_home'))
-
-        # Prepopulate email field so user doesn't need to retype it???
 
         flash("Sorry, the password is incorrect. Please try again.")
         return redirect(url_for('login'))
@@ -904,7 +812,6 @@ def create_an_account(join_type):
 
         return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
                                 action="confirmation_email_sent"))
-        # return render_template("confirm_your_account.html", page_title=page_title)
     return render_template('register.html', form=form, page_title=page_title)
 
 
