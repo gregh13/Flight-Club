@@ -886,6 +886,26 @@ def secret():
 @login_required
 def serious_report():
     # For users who reported an issue and want to take further action.
+    user = User.query.filter_by(id=current_user.id).first()
+
+    # sends email to user as a copy of their reported issue
+    email_params1 = {"revisit": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
+
+    send_email(company_email=company_email, company_name=company_name,
+               user_name=user.name, user_email=user.email,
+               subject=None, params=email_params1,
+               template_id=11, api_key=api_key)
+
+    # send email to FlightClub to notify of a reported issue
+    email_params2 = {"email": user.email,
+                     "name": user.name,
+                     "revisit": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
+
+    send_email(company_email=company_email, company_name=company_name,
+               user_name=company_name, user_email=company_email,
+               subject=None, params=email_params2,
+               template_id=10, api_key=api_key)
+
     return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 
