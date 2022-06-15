@@ -11,7 +11,6 @@ import random
 import time
 import os
 
-
 day_of_week = datetime.today().weekday()
 MAIN_URL = os.getenv("MAIN_URL")
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
@@ -30,7 +29,6 @@ headers = {
 
 
 def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_string):
-
     flight_link_string = ""
     add_and_sign = True
 
@@ -139,6 +137,7 @@ def road_goat_image_search(city_name, country_to):
                 return image_link
             return None
         return None
+
     city_name = city_name.split(" - ")[0]
     url_encoded_city_name = urllib.parse.quote(city_name)
     url_encoded_country_name = urllib.parse.quote(country_to)
@@ -163,7 +162,7 @@ def road_goat_image_search(city_name, country_to):
         return country_link
 
     backup_link = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-               "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                  "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
     return backup_link
 
 
