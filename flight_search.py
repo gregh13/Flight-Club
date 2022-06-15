@@ -150,7 +150,7 @@ def road_goat_image_search(city_name, country_to):
     if city_link:
         return city_link
 
-    if " USA " in city_name:
+    if ", USA" in city_name:
         print("Inner USA")
         state = city_name.split(", ")[-2]
         print(state)
