@@ -139,31 +139,26 @@ def road_goat_image_search(city_name, country_to):
                 return image_link
             return None
         return None
-    print("\n\nROAD GOAT\n\n")
     city_name = city_name.split(" - ")[0]
-    print(f"City Name: {city_name}")
     url_encoded_city_name = urllib.parse.quote(city_name)
     url_encoded_country_name = urllib.parse.quote(country_to)
 
     city_link = send_api_request(query=url_encoded_city_name)
-    print(f"city_link: {city_link}")
     if city_link:
         return city_link
 
     if ", USA" in city_name:
-        print("Inner USA")
         state = city_name.split(", ")[-2]
-        print(state)
-        state_name = usa_states_dict[state]
-        print(state_name)
+        if state in usa_states_dict:
+            state_name = usa_states_dict[state]
+        else:
+            state_name = state
         url_encoded_state_name = urllib.parse.quote(state_name)
         state_link = send_api_request(query=url_encoded_state_name)
-        print(f"state_link: {state_link}")
         if state_link:
             return state_link
 
     country_link = send_api_request(query=url_encoded_country_name)
-    print(f"country_link: {country_link}")
     if country_link:
         return country_link
 
