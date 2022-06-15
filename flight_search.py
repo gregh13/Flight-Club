@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, date
 from main import User, Preferences, FlightDeals, db
 from new_iata_codes import all_cities_international
 from bad_airlines import bad_airline_string
+from states_dictionaries import usa_states_dict
 import requests
 import base64
 import urllib.parse
@@ -131,45 +132,39 @@ def road_goat_image_search(city_name, country_to):
             'Authorization': f'Basic {auth_key}'
         }
         response = requests.get(url=url, headers=headers)
-        res = response.json()
-        return res
+        results = response.json()
+        if results["data"]:
+            if results['data'][0]['relationships']['featured_photo']['data']:
+                image_link = results["included"][0]["attributes"]["image"]["full"]
+                return image_link
+            return None
+        return None
 
     city_name = city_name.split(" - ")[0]
     url_encoded_city_name = urllib.parse.quote(city_name)
     url_encoded_country_name = urllib.parse.quote(country_to)
 
-    results = send_api_request(query=url_encoded_city_name)
-    if results["data"]:
-        if results['data'][0]['relationships']['featured_photo']['data']:
-            image_link = results["included"][0]["attributes"]["image"]["full"]
-        else:
-            results = send_api_request(query=url_encoded_country_name)
-            if results["data"]:
-                if results['data'][0]['relationships']['featured_photo']['data']:
-                    image_link = results["included"][0]["attributes"]["image"]["full"]
-                else:
-                    airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-                               "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                    image_link = airplane
-            else:
-                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-                           "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                image_link = airplane
-    else:
-        results = send_api_request(query=url_encoded_country_name)
-        if results["data"]:
-            if results['data'][0]['relationships']['featured_photo']['data']:
-                image_link = results["included"][0]["attributes"]["image"]["full"]
-            else:
-                airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-                           "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                image_link = airplane
-        else:
-            airplane = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-                       "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            image_link = airplane
+    city_link = send_api_request(query=url_encoded_city_name)
+    if city_link:
+        return city_link
 
-    return image_link
+    if " USA " in city_name:
+        state = city_name.split(", ")[-2]
+        print(state)
+        state_name = usa_states_dict[state]
+        print(state_name)
+        url_encoded_state_name = urllib.parse.quote(state_name)
+        state_link = send_api_request(query=url_encoded_state_name)
+        if state_link:
+            return state_link
+
+    country_link = send_api_request(query=url_encoded_country_name)
+    if country_link:
+        return country_link
+
+    backup_link = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
+               "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    return backup_link
 
 
 def look_for_flights(user_prefs, destination):
