@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import RegisterForm, LoginForm, PreferenceForm, DestinationForm, SendResetEmail, ResetPassword, \
-                    SubmitTicketForm, ChangeEmailForm, ChangePasswordForm, ChangeNameForm, DeleteAccountForm
+    SubmitTicketForm, ChangeEmailForm, ChangePasswordForm, ChangeNameForm, DeleteAccountForm
 from functools import wraps
 from new_iata_codes import all_cities_international
 from numbers_and_letters import COMBINED_LIST
@@ -205,6 +205,7 @@ def admin_only(function):
             return abort(403)
         else:
             return function(*args, **kwargs)
+
     return decorated_function
 
 
@@ -248,7 +249,6 @@ def action_success(action):
 
 @app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
 def confirm_your_account(confirm_string):
-
     page_title = "Account Confirmed!"
     params = {"heading": "Your account has been confirmed!",
               "body1": "You've climbed the ladder, said the secret password, "
@@ -309,7 +309,7 @@ def reset_your_password():
         email_params = {"reset_token": f"{MAIN_URL}itsokfriendweforgiveyou/{reset_string}",
                         "notify": f"{MAIN_URL}report_issue", "header_link": MAIN_URL}
 
-        send_email(company_email=company_email, company_name=company_name, user_name=user.name,user_email=user.email,
+        send_email(company_email=company_email, company_name=company_name, user_name=user.name, user_email=user.email,
                    subject="Password Reset Request", params=email_params, template_id=4, api_key=api_key)
 
         params = {"heading": "An email has been sent to help you reset your password.",
@@ -325,7 +325,6 @@ def reset_your_password():
 
 @app.route('/itsokfriendweforgiveyou/<user_recovery_string>', methods=["GET", "POST"])
 def authenticate_reset_password(user_recovery_string):
-
     form = ResetPassword()
     page_title = "Reset Your Password"
     if form.validate_on_submit():
@@ -376,8 +375,8 @@ def authenticate_reset_password(user_recovery_string):
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
 
-            return redirect(url_for('action_successful_redirect', params=params, page_title="Password Reset Successfully!",
-                                    action="password_reset_success"))
+            return redirect(url_for('action_successful_redirect', params=params,
+                                    page_title="Password Reset Successfully!", action="password_reset_success"))
         flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
         return redirect(url_for("reset_your_password"))
     return render_template("reset_password.html", page_title=page_title, form=form)
@@ -418,8 +417,7 @@ def report_issue():
         params = {"heading": "Your issue has been successfully reported",
                   "body1": "An email has been sent to Flight Club about your concern. "
                            "You have also been sent an email with the details of your report.",
-                  "body2": "Flight Club will try to respond to this issue in a timely manner. "
-                           ,
+                  "body2": "Flight Club will try to respond to this issue in a timely manner. ",
                   "body3": "Thank you for your patience.",
                   "button_text": "Return to Home",
                   "url_for": 'user_home'}
@@ -665,7 +663,7 @@ def update_destinations():
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
             destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
-                                                    if city_name == dest_dict['city']][0]
+                                                        if city_name == dest_dict['city']][0]
             destinations_update_dict[f"price{x + 1}"] = dest_dict['price_ceiling']
 
         Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
