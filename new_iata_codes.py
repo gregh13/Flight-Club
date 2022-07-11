@@ -1358,7 +1358,7 @@ all_cities_international = {
     "URC": "Urumqi, Sinkiang, China - (URC)",
     "USH": "Ushuaia, Tierra del Fuego, Argentina - (USH)",
     "UKK": "Ust Kamenogorsk, Kazakhstan - (UKK)",
-    "UTP": "Utapao, Thailand - (UTP)",
+    "UTP": "Utapao, Pattaya, Thailand - (UTP)",
     "VAA": "Vaasa, Finland - (VAA)",
     "EGE": "Vail, CO, USA - (EGE)",
     "YVO": "Val-d'Or, PQ, Canada - (YVO)",
