@@ -222,14 +222,19 @@ def look_for_flights(user_prefs, destination):
 def process_flight_info(flight_data):
     # Grabs first (cheapest) result
     data = flight_data["data"][0]
+    print(data)
     # Sets default value in case 'if' statements don't get triggered
     leave_destination_date = data["route"][-1]['local_departure'].split("T")[0]
     # Catches more accurate departure date when return trip has multiple flights
     for route in data["route"]:
         if route["flyFrom"] == data['flyTo']:
             leave_destination_date = route['local_departure'].split("T")[0]
-        if route["flyFrom"] == data["routes"][0][1]:
+        try:
+            route["flyFrom"] == data["routes"][0][1]
             leave_destination_date = route['local_departure'].split("T")[0]
+        except KeyError:
+            print("No 'Routes' in data")
+            continue
 
     flight_data_dict = \
         {
