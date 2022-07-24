@@ -402,14 +402,14 @@ for u in all_users:
 
                 # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
                 add_note = ""
-                if flight_dict["routes"][0]["flyFrom"] == flight_dict["routes"][-1]["flyFrom"]:
+                if flight_dict["routes"][0]["flyFrom"] == flight_dict["routes"][-1]["flyTo"]:
                     flight_link = configure_flight_link(user_pref=user_preferences_dict,
                                                         flight_dict=flight_dict,
                                                         total_passengers=total_passengers,
                                                         bad_airline_string=bad_airline_string)
                 else:
                     add_note = f"Note: Leaving airport ({flight_dict['routes'][0]['flyFrom']})" \
-                               f" and returning airport ({flight_dict['routes'][-1]['flyFrom']}) are not the same"
+                               f" and returning airport ({flight_dict['routes'][-1]['flyTo']}) are not the same"
                     flight_link = flight_dict["deep_link"]
 
                 email_flight_deal_list.append(
