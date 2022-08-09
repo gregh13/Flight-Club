@@ -41,7 +41,7 @@ bad_airline_dict = {
     "KM": "Air Malta",
     "JU": "Air Serbia",
     "JD": "Capital Airlines",
-    "5J": "Cebu Pacfic",
+    "5J": "Cebu Pacific",
     "G5": "China Express Airlines",
     "TM": "LAM Mozambique",
     "8Q": "Onur Air",
@@ -57,7 +57,8 @@ bad_airline_dict = {
     "IB": "Iberia Airlines Spanish",
     "CI": "China Airlines",
     "FB": "Bulgaria Air",
-    "HY": "Uzbekistan Airway"
+    "HY": "Uzbekistan Airway",
+    "F9": "Frontier Airlines"
 }
 
 

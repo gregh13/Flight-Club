@@ -31,6 +31,16 @@ headers = {
 def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_string):
     flight_link_string = ""
     add_and_sign = True
+    # Odd behavior from Kiwi for Las Vegas (LAS) and Phoenix (PHX) airport codes require work-around
+    # These two are high frequency destinations/home airports for current users
+    if flight_dict['airport_from_code'] == "LAS":
+        flight_dict['airport_from_code'] = "mccarran-international-las-vegas-nevada-united-states"
+    if flight_dict['airport_from_code'] == "PHX":
+        flight_dict['airport_from_code'] = "phoenix-sky-harbor-international-phoenix-arizona-united-states"
+    if flight_dict['airport_to_code'] == "LAS":
+        flight_dict['airport_to_code'] = "mccarran-international-las-vegas-nevada-united-states"
+    if flight_dict['airport_to_code'] == "PHX":
+        flight_dict['airport_to_code'] = "phoenix-sky-harbor-international-phoenix-arizona-united-states"
 
     flight_link_string += f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
                           f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
