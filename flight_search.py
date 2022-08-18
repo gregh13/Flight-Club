@@ -11,6 +11,8 @@ import random
 import time
 import os
 
+# -------------------------------------------------------------------------------------------------------------- #
+
 day_of_week = datetime.today().weekday()
 MAIN_URL = os.getenv("MAIN_URL")
 LOCATION_ENDPOINT = "https://tequila-api.kiwi.com/locations/query"
@@ -27,6 +29,236 @@ headers = {
     "apikey": FL_APIKEY
 }
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Main function checks every user in database and searches their destinations when applicable.
+
+
+def main():
+    # Grab data from database
+    all_users = User.query.all()
+
+    # Loops through all users
+    for u in all_users:
+        # Helps slow down API calls to Tequila Kiwi Flight Search (100 requests per minute)
+        time.sleep(11)
+
+        # Check if today matches user's preferred day
+        email_day = u.preferences[0].email_day
+        if day_of_week != email_day:
+            # Move on to next user
+            continue
+        # Check user's email frequency to see if it should send email
+        user_preference_object = Preferences.query.filter_by(user_pref_id=u.preferences[0].user_pref_id).first()
+        email_freq = user_preference_object.email_frequency
+        if email_freq != 1:
+            if email_freq == 2:
+                # Biweekly, send
+                user_preference_object.email_frequency = 3
+                db.session.commit()
+            elif email_freq == 3:
+                # Biweekly, don't send
+                user_preference_object.email_frequency = 2
+                db.session.commit()
+                continue
+            elif email_freq == 4:
+                # Monthly, send
+                user_preference_object.email_frequency = 5
+                db.session.commit()
+            elif email_freq == 5 or email_freq == 6:
+                # Monthly, don't send
+                user_preference_object.email_frequency = (email_freq + 1)
+                db.session.commit()
+                continue
+            elif email_freq == 7:
+                # Monthly, don't send
+                user_preference_object.email_frequency = 4
+                db.session.commit()
+                continue
+
+        # Prepare for flight search
+        bad_codes = []
+        email_flight_deal_list = []
+        website_flight_deal_dict = {"flight_search_date": date.today().strftime('%a, %B %-d, %Y')}
+
+        # Initialize Flight Deals DB Table Dictionary
+        for x in range(0, 10):
+            website_flight_deal_dict[f"place{x + 1}"] = None
+            website_flight_deal_dict[f"message{x + 1}"] = None
+            website_flight_deal_dict[f"link{x + 1}"] = None
+        user_name = u.name
+        user_email = u.email
+
+        # Get user's preferences and destinations
+        user_preferences_dict = u.preferences[0].__dict__
+        user_destinations_dict = u.destinations[0].__dict__
+
+        # Prepare personalized message to user for flight deals
+        adults = user_preferences_dict['num_adults']
+        children = user_preferences_dict['num_children']
+        infants = user_preferences_dict['num_infants']
+        total_passengers = (adults + children + infants)
+        passengers = ""
+        if adults != 0:
+            if adults == 1:
+                passengers += f"{adults} Adult"
+            else:
+                passengers += f"{adults} Adults"
+        if children != 0:
+            if children == 1:
+                passengers += f", {children} Child"
+            else:
+                passengers += f", {children} Children"
+        if infants != 0:
+            if infants == 1:
+                passengers += f", {infants} Infant"
+            else:
+                passengers += f", {infants} Infants"
+
+        # Filter filled vs empty destinations in user destinations db data, format data into dictionary
+        list_of_dicts = []
+        for x in range(1, 11):
+            dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
+                           "price_ceiling": user_destinations_dict[f'price{x}'],
+                           "home_airport": user_destinations_dict["home_airport"],
+                           "currency": user_destinations_dict["currency"]}
+            # Stops empty destination fields from being added
+            if dict_to_add["iata"] is None:
+                pass
+            else:
+                list_of_dicts.append(dict_to_add)
+
+        # Loops through as many destinations as user has saved
+        for x in range(0, len(list_of_dicts)):
+            destination = list_of_dicts[x]
+            iata_code = destination["iata"]
+
+            # Hidden option to get a random destination. Destination name is "Surprise Me", code is ???
+            if iata_code == "???":
+                # While loop protects against randomly getting "???" again or same as home airport
+                while iata_code == "???" or iata_code == user_destinations_dict["home_airport"]:
+                    iata_code = random.choice(list(all_cities_international))
+
+            # Grabs city name from large airport dictionary
+            city_name = all_cities_international[iata_code]
+
+            # Begin flight deal search: API call to Tequila
+            flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
+
+            # When fly_to location code is bad or doesn't exist
+            if 'Unprocessable Entity' in flight_data.values():
+                # For error logging
+                print(f"{user_name}: {destination} - Unprovessable Entity\n")
+                bad_codes.append(iata_code)
+                # Message to user
+                message = "Error: Destination not recognized by flight search. Please change"
+                website_flight_deal_dict[f"place{x + 1}"] = city_name
+                website_flight_deal_dict[f"message{x + 1}"] = message
+                continue
+            elif len(flight_data["data"]) == 0:
+                # For error logging
+                print(f"{user_name}: No flight data for destination: {iata_code}\n")
+                bad_codes.append(iata_code)
+                message = "No flights available. Perhaps destination is too remote or quite far from your home airport " \
+                          "(exceeds your max stops or flight duration), " \
+                          "or perhaps travel restrictions are currently in place."
+                website_flight_deal_dict[f"place{x + 1}"] = city_name
+                website_flight_deal_dict[f"message{x + 1}"] = message
+                continue
+            else:
+                # Tequila Flight Search API returned at least one valid results
+                # Process flight deal data into dictionary
+                flight_dict = process_flight_info(flight_data=flight_data)
+
+                # Set price ceiling according to number of passengers as Tequila returns total flight price
+                price_ceiling = total_passengers * destination["price_ceiling"]
+
+                # See if the deals is less than user's specified maximum
+                if flight_dict["price"] <= price_ceiling:
+                    # Format dates for message to user
+                    depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
+                    depart_day = depart.strftime('%A, %B %-d')
+                    back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
+                    back_home_day = back_home.strftime('%A, %B %-d')
+                    price_with_commas = "{:,}".format(flight_dict["price"])
+                    price_formatted = str(price_with_commas) + f" {destination['currency']}"
+
+                    # Use RoadGoat API to get an image specific to the destination
+                    image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
+
+                    # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
+                    add_note = ""
+                    if flight_dict["routes"][0]["flyFrom"] == flight_dict["routes"][-1]["flyTo"]:
+                        flight_link = configure_flight_link(user_pref=user_preferences_dict,
+                                                            flight_dict=flight_dict,
+                                                            total_passengers=total_passengers,
+                                                            bad_airline_string=bad_airline_string)
+                    else:
+                        add_note = f"Note: Leaving airport ({flight_dict['routes'][0]['flyFrom']})" \
+                                   f" and returning airport ({flight_dict['routes'][-1]['flyTo']}) are not the same"
+                        flight_link = flight_dict["deep_link"]
+
+                    # Add flight details to list of deals to send in email
+                    email_flight_deal_list.append(
+                        {
+                            "city": flight_dict["city_to"],
+                            "price": price_formatted,
+                            "nights": flight_dict["nights_at_destination"],
+                            "date1": depart_day,
+                            "date2": back_home_day,
+                            "image": image_link,
+                            "num_passengers": total_passengers,
+                            "passengers": passengers,
+                            "link": flight_link
+                        }
+                    )
+
+                    # Format message to user for flight deal that was below their price ceiling
+                    message = f"Deal Found! ${price_formatted} for {total_passengers} passengers ({passengers}) " \
+                              f"from {depart_day} returning home on {back_home_day} " \
+                              f"- ({flight_dict['nights_at_destination']} nights total)\n\n{add_note}"
+                    website_flight_deal_dict[f"place{x + 1}"] = city_name
+                    website_flight_deal_dict[f"message{x + 1}"] = message
+                    website_flight_deal_dict[f"link{x + 1}"] = flight_link
+                else:
+                    # Format message to user for flight deal that wasn't cheap enough
+                    message = f"Flights available, but price wasn't lower than your limit " \
+                              f"(${'{:,}'.format(destination['price_ceiling'])} {destination['currency']})"
+                    website_flight_deal_dict[f"place{x + 1}"] = city_name
+                    website_flight_deal_dict[f"message{x + 1}"] = message
+
+        # Add flight deal information (including destinations where no deals were found or price was too high) to db
+        FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
+        db.session.commit()
+
+        # If any deals were found that met users price ceilings, send email
+        if email_flight_deal_list:
+            deals_found_params = {"destinations": email_flight_deal_list,
+                                  "header_link": MAIN_URL, "login_link": f"{MAIN_URL}login"}
+            send_email(sib_url=SIB_URL,
+                       company_email=COM_EMAIL,
+                       user_name=user_name,
+                       user_email=user_email,
+                       params=deals_found_params,
+                       template_id=1,
+                       api_key=SIB_APIKEY)
+        else:
+            # No deals found for user this time around
+            no_deals_params = {"login_link": f"{MAIN_URL}login", "header_link": MAIN_URL}
+            send_email(sib_url=SIB_URL,
+                       company_email=COM_EMAIL,
+                       user_name=user_name,
+                       user_email=user_email,
+                       params=no_deals_params,
+                       template_id=3,
+                       api_key=SIB_APIKEY)
+
+    # All users have been looped through, flight search is finished
+    return
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+
+# Other functions used in main
 
 def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_string):
     flight_link_string = ""
@@ -131,51 +363,6 @@ def figure_out_dates(user_prefs):
     return date_dictionary
 
 
-def road_goat_image_search(city_name, country_to):
-    def send_api_request(query):
-        url = f"https://api.roadgoat.com/api/v2/destinations/auto_complete?q={query}"
-        encoded_bytes = base64.b64encode(f'{GOAT_ACCESS_KEY}:{GOAT_SECRET_KEY}'.encode("utf-8"))
-        auth_key = str(encoded_bytes, "utf-8")
-        headers = {
-            'Authorization': f'Basic {auth_key}'
-        }
-        response = requests.get(url=url, headers=headers)
-        results = response.json()
-        if results["data"]:
-            if results['data'][0]['relationships']['featured_photo']['data']:
-                image_link = results["included"][0]["attributes"]["image"]["full"]
-                return image_link
-            return None
-        return None
-
-    city_name = city_name.split(" - ")[0]
-    url_encoded_city_name = urllib.parse.quote(city_name)
-    url_encoded_country_name = urllib.parse.quote(country_to)
-
-    city_link = send_api_request(query=url_encoded_city_name)
-    if city_link:
-        return city_link
-
-    if ", USA" in city_name:
-        state = city_name.split(", ")[-2]
-        if state in usa_states_dict:
-            state_name = usa_states_dict[state]
-        else:
-            state_name = state
-        url_encoded_state_name = urllib.parse.quote(state_name)
-        state_link = send_api_request(query=url_encoded_state_name)
-        if state_link:
-            return state_link
-
-    country_link = send_api_request(query=url_encoded_country_name)
-    if country_link:
-        return country_link
-
-    backup_link = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
-                  "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    return backup_link
-
-
 def look_for_flights(user_prefs, destination):
     flight_date_dict = figure_out_dates(user_prefs)
 
@@ -258,6 +445,51 @@ def process_flight_info(flight_data):
     return flight_data_dict
 
 
+def road_goat_image_search(city_name, country_to):
+    def send_api_request(query):
+        url = f"https://api.roadgoat.com/api/v2/destinations/auto_complete?q={query}"
+        encoded_bytes = base64.b64encode(f'{GOAT_ACCESS_KEY}:{GOAT_SECRET_KEY}'.encode("utf-8"))
+        auth_key = str(encoded_bytes, "utf-8")
+        headers = {
+            'Authorization': f'Basic {auth_key}'
+        }
+        response = requests.get(url=url, headers=headers)
+        results = response.json()
+        if results["data"]:
+            if results['data'][0]['relationships']['featured_photo']['data']:
+                image_link = results["included"][0]["attributes"]["image"]["full"]
+                return image_link
+            return None
+        return None
+
+    city_name = city_name.split(" - ")[0]
+    url_encoded_city_name = urllib.parse.quote(city_name)
+    url_encoded_country_name = urllib.parse.quote(country_to)
+
+    city_link = send_api_request(query=url_encoded_city_name)
+    if city_link:
+        return city_link
+
+    if ", USA" in city_name:
+        state = city_name.split(", ")[-2]
+        if state in usa_states_dict:
+            state_name = usa_states_dict[state]
+        else:
+            state_name = state
+        url_encoded_state_name = urllib.parse.quote(state_name)
+        state_link = send_api_request(query=url_encoded_state_name)
+        if state_link:
+            return state_link
+
+    country_link = send_api_request(query=url_encoded_country_name)
+    if country_link:
+        return country_link
+
+    backup_link = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
+                  "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    return backup_link
+
+
 def send_email(sib_url, company_email, user_name, user_email, params: dict, template_id, api_key):
     url = sib_url
     payload = {
@@ -282,203 +514,8 @@ def send_email(sib_url, company_email, user_name, user_email, params: dict, temp
     return
 
 
-# Grab data from database
-all_users = User.query.all()
-for u in all_users:
-    # # Helps slow down API calls to Tequila Kiwi Flight Search (100 requests per minute)
-    time.sleep(11)
-    print(f"\nUser Name: {u.name}")
-    print(f"User Email: {u.email}\n")
-    email_day = u.preferences[0].email_day
-    if day_of_week != email_day:
-        print("Not today, my friend!")
-        continue
-    user_preference_object = Preferences.query.filter_by(user_pref_id=u.preferences[0].user_pref_id).first()
-    email_freq = user_preference_object.email_frequency
+# -------------------------------------------------------------------------------------------------------------- #
 
-    if email_freq != 1:
-        if email_freq == 2:
-            print("Biweekly, send")
-            user_preference_object.email_frequency = 3
-            db.session.commit()
-        elif email_freq == 3:
-            print("Biweekly, don't send")
-            user_preference_object.email_frequency = 2
-            db.session.commit()
-            continue
-        elif email_freq == 4:
-            print("Monthly, send")
-            user_preference_object.email_frequency = 5
-            db.session.commit()
-        elif email_freq == 5 or email_freq == 6:
-            print("Monthly, don't send")
-            user_preference_object.email_frequency = (email_freq + 1)
-            db.session.commit()
-            continue
-        elif email_freq == 7:
-            print("Monthly, don't send")
-            user_preference_object.email_frequency = 4
-            db.session.commit()
-            continue
+# Call main function
 
-    bad_codes = []
-    email_flight_deal_list = []
-    website_flight_deal_dict = {"flight_search_date": date.today().strftime('%a, %B %-d, %Y')}
-    for x in range(0, 10):
-        website_flight_deal_dict[f"place{x + 1}"] = None
-        website_flight_deal_dict[f"message{x + 1}"] = None
-        website_flight_deal_dict[f"link{x + 1}"] = None
-    user_name = u.name
-    user_email = u.email
-    print(f"\n\nUser Name: {user_name}\nUser Email: {user_email}")
-
-    user_preferences_dict = u.preferences[0].__dict__
-    user_destinations_dict = u.destinations[0].__dict__
-    print(f'Preferences: {user_preferences_dict}')
-    print(f'Destinations: {user_destinations_dict}\n\n')
-
-    total_passengers = (user_preferences_dict['num_adults']
-                        + user_preferences_dict['num_children']
-                        + user_preferences_dict['num_infants'])
-    passengers = ""
-    if user_preferences_dict['num_adults'] != 0:
-        if user_preferences_dict['num_adults'] == 1:
-            passengers += f"{user_preferences_dict['num_adults']} Adult"
-        else:
-            passengers += f"{user_preferences_dict['num_adults']} Adults"
-    if user_preferences_dict['num_children'] != 0:
-        if user_preferences_dict['num_children'] == 1:
-            passengers += f", {user_preferences_dict['num_children']} Child"
-        else:
-            passengers += f", {user_preferences_dict['num_children']} Children"
-    if user_preferences_dict['num_infants'] != 0:
-        if user_preferences_dict['num_infants'] == 1:
-            passengers += f", {user_preferences_dict['num_infants']} Infant"
-        else:
-            passengers += f", {user_preferences_dict['num_infants']} Infants"
-
-    list_of_dicts = []
-    for x in range(1, 11):
-        dict_to_add = {"iata": user_destinations_dict[f'city{x}'],
-                       "price_ceiling": user_destinations_dict[f'price{x}'],
-                       "home_airport": user_destinations_dict["home_airport"],
-                       "currency": user_destinations_dict["currency"]}
-        if dict_to_add["iata"] is None:
-            pass
-        else:
-            list_of_dicts.append(dict_to_add)
-
-    for x in range(0, len(list_of_dicts)):
-        destination = list_of_dicts[x]
-        # 'Surprise Me' choice
-        if destination["iata"] == "???":
-            # While loop protects against randomly getting "???" again or same as home airport
-            while destination["iata"] == "???" or destination["iata"] == user_destinations_dict["home_airport"]:
-                destination["iata"] = random.choice(list(all_cities_international))
-
-        city_name = all_cities_international[destination["iata"]]
-        print(f"Destination: {city_name}")
-        flight_data = look_for_flights(user_prefs=user_preferences_dict, destination=destination)
-        # When fly_to location code is bad or doesn't exist
-        if 'Unprocessable Entity' in flight_data.values():
-            print("Unprovessable Entity\n")
-            bad_codes.append(destination["iata"])
-            message = "Error: Destination not recognized by flight search. Please change"
-            website_flight_deal_dict[f"place{x + 1}"] = city_name
-            website_flight_deal_dict[f"message{x + 1}"] = message
-            continue
-        elif len(flight_data["data"]) == 0:
-            print(f"No flight data for destination: {destination['iata']}\n")
-            bad_codes.append(destination["iata"])
-            message = "No flights available. Perhaps destination is too remote or quite far from your home airport " \
-                      "(exceeds your max stops or flight duration), " \
-                      "or perhaps travel restrictions are currently in place."
-            website_flight_deal_dict[f"place{x + 1}"] = city_name
-            website_flight_deal_dict[f"message{x + 1}"] = message
-            continue
-        else:
-            flight_dict = process_flight_info(flight_data=flight_data)
-            price_ceiling = total_passengers * destination["price_ceiling"]
-
-            if flight_dict["price"] <= price_ceiling:
-                depart = datetime.strptime(flight_dict["departure"], '%Y-%m-%d')
-                depart_day = depart.strftime('%A, %B %-d')
-                back_home = datetime.strptime(flight_dict["arrival"], '%Y-%m-%d')
-                back_home_day = back_home.strftime('%A, %B %-d')
-
-                price_with_commas = "{:,}".format(flight_dict["price"])
-                price_formatted = str(price_with_commas) + f" {destination['currency']}"
-                image_link = road_goat_image_search(city_name=city_name, country_to=flight_dict["country_to"])
-
-                # Catches cases where leaving airport and returning airport aren't the same (JFK to SFO, SFO to EWR)
-                add_note = ""
-                if flight_dict["routes"][0]["flyFrom"] == flight_dict["routes"][-1]["flyTo"]:
-                    flight_link = configure_flight_link(user_pref=user_preferences_dict,
-                                                        flight_dict=flight_dict,
-                                                        total_passengers=total_passengers,
-                                                        bad_airline_string=bad_airline_string)
-                else:
-                    add_note = f"Note: Leaving airport ({flight_dict['routes'][0]['flyFrom']})" \
-                               f" and returning airport ({flight_dict['routes'][-1]['flyTo']}) are not the same"
-                    flight_link = flight_dict["deep_link"]
-
-                email_flight_deal_list.append(
-                    {
-                        "city": flight_dict["city_to"],
-                        "price": price_formatted,
-                        "nights": flight_dict["nights_at_destination"],
-                        "date1": depart_day,
-                        "date2": back_home_day,
-                        "image": image_link,
-                        "num_passengers": total_passengers,
-                        "passengers": passengers,
-                        "link": flight_link
-                    }
-                )
-
-                message = f"Deal Found! ${price_formatted} for {total_passengers} passengers ({passengers}) " \
-                          f"from {depart_day} returning home on {back_home_day} " \
-                          f"- ({flight_dict['nights_at_destination']} nights total)\n\n{add_note}"
-                website_flight_deal_dict[f"place{x + 1}"] = city_name
-                website_flight_deal_dict[f"message{x + 1}"] = message
-                website_flight_deal_dict[f"link{x + 1}"] = flight_link
-
-                print(f"\nHomebrew Link: {flight_link}")
-                print(f"\nDeep_link: {flight_dict['deep_link']}")
-                print("\n\n")
-
-            else:
-                message = f"Flights available, but price wasn't lower than your limit " \
-                          f"(${'{:,}'.format(destination['price_ceiling'])} {destination['currency']})"
-                website_flight_deal_dict[f"place{x + 1}"] = city_name
-                website_flight_deal_dict[f"message{x + 1}"] = message
-
-    FlightDeals.query.filter_by(user_deals_id=u.flight_deals[0].user_deals_id).update(website_flight_deal_dict)
-    db.session.commit()
-
-    if email_flight_deal_list:
-        deals_found_params = {"destinations": email_flight_deal_list,
-                              "header_link": MAIN_URL, "login_link": f"{MAIN_URL}login"}
-        send_email(sib_url=SIB_URL,
-                   company_email=COM_EMAIL,
-                   user_name=user_name,
-                   user_email=user_email,
-                   params=deals_found_params,
-                   template_id=1,
-                   api_key=SIB_APIKEY)
-        print("Flight Deal List:")
-        print(email_flight_deal_list)
-        print(f"\nNo flight info for: {bad_codes}")
-    else:
-        no_deals_params = {"login_link": f"{MAIN_URL}login", "header_link": MAIN_URL}
-        send_email(sib_url=SIB_URL,
-                   company_email=COM_EMAIL,
-                   user_name=user_name,
-                   user_email=user_email,
-                   params=no_deals_params,
-                   template_id=3,
-                   api_key=SIB_APIKEY)
-        print("No flight deals found this time around :(")
-        print(f"\nNo flight info for: {bad_codes}")
-
-    print("FINISHED")
+main()
