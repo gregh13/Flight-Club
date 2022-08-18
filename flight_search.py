@@ -260,11 +260,15 @@ def main():
 
 # Other functions used in main
 
+# Takes flight deal information, formats link to specific flight search on Kiwi.com (including filters like stops, etc.)
 def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_string):
+    # Initialize flight link variables
     flight_link_string = ""
     add_and_sign = True
-    # Odd behavior from Kiwi for Las Vegas (LAS) and Phoenix (PHX) airport codes require work-around
-    # These two are high frequency destinations/home airports for current users
+
+    # Odd behavior from Kiwi.com for Las Vegas (LAS) and Phoenix (PHX) airport codes require work-around
+    # These two are high frequency destinations/home airports for current users, hence hard-coded solution.
+    # Other airport codes behavior normally, not sure why only these two act weirdly on Kiwi.com
     if flight_dict['airport_from_code'] == "LAS":
         flight_dict['airport_from_code'] = "mccarran-international-las-vegas-nevada-united-states"
     if flight_dict['airport_from_code'] == "PHX":
@@ -274,9 +278,11 @@ def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_
     if flight_dict['airport_to_code'] == "PHX":
         flight_dict['airport_to_code'] = "phoenix-sky-harbor-international-phoenix-arizona-united-states"
 
+    # Format base form of link
     flight_link_string += f"https://www.kiwi.com/en/search/results/{flight_dict['airport_from_code']}/" \
                           f"{flight_dict['airport_to_code']}/{flight_dict['departure']}/" \
                           f"{flight_dict['leave_destination_date']}?"
+    # Depending on user's preferences, need to add more items to end of link.
     if user_pref['max_flight_time'] < 60:
         add_and_sign = False
         flight_link_string += f"flightDurationMax={user_pref['max_flight_time']}&"
@@ -287,17 +293,21 @@ def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_
         add_and_sign = False
         flight_link_string += f"airlinesList={bad_airline_string.replace(',', '%2C')}&" \
                               f"selectedAirlinesExclude=true&"
+
+    # If user didn't have any of above settings (which included an & sign at the end), need to add & to end of link
     if add_and_sign:
         flight_link_string += "&"
 
     flight_link_string += f"sortBy=price"
 
+    # Kiwi.com defaults to 1 adult passenger, so don't need to add anything to the link if that's the user's preference
     if user_pref['num_adults'] == 1 and total_passengers == 1:
         pass
     else:
         flight_link_string += f"&adults={user_pref['num_adults']}&" \
                               f"children={user_pref['num_children']}&" \
                               f"infants={user_pref['num_infants']}"
+    # Kiwi.com defaults with economy, only need to add to link if user preference is different
     if user_pref["cabin_class"] != "M":
         if user_pref["cabin_class"] == "W":
             flight_link_string += f"&cabinClass=PREMIUM_ECONOMY-true"
@@ -309,43 +319,56 @@ def configure_flight_link(user_pref, flight_dict, total_passengers, bad_airline_
     return flight_link_string
 
 
+# Takes user preferences as input and determines which flight dates to search for (fixed vs rolling dates)
 def figure_out_dates(user_prefs):
+
     today = date.today()
+
+    # Get user's specific dates (if any)
     start_specific = user_prefs["specific_search_start_date"]
     end_specific = user_prefs["specific_search_end_date"]
+
+    # Calculate dates for user's rolling date preferences (lead time and search window)
     forward_start = (today + timedelta(days=user_prefs["search_start_date"])).strftime("%d/%m/%Y")
     forward_end = (today + timedelta(days=(user_prefs["search_start_date"] +
                                            user_prefs["search_length"]))).strftime("%d/%m/%Y")
+
+    # Initialize variables
     return_from = ""
     return_to = ""
+
     # Sets defaults, helps clean up 'if' statements below
     date_from = forward_start
     date_to = forward_end
 
+    # Checks and optimizes search dates depending on user's preferences and current date
+    # Many different scenarios when mixing specific dates with rolling date preferences and passage of time
+    # Kiwi Flight Search requires dd/mm/yyyy format
     if start_specific:
+        # User has both a specific start and end date in preferences
         if end_specific:
+            # Check if start date is ok (and end date since validated with form)
             if start_specific >= today:
-                # Start date is ok (and end date since validated with form)
-                # Kiwi Flight Search requires dd/mm/yyyy format
                 date_from = start_specific.strftime("%d/%m/%Y")
                 date_to = end_specific.strftime("%d/%m/%Y")
                 return_from = start_specific.strftime("%d/%m/%Y")
                 return_to = end_specific.strftime("%d/%m/%Y")
 
+            # Start date is in the past, check if end date is ok in relation to today and user's min trip length
             elif end_specific > (today + timedelta(days=(1 + user_prefs["min_nights"]))):
-                # start date is past, check end date is ok
                 date_from = today.strftime("%d/%m/%Y")
                 date_to = end_specific.strftime("%d/%m/%Y")
                 return_from = today.strftime("%d/%m/%Y")
                 return_to = end_specific.strftime("%d/%m/%Y")
 
+        # No end date, check if start date is okay
         elif start_specific >= today:
-            # No end date, start date is okay (not past)
             date_from = start_specific.strftime("%d/%m/%Y")
             date_to = (start_specific + timedelta(days=user_prefs["search_length"])).strftime("%d/%m/%Y")
 
+    # Only specific end date
     elif end_specific:
-        # Only end date
+        # Checks if end date is ok in relation to user's lead time preference and min trip length
         if end_specific > (today + timedelta(days=(user_prefs["search_length"] + user_prefs["search_start_date"]))):
             # end date is okay (far enough out to cover search length), use lead time preference
             date_to = end_specific.strftime("%d/%m/%Y")
@@ -359,7 +382,6 @@ def figure_out_dates(user_prefs):
             return_to = end_specific.strftime("%d/%m/%Y")
 
     date_dictionary = {"date_from": date_from, "date_to": date_to, "return_from": return_from, "return_to": return_to}
-
     return date_dictionary
 
 
