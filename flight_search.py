@@ -385,7 +385,9 @@ def figure_out_dates(user_prefs):
     return date_dictionary
 
 
+# Takes user preferences and destinations, calls Tequila API, returns flight deal json data
 def look_for_flights(user_prefs, destination):
+    # Checks user's preferences to get correct date range for API call
     flight_date_dict = figure_out_dates(user_prefs)
 
     if user_prefs['exclude_airlines'] == "true":
@@ -438,15 +440,18 @@ def look_for_flights(user_prefs, destination):
         return search_response.json()
 
 
+# Takes json results from API call and processes data into a dictionary
 def process_flight_info(flight_data):
     # Grabs first (cheapest) result
     data = flight_data["data"][0]
-    print(data)
+
     # Sets default value in case 'if' statements don't get triggered
     leave_destination_date = data["route"][-1]['local_departure'].split("T")[0]
+
     # Catches more accurate departure date when return trip has multiple flights
     for route in data["route"]:
         if route["flyFrom"] == data['flyTo']:
+            # Gets the departure for the 1st flight out of destination airport, the date user would 'leave' destination
             leave_destination_date = route['local_departure'].split("T")[0]
 
     flight_data_dict = \
@@ -467,6 +472,7 @@ def process_flight_info(flight_data):
     return flight_data_dict
 
 
+# Takes user's destination city and country, returns (hopefully) an image of that destination
 def road_goat_image_search(city_name, country_to):
     def send_api_request(query):
         url = f"https://api.roadgoat.com/api/v2/destinations/auto_complete?q={query}"
@@ -484,35 +490,48 @@ def road_goat_image_search(city_name, country_to):
             return None
         return None
 
+    # Strip the 3 letter airport code from the end of city name
     city_name = city_name.split(" - ")[0]
     url_encoded_city_name = urllib.parse.quote(city_name)
-    url_encoded_country_name = urllib.parse.quote(country_to)
 
+    # Search road goat for just city name
     city_link = send_api_request(query=url_encoded_city_name)
     if city_link:
         return city_link
 
+    # if city name didn't get any results and destination is in USA, look for images of the state the city is in
     if ", USA" in city_name:
+        # Isolate just two letter state abbreviation
         state = city_name.split(", ")[-2]
+
+        # Grab state's full name from state's abbreviation
         if state in usa_states_dict:
             state_name = usa_states_dict[state]
         else:
             state_name = state
         url_encoded_state_name = urllib.parse.quote(state_name)
+
+        # Search road goat for USA state image
         state_link = send_api_request(query=url_encoded_state_name)
+
         if state_link:
             return state_link
 
+    # If city (and state) search don't return results, search for an image of the country
+    url_encoded_country_name = urllib.parse.quote(country_to)
     country_link = send_api_request(query=url_encoded_country_name)
     if country_link:
         return country_link
 
+    # If none of those searches return an image, use default image (airplane in sky)
     backup_link = "https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg?" \
                   "auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
     return backup_link
 
 
+# Takes flight search deal information, sends nicely formatted email to user
 def send_email(sib_url, company_email, user_name, user_email, params: dict, template_id, api_key):
+    # Configure request params and data
     url = sib_url
     payload = {
         "sender": {
@@ -527,12 +546,16 @@ def send_email(sib_url, company_email, user_name, user_email, params: dict, temp
         "params": params,
         "templateId": template_id
     }
+
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
         "api-key": api_key
     }
+
+    # Send email to user
     response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
     return
 
 
