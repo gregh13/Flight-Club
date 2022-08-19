@@ -1,12 +1,13 @@
 /* Color Values */
 
-/* Color1: #287AD7 */
+/* main-purple/blue: #1C16BD */
+/* hover-purple/blue: #261EFF */
+/* form-gray: #f2f2f2*/
+/* main-teal: #0BAAB0 */
 /* logout-red: #CC6666 */
 /* danger-btn: #dc3545 */
-/* main-teal: #0BAAB0 */
-/* form-gray: #f2f2f2*/
-/* main-purple: #1C16BD */
-/* hover-purple: #261EFF */
+
+/* -------------------------------------------------------------------------------------------- */
 
 body{
   font-family: 'Montserrat', sans-serif;
@@ -21,21 +22,6 @@ body::after {
   height: 53px; /* Set same as footer's height */
 }
 
-/* Footer */
-#footer {
-  font-family: 'Montserrat', sans-serif;
-  background-color: #0BAAB0;
-  text-align: center;
-  padding-top: 7px;
-  padding-bottom: 1%;
-  font-size: .75rem;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 53px;
-}
-
-
 h1 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
@@ -49,12 +35,11 @@ h2 {
   font-weight: 400;
 }
 
+/* -------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------- */
+/* Index/Landing Page */
 
 /* Title */
-
-#title {
-  color: #fff;
-}
 
 .container-fluid {
   padding: 10px 0 0 22px;
@@ -69,12 +54,20 @@ h2 {
   height: 90px;
 }
 
+#title {
+  color: #fff;
+}
 
 .title-catchphrase {
   padding-bottom: 444px;
 }
 
+
 /* Navigation Bar */
+
+.logged-out-indent {
+  padding-right: 22px;
+}
 
 .navbar {
   padding: 0;
@@ -92,10 +85,6 @@ h2 {
 
 .nav-link {
   font-size:
-}
-
-.logged-out-indent {
-  padding-right: 22px;
 }
 
 
@@ -117,21 +106,21 @@ h2 {
   padding-bottom: 22px;
 }
 
-
 .icon-text:hover {
   color: #8f8f8f;
 }
 
+
 /* Testimonials */
+
+.carousel-item {
+    padding: 7% 15%;
+}
 
 #testimonials {
   text-align: center;
   background-color: #0BAAB0;
   color: #fff
-}
-
-.carousel-item {
-    padding: 7% 15%;
 }
 
 .testimonials-image {
@@ -144,7 +133,16 @@ h2 {
   font-weight: 300;
 }
 
+
 /* Press */
+
+.make-bigger {
+  width: 21%;
+}
+
+.make-smaller {
+  width: 15%;
+}
 
 #press {
   background-color: #0BAAB0;
@@ -162,12 +160,6 @@ h2 {
   padding: 3% 2.2% 2%;
 }
 
-.make-smaller {
-  width: 15%;
-}
-.make-bigger {
-  width: 21%;
-}
 
 /* How It Works */
 
@@ -184,7 +176,12 @@ h2 {
   font-weight: 400;
 }
 
+
 /* Pricing */
+
+.card-body h2 {
+  padding: 2.2% 0;
+}
 
 #pricing {
   font-family: 'Montserrat', sans-serif;
@@ -199,11 +196,18 @@ h2 {
   padding: 0 7% 0;
 }
 
-.card-body h2 {
-  padding: 2.2% 0;
-}
 
 /* Call to Action CTA */
+
+.btn-mega {
+  padding: 6%;
+  font-family: "Ubuntu", sans-serif;
+}
+
+.btn-tiny {
+  padding: 0px 5px;
+  font-size: 11px;
+}
 
 #cta {
   font-family: 'Montserrat', sans-serif;
@@ -219,14 +223,12 @@ h2 {
   font-weight: 300;
 }
 
-.btn-mega {
-  padding: 6%;
-  font-family: "Ubuntu", sans-serif;
+#cta h2 {
+  font-size: 2.8rem;
 }
 
-.btn-tiny {
-  padding: 0px 5px;
-  font-size: 11px;
+#cta p {
+  font-size: 2rem;
 }
 
 .text-mega {
@@ -237,13 +239,24 @@ h2 {
   font-size: .85rem;
 }
 
-#cta h2 {
-  font-size: 2.8rem;
+
+/* Footer */
+#footer {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #0BAAB0;
+  text-align: center;
+  padding-top: 7px;
+  padding-bottom: 1%;
+  font-size: .75rem;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 53px;
 }
 
-#cta p {
-  font-size: 2rem;
-}
+/* End of Index/Landing Page */
+/* -------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------- */
 
 /* Custom Button Styling */
 
@@ -295,6 +308,7 @@ h2 {
   background-color: #1C16BD;
 }
 
+/* -------------------------------------------------------------------------------------------- */
 /* Responsive Viewing */
 
 @media (max-width: 800px) and (min-width: 561px) {
