@@ -283,6 +283,18 @@ h2 {
   background-color: #1C16BD;
 }
 
+.btn-custom-outline-form {
+    @include button-variant(pink, red, red, #444, #333, red);
+    color: #1C16BD;
+    background-color: #f2f2f2;
+    border-color: #1C16BD;
+}
+
+.btn-custom-outline-form:hover {
+  color: #fff;
+  background-color: #1C16BD;
+}
+
 .btn-custom-outline-logout {
     @include button-variant(pink, red, red, #444, #333, red);
     color: #1C16BD;
@@ -294,18 +306,6 @@ h2 {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
-}
-
-.btn-custom-outline-form {
-    @include button-variant(pink, red, red, #444, #333, red);
-    color: #1C16BD;
-    background-color: #f2f2f2;
-    border-color: #1C16BD;
-}
-
-.btn-custom-outline-form:hover {
-  color: #fff;
-  background-color: #1C16BD;
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -322,6 +322,7 @@ h2 {
 }
 
 @media (max-width: 420px) {
+
   .container-fluid {
     background-image: url("../images/flipflops-full-resized-mobile-cropped.jpg");
     background-size: cover;
@@ -330,38 +331,13 @@ h2 {
     padding: 10px 0 0 22px;
     background-image: url("../images/header-snippet-mobile.png");
   }
-  #signUp {
-    padding: auto;
-    text-align: right;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-  }
-  h2 {
-    font-size: 2.2rem;
-  }
-  h3 {
-    font-size: 1.50rem;
-  }
-
-  #testimonials h2 {
-    font-size: 1.3rem;
-  }
-
-  .testimonials-details {
-    font-size: 0.7rem;
-  }
-  .testimonials-image {
-    width: 50px;
-  }
 
   #cta h2 {
     font-size: 2rem;
     padding-top: 11px;
   }
 
-   #cta p {
+  #cta p {
     font-size: 1.2rem;
   }
 
@@ -373,27 +349,63 @@ h2 {
     font-size: 2.2rem;
   }
 
-  .text-mega-small {
-    font-size: 0.6rem;
+  .g-recaptcha {
+    transform:scale(0.73);
+    transform-origin:0 0;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+  }
+
+  h3 {
+    font-size: 1.50rem;
+  }
+
+  .logged-out {
+  font-size: 1rem;
+  }
+
+  .logged-out-indent {
+  padding-right: 8px;
+  }
+
+  .logged-out-plane {
+  width: 27%;
+  padding-top: 4px;
   }
 
   .navbar-brand {
   font-family: 'Ubuntu', sans-serif;
   font-size: 1.7rem;
   padding: 8px 0px;
-}
-  .logged-out {
-  font-size: 1rem;
   }
-  .logged-out-plane {
+
+  #signUp {
+    padding: auto;
+    text-align: right;
   }
-  .logged-out-indent {
-  padding-right: 8px;
+
+  .testimonials-details {
+    font-size: 0.7rem;
   }
-  .g-recaptcha {
-    transform:scale(0.73);
-    transform-origin:0 0;
+
+  #testimonials h2 {
+    font-size: 1.3rem;
   }
+
+  .testimonials-image {
+    width: 50px;
+  }
+
+  .text-mega-small {
+    font-size: 0.6rem;
+  }
+
 }
 
 .header-title {
@@ -403,14 +415,16 @@ h2 {
     padding-bottom: 0px;
 }
 
-.page-title {
-text-align: center;
-padding: 2% 1%;
+/* --------------------------------------------------------------------------------------------- */
+/* Padding and Alignment*/
+
+.center-item {
+width: 14%
 }
 
-.form-padding {
-padding: 5% 1%;
-text-align: center;
+.control-label {
+    font-weight: bold;
+    font-size: 1.1rem;
 }
 
 .form-container {
@@ -420,9 +434,9 @@ text-align: center;
   text-align: center;
   }
 
-.control-label {
-    font-weight: bold;
-    font-size: 1.1rem;
+.form-padding {
+padding: 5% 1%;
+text-align: center;
 }
 
 .left-padded {
@@ -430,8 +444,9 @@ text-align: left;
 padding-left: 25%;
 }
 
-.center-item {
-width: 14%
+.page-title {
+text-align: center;
+padding: 2% 1%;
 }
 
 .table-border {
@@ -506,10 +521,6 @@ input[type=number] {
 /* -------------------------------------------------------------------------------------------- */
 /* Dropdown Menu */
 
-.dropdown-toggle::after {
-    content: none;
-}
-
 .dropdown-item:active {
     background: #261EFF;
 }
@@ -528,6 +539,10 @@ input[type=number] {
     background-color: #dc3545;
 }
 
+.dropdown-toggle::after {
+    content: none;
+}
+
 .menu-icon {
     opacity: 0.60
 }
@@ -535,7 +550,6 @@ input[type=number] {
 .menu-icon:hover {
     opacity: 1.0
 }
-
 
 tr.bordered {
     border-bottom: 1px solid #000;
