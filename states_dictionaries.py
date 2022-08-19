@@ -1,3 +1,5 @@
+# Dictionary of states in USA and Australia to help destination image searching (via RoadGoat API)
+
 usa_states_dict = {
     "AL": "Alabama",
     "AK": "Alaska",

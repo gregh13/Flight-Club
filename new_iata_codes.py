@@ -1,3 +1,5 @@
+# Large dictionary with most functional municipal airports in the world and their iata airport code
+
 all_cities_international = {
     "AAL": "Aalborg, Denmark - (AAL)",
     "AES": "Aalesund, Norway - (AES)",

@@ -1,3 +1,5 @@
+# List of airline codes/names to exclude if user chooses 'Exclude Bad Airlines'
+
 bad_airline_dict = {
     "VH": "Viva Air Colombia",
     "VB": "VivaAerobus Mexican",
