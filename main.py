@@ -13,7 +13,6 @@ from numbers_and_letters import COMBINED_LIST
 from travel_quotes import quote_dictionary
 import random
 import requests
-import ast
 from datetime import datetime, date
 import os
 
@@ -1164,7 +1163,6 @@ def user_home():
     return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
 # ------------------------------------------------------------------------------------------- #
-
 # Run app
 
 if __name__ == '__main__':
