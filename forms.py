@@ -8,7 +8,7 @@ city_list = [all_cities_international[iata] for iata in all_cities_international
 
 
 # ------------------------------------------------------------------------------------------- #
-# Custom validators
+# Custom validators for user's selection of date preferences
 
 
 def invalid_max_nights(form, field):
@@ -100,6 +100,8 @@ class DeleteAccountForm(FlaskForm):
     submit = SubmitField("Delete Account")
 
 
+# Note this form uses a 'FieldList and FormField' for destinations. This allows users to dynamically add destinations
+# However, this creates a need for some work-arounds in main.py as it doesn't operate like normal flask form fields.
 class DestinationForm(FlaskForm):
     search = SearchField("Search field")
     home_airport = StringField("Home Airport", validators=[InputRequired(message="'Home Airport' field is required"),
@@ -118,6 +120,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
+# While not actually used directly, the 'description' kwarg matches the tooltip description that users see on the page
 class PreferenceForm(FlaskForm):
     email_frequency = SelectField("Email Frequency", choices=[(1, "Once a week"), (2, "Once every two weeks"),
                                                               (4, "Once a month")],
