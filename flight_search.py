@@ -256,8 +256,17 @@ def main():
     return
 
 
-# -------------------------------------------------------------------------------------------------------------- #
+# ------------------------------------------------------------------------------------------- #
+# List of other functions below
 
+# configure_flight_link
+# figure_out_dates
+# look_for_flights
+# process_flight_info
+# road_goat_image_search
+# send_email
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Other functions used in main
 
 # Takes flight deal information, formats link to specific flight search on Kiwi.com (including filters like stops, etc.)
