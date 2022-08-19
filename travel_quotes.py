@@ -1,3 +1,5 @@
+# Dictionary of 77 travel related quotes that will be randomly displayed on user's homepage
+
 quote_dictionary = {
     "1": '“To my mind, the greatest reward and luxury of travel is to be able to experience everyday things as if for the first time, to be in a position in which almost nothing is so familiar it is taken for granted.” – Bill Bryson',
     "2": '“The world is a book and those who do not travel read only one page.” – St. Augustine',

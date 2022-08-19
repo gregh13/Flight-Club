@@ -528,7 +528,7 @@ def road_goat_image_search(city_name, country_to):
 
     # if city name didn't get any results and destination is in Australia, look for images of the state the city is in
     if ", Australia" in city_name:
-        # Isolate just two letter state abbreviation
+        # Isolate just the state abbreviation
         state = city_name.split(", ")[-2]
 
         # Grab state's full name from state's abbreviation
