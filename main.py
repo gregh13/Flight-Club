@@ -598,7 +598,7 @@ def delete_account():
             dest = Destinations.query.filter_by(user_dest_id=current_user.id).first()
             deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first()
 
-            # Delete user's account and all information
+            # Delete user's account and all user information
             db.session.delete(prefs)
             db.session.delete(dest)
             db.session.delete(deals)
