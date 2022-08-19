@@ -17,6 +17,9 @@ import ast
 from datetime import datetime, date
 import os
 
+# ------------------------------------------------------------------------------------------- #
+# Configuration and Keys
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("CONFIG_SECRET_KEY")
 api_key = os.getenv("SIB_APIKEY")
@@ -24,21 +27,25 @@ company_email = os.getenv("COM_EMAIL")
 company_name = "Flight Club"
 MAIN_URL = os.getenv("MAIN_URL")
 Bootstrap(app)
+Base = declarative_base()
 
-# LATER, during Heroku stage
+# Gets db url from Heroku Postgres, need to change format to work with sqlalchemy
 uri = os.getenv("DATABASE_URL")
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///club-users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Setup login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_message = ''
+login_manager.login_view = 'login'
 
-Base = declarative_base()
+
+# ------------------------------------------------------------------------------------------- #
+# Database Tables
 
 
 class User(UserMixin, db.Model, Base):
@@ -53,6 +60,7 @@ class User(UserMixin, db.Model, Base):
     reset_token = db.Column(db.Text)
     reset_timestamp = db.Column(db.String(100))
     quote_string = db.Column(db.Text)
+    # Links the other three tables to this table
     preferences = relationship('Preferences', back_populates="user_pref")
     destinations = relationship('Destinations', back_populates="user_dest")
     flight_deals = relationship('FlightDeals', back_populates="user_deals")
@@ -60,12 +68,8 @@ class User(UserMixin, db.Model, Base):
 
 class Destinations(db.Model, Base):
     __tablename__ = 'destinations'
-    # id is for this table, same as all tables
     id = db.Column(db.Integer, primary_key=True)
-    # relationship id uses ForeignKey with the table name of parent: (users)
     user_dest_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # relationship param uses the parent class name: (User)
-    # back_populates to whatever you named the relationship in the parent/child
     user_dest = relationship("User", back_populates="destinations")
     home_airport = db.Column(db.String(100))
     currency = db.Column(db.String(100))
@@ -156,21 +160,54 @@ class FlightDeals(db.Model, Base):
 db.create_all()
 
 
-@app.route('/redirect/<action>')
+# ------------------------------------------------------------------------------------------- #
+# List of All Functions and Routes
+
+# action_success
+# admin_only
+# authenticate_reset_password
+# change_email
+# change_name
+# change_password
+# confirm_account
+# create_account
+# delete_account
+# get_random_string
+# landing_page
+# load_user
+# login
+# logout
+# logout_anyway
+# my_account
+# my_deals
+# my_destinations
+# my_preferences
+# not_found
+# report_issue
+# reset_password
+# secret
+# send_email
+# serious_report
+# travel_quote_string
+# update_destinations
+# update_preferences
+# user_home
+
+
+# ------------------------------------------------------------------------------------------- #
+# Functions and Routes
+
+# Gives feedback to user after completing some action/step
+@app.route('/<action>')
 def action_success(action):
+    # Action variable is only used to give better feedback to user via the url link ending
+    # Get page details from session variables
     params = session.get('params', None)
     page_title = session.get('page_title', None)
     return render_template("action_successful.html", params=params, page_title=page_title)
 
 
-@app.route('/redirectionwrap/<params>/<page_title>/<action>')
-def action_successful_redirect(params, page_title, action):
-    parameters = ast.literal_eval(params)
-    session['params'] = parameters
-    session['page_title'] = page_title
-    return redirect(url_for('action_success', action=action))
-
-
+# Wrapper used to limit access to only admin
 def admin_only(function):
     @wraps(function)
     def decorated_function(*args, **kwargs):
@@ -197,7 +234,7 @@ def authenticate_reset_password(user_recovery_string):
 
         if user.reset_token is None:
             flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
-            return redirect(url_for("reset_your_password"))
+            return redirect(url_for("reset_password"))
 
         # reformat user.reset_timestamp into datetime
         timestamp_config = tuple([int(x) for x in user.reset_timestamp[:10].split('-')]) + \
@@ -209,7 +246,7 @@ def authenticate_reset_password(user_recovery_string):
         if time_difference_mins > 30:
             user.reset_token = None
             flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
-            return redirect(url_for("reset_your_password"))
+            return redirect(url_for("reset_password"))
 
         if user.reset_token == user_recovery_string:
             password = form.password.data
@@ -233,11 +270,12 @@ def authenticate_reset_password(user_recovery_string):
                       "body3": None,
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
+            session['params'] = params
+            session['page_title'] = "Password Reset Successfully!"
 
-            return redirect(url_for('action_successful_redirect', params=params,
-                                    page_title="Password Reset Successfully!", action="password_reset_success"))
+            return redirect(url_for('action_success', action="password_reset_success"))
         flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
-        return redirect(url_for("reset_your_password"))
+        return redirect(url_for("reset_password"))
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
@@ -254,17 +292,17 @@ def change_email():
             return redirect(url_for('change_email'))
         if check_password_hash(user.password, current_password):
             all_users = User.query.all()
-            confirmation_string = create_random_string()
+            confirmation_string = get_random_string()
             # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
             all_confirmations_tokens = [user.confirmation_token for user in all_users]
             while confirmation_string in all_confirmations_tokens:
-                confirmation_string = create_random_string()
+                confirmation_string = get_random_string()
             user.email = form.email.data
             user.confirmation_token = confirmation_string
             user.confirmed = False
             db.session.commit()
             logout_user()
-            email_params = {"confirmation_token": f"{MAIN_URL}confirm_your_account/{confirmation_string}",
+            email_params = {"confirmation_token": f"{MAIN_URL}confirm_account/{confirmation_string}",
                             "name": user.name,
                             "header_link": MAIN_URL}
             send_email(company_email=company_email, company_name=company_name,
@@ -280,8 +318,10 @@ def change_email():
                       "button_text": None,
                       "url_for": None}
 
-            return redirect(url_for('action_successful_redirect', params=params, page_title="Confirm Your New Email",
-                                    action="confirmation_email_sent"))
+            session['params'] = params
+            session['page_title'] = "Confirm Your New Email"
+
+            return redirect(url_for('action_success', action="confirmation_email_sent"))
         else:
             flash("Sorry, your current password was incorrect.")
             return redirect(url_for('change_email'))
@@ -303,9 +343,12 @@ def change_name():
                   "body3": None,
                   "button_text": "My Dashboard",
                   "url_for": 'user_home'}
+
+        session['params'] = params
+        session['page_title'] = "Name Changed!"
+
         return redirect(
-            url_for('action_successful_redirect', params=params, page_title="Name Changed!",
-                    action="change_name_success"))
+            url_for('action_success', action="change_name_success"))
 
     return render_template("change_name.html", form=form, page_title=page_title)
 
@@ -342,17 +385,20 @@ def change_password():
                       "body3": None,
                       "button_text": "Go to Login Page",
                       "url_for": 'login'}
+
+            session['params'] = params
+            session['page_title'] = "Password Changed!"
+
             return redirect(
-                url_for('action_successful_redirect', params=params, page_title="Password Changed!",
-                        action="change_password_success"))
+                url_for('action_success', action="change_password_success"))
         else:
             flash("Sorry, your current password was incorrect.")
             return redirect(url_for('change_password'))
     return render_template("change_password.html", page_title=page_title, form=form)
 
 
-@app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
-def confirm_your_account(confirm_string):
+@app.route('/confirm_account/<confirm_string>', methods=["GET"])
+def confirm_account(confirm_string):
     page_title = "Account Confirmed!"
     params = {"heading": "Your account has been confirmed!",
               "body1": "You've climbed the ladder, said the secret password, "
@@ -366,8 +412,9 @@ def confirm_your_account(confirm_string):
 
         if user.confirmed:
             if user.confirmation_token == confirm_string:
-                return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                                        action="confirmation_success"))
+                session['params'] = params
+                session['page_title'] = page_title
+                return redirect(url_for('action_success', action="confirmation_success"))
             else:
                 continue
         # Since tokens are unique, we can confirm without checking which user is confirming
@@ -376,8 +423,9 @@ def confirm_your_account(confirm_string):
             db.session.commit()
 
             login_user(user)
-            return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                                    action="confirmation_success"))
+            session['params'] = params
+            session['page_title'] = page_title
+            return redirect(url_for('action_success', action="confirmation_success"))
         else:
             continue
 
@@ -389,12 +437,13 @@ def confirm_your_account(confirm_string):
               "button_text": None,
               "url_for": None}
 
-    return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
-                            action="confirmation_email_sent"))
+    session['params'] = params
+    session['page_title'] = "Almost there..."
+    return redirect(url_for('action_success', action="confirmation_email_sent"))
 
 
-@app.route('/create_an_account/<join_type>', methods=['GET', 'POST'])
-def create_an_account(join_type):
+@app.route('/create_account/<join_type>', methods=['GET', 'POST'])
+def create_account(join_type):
     if current_user.is_authenticated:
         return redirect(url_for('user_home'))
     page_title = "Create an Account"
@@ -411,11 +460,11 @@ def create_an_account(join_type):
             salt_length=8
         )
         all_users = User.query.all()
-        confirmation_string = create_random_string()
+        confirmation_string = get_random_string()
         # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
         all_confirmations_tokens = [user.confirmation_token for user in all_users]
         while confirmation_string in all_confirmations_tokens:
-            confirmation_string = create_random_string()
+            confirmation_string = get_random_string()
 
         starting_string = travel_quote_string()
         user = User(name=form.name.data,
@@ -429,7 +478,7 @@ def create_an_account(join_type):
         db.session.add(user)
         db.session.commit()
 
-        params = {"confirmation_token": f"{MAIN_URL}confirm_your_account/{confirmation_string}",
+        params = {"confirmation_token": f"{MAIN_URL}confirm_account/{confirmation_string}",
                   "name": user.name,
                   "header_link": MAIN_URL}
         send_email(company_email=company_email, company_name=company_name,
@@ -472,18 +521,10 @@ def create_an_account(join_type):
                   "button_text": None,
                   "url_for": None}
 
-        return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
-                                action="confirmation_email_sent"))
+        session['params'] = params
+        session['page_title'] = "Almost there..."
+        return redirect(url_for('action_success', action="confirmation_email_sent"))
     return render_template('register.html', form=form, page_title=page_title)
-
-
-# Returns a random string of alphanumeric (both upper and lowercase) of variable length (78 to 97)
-def create_random_string():
-    seq_len = random.randint(78, 97)
-    random_string = ""
-    for x in range(0, seq_len):
-        random_string += random.choice(COMBINED_LIST)
-    return random_string
 
 
 @app.route('/delete_account', methods=["GET", "POST"])
@@ -509,15 +550,25 @@ def delete_account():
                       "body3": None,
                       "button_text": "Go to Main Page",
                       "url_for": 'landing_page'}
+            session['params'] = params
+            session['page_title'] = "Account Deleted!"
             return redirect(
-                url_for('action_successful_redirect', params=params, page_title="Account Deleted!",
-                        action="delete_account_success"))
+                url_for('action_success', action="delete_account_success"))
 
         else:
             flash("Sorry, the password you entered was incorrect")
             return redirect(url_for('delete_account'))
 
     return render_template("delete_account.html", form=form, page_title=page_title)
+
+
+# Returns a random string of alphanumeric (both upper and lowercase) of variable length (78 to 97)
+def get_random_string():
+    seq_len = random.randint(78, 97)
+    random_string = ""
+    for x in range(0, seq_len):
+        random_string += random.choice(COMBINED_LIST)
+    return random_string
 
 
 @app.route('/')
@@ -551,9 +602,9 @@ def login():
                       "body3": None,
                       "button_text": None,
                       "url_for": None}
-
-            return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
-                                    action="confirmation_email_sent"))
+            session['params'] = params
+            session['page_title'] = "Almost there..."
+            return redirect(url_for('action_success', action="confirmation_email_sent"))
         if check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('user_home'))
@@ -660,8 +711,9 @@ def not_found(error):
               "body3": None,
               "button_text": "Return to Main Page",
               "url_for": "landing_page"}
-    return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                            action="page_not_found"))
+    session['params'] = params
+    session['page_title'] = page_title
+    return redirect(url_for('action_success', action="page_not_found"))
 
 
 @app.route('/report_issue', methods=["GET", "POST"])
@@ -703,13 +755,14 @@ def report_issue():
                   "body3": "Thank you for your patience.",
                   "button_text": "Return to Home",
                   "url_for": 'user_home'}
-        return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
-                                action="report_submitted"))
+        session['params'] = params
+        session['page_title'] = "Report Submitted!"
+        return redirect(url_for('action_success', action="report_submitted"))
     return render_template('report_issue.html', form=form, page_title=page_title)
 
 
-@app.route('/reset_your_password', methods=["GET", "POST"])
-def reset_your_password():
+@app.route('/reset_password', methods=["GET", "POST"])
+def reset_password():
     form = SendResetEmail()
     page_title = "Reset Your Password"
     if form.validate_on_submit():
@@ -718,8 +771,8 @@ def reset_your_password():
         user = User.query.filter_by(email=email).first()
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
-            return redirect(url_for('reset_your_password'))
-        reset_string = create_random_string()
+            return redirect(url_for('reset_password'))
+        reset_string = get_random_string()
         user.reset_token = reset_string
         user.reset_timestamp = timestamp
         db.session.commit()
@@ -737,8 +790,9 @@ def reset_your_password():
                   "body3": None,
                   "button_text": None,
                   "url_for": None}
-        return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
-                                action="reset_email_sent"))
+        session['params'] = params
+        session['page_title'] = "Reset Email Sent!"
+        return redirect(url_for('action_success', action="reset_email_sent"))
     return render_template("send_reset_email.html", page_title=page_title, form=form)
 
 
@@ -935,9 +989,6 @@ def user_home():
     quote = quote_dictionary[random_num]
     return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
-
-login_manager.login_message = ''
-login_manager.login_view = 'login'
 
 if __name__ == '__main__':
     app.run()
