@@ -219,6 +219,7 @@ def admin_only(function):
     return decorated_function
 
 
+# Checks user timestamp and reset token to verify password reset
 @app.route('/itsokfriendweforgiveyou/<user_recovery_string>', methods=["GET", "POST"])
 def authenticate_reset_password(user_recovery_string):
     form = ResetPassword()
@@ -243,27 +244,36 @@ def authenticate_reset_password(user_recovery_string):
         td = current_timestamp - reset_timestamp
         time_difference_mins = int(round(td.total_seconds() / 60))
 
+        # Check if user's password reset link hasn't expired
         if time_difference_mins > 30:
+            # Set user's reset_token to empty since too much time has elapsed
             user.reset_token = None
             flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
             return redirect(url_for("reset_password"))
 
+        # Check users reset token with reset string in the url link
         if user.reset_token == user_recovery_string:
             password = form.password.data
+
+            # Salt and hash user's new password
             salted_hashbrowns = generate_password_hash(
                 password=password,
                 method='pbkdf2:sha256',
                 salt_length=8
             )
             user.password = salted_hashbrowns
+
+            # Set user's reset token back to empty
             user.reset_token = None
             db.session.commit()
 
+            # Send email to user
             email_params = {"header_link": MAIN_URL}
             send_email(company_email=company_email, company_name=company_name, user_name=user.name,
                        user_email=user.email,
                        subject="Password Change Notice", params=email_params, template_id=8, api_key=api_key)
 
+            # Set params for the action_success page shown to user next
             params = {"heading": "Your password has been reset to your new password",
                       "body1": "Please login to your account.",
                       "body2": None,
@@ -272,13 +282,14 @@ def authenticate_reset_password(user_recovery_string):
                       "url_for": 'login'}
             session['params'] = params
             session['page_title'] = "Password Reset Successfully!"
-
             return redirect(url_for('action_success', action="password_reset_success"))
+
         flash(f"Sorry, your reset link token has expired, please submit a new reset email request.")
         return redirect(url_for("reset_password"))
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
+# Allows current users to change their email address
 @app.route('/my_account/change_email', methods=["GET", "POST"])
 @login_required
 def change_email():
@@ -287,21 +298,30 @@ def change_email():
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
         current_password = form.password.data
+
+        # Check if new email is available to make an account
         if User.query.filter_by(email=form.email.data).first():
             flash(f"An account for '{form.email.data}' already exists. Please try a different email address")
             return redirect(url_for('change_email'))
+
+        # Checks entered password with user's password in db
         if check_password_hash(user.password, current_password):
             all_users = User.query.all()
             confirmation_string = get_random_string()
-            # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
+
+            # Check existing tokens, makes sure no one has the same token (even though the odds are incredibly small)
             all_confirmations_tokens = [user.confirmation_token for user in all_users]
             while confirmation_string in all_confirmations_tokens:
                 confirmation_string = get_random_string()
+
+            # Change email, add confirmation token, reset 'confirmed' to False, save to db, logout user
             user.email = form.email.data
             user.confirmation_token = confirmation_string
             user.confirmed = False
             db.session.commit()
             logout_user()
+
+            # Send account confirmation email to user's new email
             email_params = {"confirmation_token": f"{MAIN_URL}confirm_account/{confirmation_string}",
                             "name": user.name,
                             "header_link": MAIN_URL}
@@ -310,6 +330,7 @@ def change_email():
                        subject="Account Confirmation", params=email_params,
                        template_id=5, api_key=api_key)
 
+            # Set params for the action_success page shown to user next
             params = {"heading": "Please check your email to confirm your change of email address",
                       "body1": "Again, if you don't see an email from us in your inbox, check your spam folder.",
                       "body2": "And if it ended up in the spam folder, make sure to mark it as 'Not Spam' "
@@ -320,14 +341,16 @@ def change_email():
 
             session['params'] = params
             session['page_title'] = "Confirm Your New Email"
-
             return redirect(url_for('action_success', action="confirmation_email_sent"))
+
         else:
+            # Password was incorrect, reload change email page
             flash("Sorry, your current password was incorrect.")
             return redirect(url_for('change_email'))
     return render_template("change_email.html", page_title=page_title, form=form)
 
 
+# Allows user to change name that is displayed on user's homepage
 @app.route('/change_name', methods=["GET", "POST"])
 @login_required
 def change_name():
@@ -337,6 +360,8 @@ def change_name():
         user = User.query.filter_by(id=current_user.id).first()
         user.name = form.name.data
         db.session.commit()
+
+        # Set params for the action_success page shown to user next
         params = {"heading": "Your name has been successfully changed",
                   "body1": "You can view your name at the top of your dashboard or in your account settings",
                   "body2": None,
@@ -346,13 +371,13 @@ def change_name():
 
         session['params'] = params
         session['page_title'] = "Name Changed!"
-
         return redirect(
             url_for('action_success', action="change_name_success"))
 
     return render_template("change_name.html", form=form, page_title=page_title)
 
 
+# Allows user to change their password
 @app.route('/my_account/change_password', methods=["GET", "POST"])
 @login_required
 def change_password():
@@ -361,8 +386,12 @@ def change_password():
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
         current_password = form.password.data
+
+        # Checks entered password with user's password in db
         if check_password_hash(user.password, current_password):
             new_password = form.new_password.data
+
+            # Salt and hash user's new password, save to db, and logout user
             salted_hashbrowns = generate_password_hash(
                 password=new_password,
                 method='pbkdf2:sha256',
@@ -373,12 +402,13 @@ def change_password():
 
             logout_user()
 
-            # send email to user saying they've changed their password
+            # Send email to user about password change
             email_params = {"header_link": MAIN_URL}
             send_email(company_email=company_email, company_name=company_name, user_name=user.name,
                        user_email=user.email,
                        subject="Password Change Notice", params=email_params, template_id=8, api_key=api_key)
 
+            # Set params for the action_success page shown to user next
             params = {"heading": "Your password has been successfully changed",
                       "body1": "Please login to your account again.",
                       "body2": None,
@@ -397,6 +427,7 @@ def change_password():
     return render_template("change_password.html", page_title=page_title, form=form)
 
 
+# Unique url link in confirmation email takes users to this webpage to confirm their account
 @app.route('/confirm_account/<confirm_string>', methods=["GET"])
 def confirm_account(confirm_string):
     page_title = "Account Confirmed!"
@@ -407,21 +438,27 @@ def confirm_account(confirm_string):
               "body3": None,
               "button_text": "Go to My Account",
               "url_for": "user_home"}
+
+    # Rather than create more friction in confirmation process, users only need to click the link in the email.
+    # Back-end searches through all users to match the confirmation_string with their confirmation token
     all_users = User.query.all()
     for user in all_users:
 
         if user.confirmed:
             if user.confirmation_token == confirm_string:
+                # User is already confirmed, redirect to confirmation page
                 session['params'] = params
                 session['page_title'] = page_title
                 return redirect(url_for('action_success', action="confirmation_success"))
             else:
+                # Skip other confirmed users
                 continue
-        # Since tokens are unique, we can confirm without checking which user is confirming
+        # Search all unconfirmed users
+        # Since confirmation tokens are unique, we can confirm without checking which user is confirming
         elif user.confirmation_token == confirm_string:
+            # Set user as confirmed, login user, set params for redirect to action success page
             user.confirmed = True
             db.session.commit()
-
             login_user(user)
             session['params'] = params
             session['page_title'] = page_title
@@ -429,6 +466,7 @@ def confirm_account(confirm_string):
         else:
             continue
 
+    # In case confirmation string doesn't match any users, prepare general message for redirect action success page
     params = {"heading": "Please check your email to confirm your account",
               "body1": "If you don't see an email from us in your inbox, check your spam folder.",
               "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
