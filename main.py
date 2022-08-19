@@ -667,6 +667,8 @@ def login():
 
         # Checks if user has confirmed their account
         if not user.confirmed:
+
+            # Set params for the action_success page shown to user next
             params = {"heading": "Please check your email to confirm your account",
                       "body1": "If you don't see an email from us in your inbox, check your spam folder.",
                       "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
@@ -723,39 +725,54 @@ def my_account():
     return render_template("my_account.html", page_title=page_title)
 
 
-
+# Shows user flight deals for all destinations (and a message for destinations where no deals were found)
 @app.route('/my_deals')
 @login_required
 def my_deals():
     page_title = "My Flight Deals"
+
+    # Grabs a dictionary of user's flight deal information
     user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
 
+    # Page shows the date of the most recent flight search. For new users, date will default to today's date
     if not user_deals["flight_search_date"]:
         user_deals["flight_search_date"] = date.today().strftime('%a, %B %-d, %Y')
 
     return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
 
 
+# Shows user their current destinations and price ceilings
 @app.route('/my_destinations')
 @login_required
 def my_destinations():
     page_title = "My Destinations"
+
+    # Pass city codes to webpage to change 3 letter codes to more user friendly city/country names
     city_options = all_cities_international
+
+    # Grab dictionary of user's destinations
     des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
-    month = date.today().strftime("%B").lower()
+
+    # For new users who haven't updated their destinations and preferred currency, default to blank
     if not des["currency"]:
         des["currency"] = ""
+
+    # Gets current month for the link to events happening around the world by month
+    month = date.today().strftime("%B").lower()
 
     return render_template("my_destinations.html", page_title=page_title, des=des,
                            city_options=city_options, current_month=month)
 
 
+# Shows user their current search preferences
 @app.route('/my_preferences')
 @login_required
 def my_preferences():
     page_title = "My Preferences"
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
 
+    # User's preferences are stored in db with integers and keys that are easier to use in the flight search
+    # The following dictionaries turn those keys into more user friendly output
     email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 3: "Once every two weeks",
                        4: "Once a month", 5: "Once a month", 6: "Once a month", 7: "Once a month"}
     email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
@@ -767,13 +784,18 @@ def my_preferences():
     search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
                           60: 'Two months', 90: 'Three months', 120: 'Four months', 150: 'Five months',
                           180: 'Six months', 0: 'Using Specific Date'}
+
+    # Initialize variables
     start_specific = None
     end_specific = None
+
+    # If user has specific dates, format them to more user friendly output (e.g. Mon, August 15th, 2022)
     if prefs.specific_search_start_date:
         start_specific = prefs.specific_search_start_date.strftime('%a, %B %-d, %Y')
     if prefs.specific_search_end_date:
         end_specific = prefs.specific_search_end_date.strftime('%a, %B %-d, %Y')
 
+    # Compile all dictionaries into one master dictionary to send for page rendering
     preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
                               "cabin_class": cabin_class_dict, "exclude_airlines": exclude_airlines_dict,
                               "ret_to_diff_airport": ret_to_diff_airport_dict,
@@ -783,8 +805,10 @@ def my_preferences():
     return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
 
 
+# Custom 404 handling for more pleasant user experience when things go awry
 @app.errorhandler(404)
 def not_found(error):
+    # Set params for the action_success page shown to user next
     page_title = "Flight GPS not working?"
     params = {"heading": "404 - Page Not Found",
               "body1": "Oh no! Something's not right with the url. We couldn't find a page for you, sorry about that.",
