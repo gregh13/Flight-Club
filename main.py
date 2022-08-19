@@ -821,38 +821,40 @@ def not_found(error):
     return redirect(url_for('action_success', action="page_not_found"))
 
 
+# Allows user to send a report to admin in case of a bug, complaint, or request
 @app.route('/report_issue', methods=["GET", "POST"])
 def report_issue():
+    # Users must be logged in to send a report
     if not current_user.is_authenticated:
         flash("You need to login before you can report an issue.")
         return redirect(url_for('login'))
+
     page_title = "Have A Concern?"
     form = SubmitTicketForm()
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
 
-        # sends email to user as a copy of their reported issue
+        # Sends email to user as a copy of their reported issue
         email_params1 = {"issue_subject": form.issue_subject.data,
                          "issue_description": form.issue_description.data,
                          "header_link": MAIN_URL}
-
         send_email(company_email=company_email, company_name=company_name,
                    user_name=user.name, user_email=user.email,
                    subject="Details of Reported Issue", params=email_params1,
                    template_id=6, api_key=api_key)
 
-        # send email to FlightClub to notify of a reported issue
+        # Sends email to notify FlightClub of the reported issue
         email_params2 = {"issue_subject": form.issue_subject.data,
                          "issue_description": form.issue_description.data,
                          "email": user.email,
                          "name": user.name,
                          "header_link": MAIN_URL}
-
         send_email(company_email=company_email, company_name=company_name,
                    user_name=company_name, user_email=company_email,
                    subject=f"Issue Reported by {user.name}", params=email_params2,
                    template_id=7, api_key=api_key)
 
+        # Set params for the action_success page shown to user next
         params = {"heading": "Your issue has been successfully reported",
                   "body1": "An email has been sent to Flight Club about your concern. "
                            "You have also been sent an email with the details of your report.",
@@ -866,29 +868,37 @@ def report_issue():
     return render_template('report_issue.html', form=form, page_title=page_title)
 
 
+# Allows user to reset their password in case they forgot and can't login
 @app.route('/reset_password', methods=["GET", "POST"])
 def reset_password():
     form = SendResetEmail()
     page_title = "Reset Your Password"
     if form.validate_on_submit():
+        # Captures time of password reset request
         timestamp = datetime.today()
         email = form.email.data
         user = User.query.filter_by(email=email).first()
+        # Check if entered email matches a user's email in db
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('reset_password'))
+
+        # Generate a random reset token
         reset_string = get_random_string()
+
+        # Save reset token and timestamp to user's info in db, will be used during authentication step
         user.reset_token = reset_string
         user.reset_timestamp = timestamp
         db.session.commit()
 
-        # send email to user with a link with string at end
+        # Send email to user with a password reset link with reset_string at end
         email_params = {"reset_token": f"{MAIN_URL}itsokfriendweforgiveyou/{reset_string}",
                         "notify": f"{MAIN_URL}report_issue", "header_link": MAIN_URL}
 
         send_email(company_email=company_email, company_name=company_name, user_name=user.name, user_email=user.email,
                    subject="Password Reset Request", params=email_params, template_id=4, api_key=api_key)
 
+        # Set params for the action_success page shown to user next
         params = {"heading": "An email has been sent to help you reset your password.",
                   "body1": "Please check your email and follow the instructions provided.",
                   "body2": None,
@@ -901,15 +911,15 @@ def reset_password():
     return render_template("send_reset_email.html", page_title=page_title, form=form)
 
 
+# Admin only route, just a placeholder location for now
 @app.route('/secret')
 @admin_only
 def secret():
-    # Placeholder location for now
-    # Will add admin features according to the needs of the projects (once users become active and problems arise)
+    # Will add admin features according to the needs of the project (once more users become active and problems arise)
     return render_template('secret.html')
 
 
-# Takes flight search deal information, sends nicely formatted email to user
+# Takes flight search deal information, sends nicely formatted email to user via SendInBlue
 def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
     # Configure request params and data
     url = "https://api.sendinblue.com/v3/smtp/email"
@@ -931,31 +941,31 @@ def send_email(company_email, company_name, user_name, user_email, subject, para
         "Content-Type": "application/json",
         "api-key": api_key
     }
+
     # Send email to user
     response = requests.post(url, json=payload, headers=headers)
     response.raise_for_status()
     return response.text
 
 
+# Allows users who have submitted a normal report to submit a second and more urgent report
 @app.route('/serious_report')
 @login_required
 def serious_report():
     # For users who reported an issue and want to take further action.
     user = User.query.filter_by(id=current_user.id).first()
 
-    # sends email to user as a copy of their reported issue
+    # Sends email to user as a copy of their reported issue
     email_params1 = {"revisit": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
-
     send_email(company_email=company_email, company_name=company_name,
                user_name=user.name, user_email=user.email,
                subject=None, params=email_params1,
                template_id=11, api_key=api_key)
 
-    # send email to FlightClub to notify of a reported issue
+    # Send email to FlightClub to notify of this serious reported issue
     email_params2 = {"email": user.email,
                      "name": user.name,
                      "revisit": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
-
     send_email(company_email=company_email, company_name=company_name,
                user_name=company_name, user_email=company_email,
                subject=None, params=email_params2,
@@ -965,11 +975,12 @@ def serious_report():
 
 
 # Returns a string with a comma separated list of 1 to 77, (eliminates repeats for random travel quotes on user's home)
-# Value is stored in database for user, hence the use of a string rather than an array
+# Value is stored in database for user, hence the use of a string rather than an array/list
 def travel_quote_string():
     string = ""
     for x in range(1, 78):
         if x == 77:
+            # Last number in string, doesn't add a comma after the number
             string += str(x)
         else:
             string += f"{x},"
