@@ -311,6 +311,7 @@ h2 {
 /* -------------------------------------------------------------------------------------------- */
 /* Responsive Viewing */
 
+/* For tablets and small window size */
 @media (max-width: 800px) and (min-width: 561px) {
 
   h1 {
@@ -321,6 +322,7 @@ h2 {
   }
 }
 
+/* For mobile phones */
 @media (max-width: 420px) {
 
   .container-fluid {
