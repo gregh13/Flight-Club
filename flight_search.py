@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, date
 from main import User, Preferences, FlightDeals, db
 from new_iata_codes import all_cities_international
 from bad_airlines import bad_airline_string
-from states_dictionaries import usa_states_dict
+from states_dictionaries import usa_states_dict, australia_states_dict
 import requests
 import base64
 import urllib.parse
@@ -516,6 +516,24 @@ def road_goat_image_search(city_name, country_to):
         # Grab state's full name from state's abbreviation
         if state in usa_states_dict:
             state_name = usa_states_dict[state]
+        else:
+            state_name = state
+        url_encoded_state_name = urllib.parse.quote(state_name)
+
+        # Search road goat for USA state image
+        state_link = send_api_request(query=url_encoded_state_name)
+
+        if state_link:
+            return state_link
+
+    # if city name didn't get any results and destination is in Australia, look for images of the state the city is in
+    if ", Australia" in city_name:
+        # Isolate just two letter state abbreviation
+        state = city_name.split(", ")[-2]
+
+        # Grab state's full name from state's abbreviation
+        if state in australia_states_dict:
+            state_name = australia_states_dict[state]
         else:
             state_name = state
         url_encoded_state_name = urllib.parse.quote(state_name)
