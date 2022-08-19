@@ -156,46 +156,19 @@ class FlightDeals(db.Model, Base):
 db.create_all()
 
 
-def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
-    url = "https://api.sendinblue.com/v3/smtp/email"
-    payload = {
-        "sender": {
-            "email": company_email,
-            "name": company_name
-        },
-        "to": [{
-            "email": user_email,
-            "name": user_name
-        }],
-        "subject": subject,
-        "params": params,
-        "templateId": template_id
-    }
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "api-key": api_key
-    }
-    response = requests.post(url, json=payload, headers=headers)
-    return response.text
+@app.route('/redirect/<action>')
+def action_success(action):
+    params = session.get('params', None)
+    page_title = session.get('page_title', None)
+    return render_template("action_successful.html", params=params, page_title=page_title)
 
 
-def create_random_string():
-    seq_len = random.randint(78, 97)
-    random_string = ""
-    for x in range(0, seq_len):
-        random_string += random.choice(COMBINED_LIST)
-    return random_string
-
-
-def travel_quote_string():
-    string = ""
-    for x in range(1, 78):
-        if x == 77:
-            string += str(x)
-        else:
-            string += f"{x},"
-    return string
+@app.route('/redirectionwrap/<params>/<page_title>/<action>')
+def action_successful_redirect(params, page_title, action):
+    parameters = ast.literal_eval(params)
+    session['params'] = parameters
+    session['page_title'] = page_title
+    return redirect(url_for('action_success', action=action))
 
 
 def admin_only(function):
@@ -207,120 +180,6 @@ def admin_only(function):
             return function(*args, **kwargs)
 
     return decorated_function
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
-
-
-@app.errorhandler(404)
-def not_found(error):
-    page_title = "Flight GPS not working?"
-    params = {"heading": "404 - Page Not Found",
-              "body1": "Oh no! Something's not right with the url. We couldn't find a page for you, sorry about that.",
-              "body2": "Click the button below to return to the main page.",
-              "body3": None,
-              "button_text": "Return to Main Page",
-              "url_for": "landing_page"}
-    return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                            action="page_not_found"))
-
-
-@app.route('/')
-def landing_page():
-    return render_template("index.html", page_title="")
-
-
-@app.route('/redirectionwrap/<params>/<page_title>/<action>')
-def action_successful_redirect(params, page_title, action):
-    parameters = ast.literal_eval(params)
-    session['params'] = parameters
-    session['page_title'] = page_title
-    return redirect(url_for('action_success', action=action))
-
-
-@app.route('/redirect/<action>')
-def action_success(action):
-    params = session.get('params', None)
-    page_title = session.get('page_title', None)
-    return render_template("action_successful.html", params=params, page_title=page_title)
-
-
-@app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
-def confirm_your_account(confirm_string):
-    page_title = "Account Confirmed!"
-    params = {"heading": "Your account has been confirmed!",
-              "body1": "You've climbed the ladder, said the secret password, "
-                       "and the wooden door has opened for you.",
-              "body2": "Welcome to the club, my friend!",
-              "body3": None,
-              "button_text": "Go to My Account",
-              "url_for": "user_home"}
-    all_users = User.query.all()
-    for user in all_users:
-
-        if user.confirmed:
-            if user.confirmation_token == confirm_string:
-                return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                                        action="confirmation_success"))
-            else:
-                continue
-        # Since tokens are unique, we can confirm without checking which user is confirming
-        elif user.confirmation_token == confirm_string:
-            user.confirmed = True
-            db.session.commit()
-
-            login_user(user)
-            return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
-                                    action="confirmation_success"))
-        else:
-            continue
-
-    params = {"heading": "Please check your email to confirm your account",
-              "body1": "If you don't see an email from us in your inbox, check your spam folder.",
-              "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
-                       "so that our other emails (and your deals!) don't get sent there as well.",
-              "body3": None,
-              "button_text": None,
-              "url_for": None}
-
-    return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
-                            action="confirmation_email_sent"))
-
-
-@app.route('/reset_your_password', methods=["GET", "POST"])
-def reset_your_password():
-    form = SendResetEmail()
-    page_title = "Reset Your Password"
-    if form.validate_on_submit():
-        timestamp = datetime.today()
-        email = form.email.data
-        user = User.query.filter_by(email=email).first()
-        if user is None:
-            flash(f"Sorry, there is no account for '{email}' in our database.")
-            return redirect(url_for('reset_your_password'))
-        reset_string = create_random_string()
-        user.reset_token = reset_string
-        user.reset_timestamp = timestamp
-        db.session.commit()
-
-        # send email to user with a link with string at end
-        email_params = {"reset_token": f"{MAIN_URL}itsokfriendweforgiveyou/{reset_string}",
-                        "notify": f"{MAIN_URL}report_issue", "header_link": MAIN_URL}
-
-        send_email(company_email=company_email, company_name=company_name, user_name=user.name, user_email=user.email,
-                   subject="Password Reset Request", params=email_params, template_id=4, api_key=api_key)
-
-        params = {"heading": "An email has been sent to help you reset your password.",
-                  "body1": "Please check your email and follow the instructions provided.",
-                  "body2": None,
-                  "body3": None,
-                  "button_text": None,
-                  "url_for": None}
-        return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
-                                action="reset_email_sent"))
-    return render_template("send_reset_email.html", page_title=page_title, form=form)
 
 
 @app.route('/itsokfriendweforgiveyou/<user_recovery_string>', methods=["GET", "POST"])
@@ -382,133 +241,6 @@ def authenticate_reset_password(user_recovery_string):
     return render_template("reset_password.html", page_title=page_title, form=form)
 
 
-@app.route('/report_issue', methods=["GET", "POST"])
-def report_issue():
-    if not current_user.is_authenticated:
-        flash("You need to login before you can report an issue.")
-        return redirect(url_for('login'))
-    page_title = "Have A Concern?"
-    form = SubmitTicketForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(id=current_user.id).first()
-
-        # sends email to user as a copy of their reported issue
-        email_params1 = {"issue_subject": form.issue_subject.data,
-                         "issue_description": form.issue_description.data,
-                         "header_link": MAIN_URL}
-
-        send_email(company_email=company_email, company_name=company_name,
-                   user_name=user.name, user_email=user.email,
-                   subject="Details of Reported Issue", params=email_params1,
-                   template_id=6, api_key=api_key)
-
-        # send email to FlightClub to notify of a reported issue
-        email_params2 = {"issue_subject": form.issue_subject.data,
-                         "issue_description": form.issue_description.data,
-                         "email": user.email,
-                         "name": user.name,
-                         "header_link": MAIN_URL}
-
-        send_email(company_email=company_email, company_name=company_name,
-                   user_name=company_name, user_email=company_email,
-                   subject=f"Issue Reported by {user.name}", params=email_params2,
-                   template_id=7, api_key=api_key)
-
-        params = {"heading": "Your issue has been successfully reported",
-                  "body1": "An email has been sent to Flight Club about your concern. "
-                           "You have also been sent an email with the details of your report.",
-                  "body2": "Flight Club will try to respond to this issue in a timely manner. ",
-                  "body3": "Thank you for your patience.",
-                  "button_text": "Return to Home",
-                  "url_for": 'user_home'}
-        return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
-                                action="report_submitted"))
-    return render_template('report_issue.html', form=form, page_title=page_title)
-
-
-@app.route('/home')
-@login_required
-def user_home():
-    user_name = current_user.name
-    page_title = f"Welcome Aboard, {user_name}"
-    user = User.query.filter_by(id=current_user.id).first()
-    quote_list = user.quote_string.split(",")
-    random_num = random.choice(quote_list)
-    quote_list.remove(random_num)
-    if len(quote_list) == 0:
-        new_quote_string = travel_quote_string()
-    else:
-        new_quote_string = ",".join(quote_list)
-    user.quote_string = new_quote_string
-    db.session.commit()
-
-    quote = quote_dictionary[random_num]
-    return render_template("user_home.html", page_title=page_title, travel_quote=quote)
-
-
-@app.route('/my_account')
-@login_required
-def my_account():
-    page_title = "My Account"
-    return render_template("my_account.html", page_title=page_title)
-
-
-@app.route('/change_name', methods=["GET", "POST"])
-@login_required
-def change_name():
-    page_title = "Change Your Name"
-    form = ChangeNameForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(id=current_user.id).first()
-        user.name = form.name.data
-        db.session.commit()
-        params = {"heading": "Your name has been successfully changed",
-                  "body1": "You can view your name at the top of your dashboard or in your account settings",
-                  "body2": None,
-                  "body3": None,
-                  "button_text": "My Dashboard",
-                  "url_for": 'user_home'}
-        return redirect(
-            url_for('action_successful_redirect', params=params, page_title="Name Changed!",
-                    action="change_name_success"))
-
-    return render_template("change_name.html", form=form, page_title=page_title)
-
-
-@app.route('/delete_account', methods=["GET", "POST"])
-@login_required
-def delete_account():
-    page_title = "Delete Your Account"
-    form = DeleteAccountForm()
-    if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-        user = User.query.filter_by(id=current_user.id).first()
-        if user.email != email:
-            flash("Sorry, the email address you entered is not this account's email address.")
-            return redirect(url_for('delete_account'))
-        if check_password_hash(user.password, password):
-            db.session.delete(user)
-            db.session.commit()
-            logout_user()
-            params = {"heading": "Your account and information have been permanently deleted",
-                      "body1": "We're sad to see you leave, but we understand how these things go. "
-                               "You can always make a new account with us if you change your mind",
-                      "body2": None,
-                      "body3": None,
-                      "button_text": "Go to Main Page",
-                      "url_for": 'landing_page'}
-            return redirect(
-                url_for('action_successful_redirect', params=params, page_title="Account Deleted!",
-                        action="delete_account_success"))
-
-        else:
-            flash("Sorry, the password you entered was incorrect")
-            return redirect(url_for('delete_account'))
-
-    return render_template("delete_account.html", form=form, page_title=page_title)
-
-
 @app.route('/my_account/change_email', methods=["GET", "POST"])
 @login_required
 def change_email():
@@ -556,6 +288,28 @@ def change_email():
     return render_template("change_email.html", page_title=page_title, form=form)
 
 
+@app.route('/change_name', methods=["GET", "POST"])
+@login_required
+def change_name():
+    page_title = "Change Your Name"
+    form = ChangeNameForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(id=current_user.id).first()
+        user.name = form.name.data
+        db.session.commit()
+        params = {"heading": "Your name has been successfully changed",
+                  "body1": "You can view your name at the top of your dashboard or in your account settings",
+                  "body2": None,
+                  "body3": None,
+                  "button_text": "My Dashboard",
+                  "url_for": 'user_home'}
+        return redirect(
+            url_for('action_successful_redirect', params=params, page_title="Name Changed!",
+                    action="change_name_success"))
+
+    return render_template("change_name.html", form=form, page_title=page_title)
+
+
 @app.route('/my_account/change_password', methods=["GET", "POST"])
 @login_required
 def change_password():
@@ -597,195 +351,46 @@ def change_password():
     return render_template("change_password.html", page_title=page_title, form=form)
 
 
-@app.route('/my_deals')
-@login_required
-def my_deals():
-    page_title = "My Flight Deals"
-    user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
+@app.route('/confirm_your_account/<confirm_string>', methods=["GET"])
+def confirm_your_account(confirm_string):
+    page_title = "Account Confirmed!"
+    params = {"heading": "Your account has been confirmed!",
+              "body1": "You've climbed the ladder, said the secret password, "
+                       "and the wooden door has opened for you.",
+              "body2": "Welcome to the club, my friend!",
+              "body3": None,
+              "button_text": "Go to My Account",
+              "url_for": "user_home"}
+    all_users = User.query.all()
+    for user in all_users:
 
-    if not user_deals["flight_search_date"]:
-        user_deals["flight_search_date"] = date.today().strftime('%a, %B %-d, %Y')
+        if user.confirmed:
+            if user.confirmation_token == confirm_string:
+                return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
+                                        action="confirmation_success"))
+            else:
+                continue
+        # Since tokens are unique, we can confirm without checking which user is confirming
+        elif user.confirmation_token == confirm_string:
+            user.confirmed = True
+            db.session.commit()
 
-    return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
-
-
-@app.route('/my_destinations')
-@login_required
-def my_destinations():
-    page_title = "My Destinations"
-    city_options = all_cities_international
-    des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
-    month = date.today().strftime("%B").lower()
-    if not des["currency"]:
-        des["currency"] = ""
-
-    return render_template("my_destinations.html", page_title=page_title, des=des,
-                           city_options=city_options, current_month=month)
-
-
-@app.route('/update_destinations', methods=['GET', 'POST'])
-@login_required
-def update_destinations():
-    page_title = "Update Destinations"
-    city_options = all_cities_international
-    # Grabs the current user object which contains their data
-    user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
-    # Form obj below doesn't populate fields contained within the FieldList/FormField.
-    # instead, need to manually add the data from the user object and pass it as a list of dictionaries
-    # to the SQL table variable that matches the name of the FieldList variable in the form (ex: 'destinations)
-    user_data_dict = user_des.__dict__
-    list_of_dicts = []
-    for x in range(1, 11):
-        if user_data_dict[f'city{x}'] is None:
-            pass
-        else:
-            dict_to_add = {"city": city_options[user_data_dict[f'city{x}']],
-                           "price_ceiling": user_data_dict[f'price{x}']}
-            list_of_dicts.append(dict_to_add)
-    user_des.destinations = list_of_dicts
-    if user_des.home_airport is None:
-        pass
-    else:
-        user_des.home_airport = city_options[user_data_dict["home_airport"]]
-    # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
-    form = DestinationForm(obj=user_des)
-
-    if form.validate_on_submit():
-
-        home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
-        destinations_update_dict = {"home_airport": home_airport, "currency": form.currency.data}
-        for x in range(1, 11):
-            destinations_update_dict[f"city{x}"] = None
-            destinations_update_dict[f"price{x}"] = None
-
-        destinations = form.destinations.entries
-
-        for x in range(0, len(destinations)):
-            dest_dict = destinations[x].data
-            destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
-                                                        if city_name == dest_dict['city']][0]
-            destinations_update_dict[f"price{x + 1}"] = dest_dict['price_ceiling']
-
-        Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
-
-        db.session.commit()
-
-        flash("Your destinations have been successfully updated.")
-        return redirect(url_for('my_destinations'))
-    return render_template("update_destinations.html", form=form, page_title=page_title, city_options=city_options)
-
-
-@app.route('/my_preferences')
-@login_required
-def my_preferences():
-    page_title = "My Preferences"
-    prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
-
-    email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 3: "Once every two weeks",
-                       4: "Once a month", 5: "Once a month", 6: "Once a month", 7: "Once a month"}
-    email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
-    cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
-    exclude_airlines_dict = {'true': 'Exclude Bad Airlines', 'false': 'Include All Airlines'}
-    ret_to_diff_airport_dict = {0: 'Don\'t Include', 1: 'Include'}
-    lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
-                      60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
-    search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
-                          60: 'Two months', 90: 'Three months', 120: 'Four months', 150: 'Five months',
-                          180: 'Six months', 0: 'Using Specific Date'}
-    start_specific = None
-    end_specific = None
-    if prefs.specific_search_start_date:
-        start_specific = prefs.specific_search_start_date.strftime('%a, %B %-d, %Y')
-    if prefs.specific_search_end_date:
-        end_specific = prefs.specific_search_end_date.strftime('%a, %B %-d, %Y')
-
-    preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
-                              "cabin_class": cabin_class_dict, "exclude_airlines": exclude_airlines_dict,
-                              "ret_to_diff_airport": ret_to_diff_airport_dict,
-                              "lead_time_start": lead_time_dict, "search_length": search_length_dict,
-                              "start_specific": start_specific, "end_specific": end_specific}
-
-    return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
-
-
-@app.route('/update_preferences', methods=['GET', 'POST'])
-@login_required
-def update_preferences():
-    page_title = "Update Preferences"
-    # Grabs the user's current preferences
-    prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
-    # Pass prefs as obj into form: populates the form with the current user's preferences
-    original_freq = prefs.email_frequency
-    print(f"\n\nOriginal: {original_freq}")
-    # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
-    if prefs.email_frequency == 3:
-        prefs.email_frequency = 2
-    if prefs.email_frequency in (5, 6, 7):
-        prefs.email_frequency = 4
-    form = PreferenceForm(obj=prefs)
-    if form.validate_on_submit():
-        updated_freq = form.email_frequency.data
-        # If user doesn't change email_freq pref (default input), need to change back to original user value
-        if original_freq == 3:
-            if updated_freq == "2":
-                updated_freq = original_freq
-        if original_freq in (5, 6, 7):
-            if updated_freq == "4":
-                updated_freq = original_freq
-
-        updated_preferences = {
-            "email_frequency": updated_freq, "email_day": form.email_day.data,
-            "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
-            "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
-            "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
-            "ret_to_diff_airport": form.ret_to_diff_airport.data,
-            "num_adults": form.num_adults.data, "num_children": form.num_children.data,
-            "num_infants": form.num_infants.data, "search_start_date": form.search_start_date.data,
-            "specific_search_start_date": form.specific_search_start_date.data,
-            "search_length": form.search_length.data, "specific_search_end_date": form.specific_search_end_date.data
-        }
-
-        Preferences.query.filter_by(user_pref_id=current_user.id).update(updated_preferences)
-
-        db.session.commit()
-
-        flash("Your preferences have been successfully updated.")
-
-        return redirect(url_for('my_preferences'))
-    return render_template("update_preferences.html", form=form, page_title=page_title)
-
-
-@app.route('/login', methods=["GET", "POST"])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('user_home'))
-    page_title = "Login"
-    form = LoginForm()
-    if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-        user = User.query.filter_by(email=email).first()
-        if user is None:
-            flash(f"Sorry, there is no account for '{email}' in our database.")
-            return redirect(url_for('login'))
-        if not user.confirmed:
-            params = {"heading": "Please check your email to confirm your account",
-                      "body1": "If you don't see an email from us in your inbox, check your spam folder.",
-                      "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
-                               "so that our other emails (and your deals!) don't get sent there as well.",
-                      "body3": None,
-                      "button_text": None,
-                      "url_for": None}
-
-            return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
-                                    action="confirmation_email_sent"))
-        if check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('user_home'))
+            return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
+                                    action="confirmation_success"))
+        else:
+            continue
 
-        flash("Sorry, the password is incorrect. Please try again.")
-        return redirect(url_for('login'))
-    return render_template("login.html", form=form, page_title=page_title)
+    params = {"heading": "Please check your email to confirm your account",
+              "body1": "If you don't see an email from us in your inbox, check your spam folder.",
+              "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                       "so that our other emails (and your deals!) don't get sent there as well.",
+              "body3": None,
+              "button_text": None,
+              "url_for": None}
+
+    return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
+                            action="confirmation_email_sent"))
 
 
 @app.route('/create_an_account/<join_type>', methods=['GET', 'POST'])
@@ -872,12 +477,305 @@ def create_an_account(join_type):
     return render_template('register.html', form=form, page_title=page_title)
 
 
+# Returns a random string of alphanumeric (both upper and lowercase) of variable length (78 to 97)
+def create_random_string():
+    seq_len = random.randint(78, 97)
+    random_string = ""
+    for x in range(0, seq_len):
+        random_string += random.choice(COMBINED_LIST)
+    return random_string
+
+
+@app.route('/delete_account', methods=["GET", "POST"])
+@login_required
+def delete_account():
+    page_title = "Delete Your Account"
+    form = DeleteAccountForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        user = User.query.filter_by(id=current_user.id).first()
+        if user.email != email:
+            flash("Sorry, the email address you entered is not this account's email address.")
+            return redirect(url_for('delete_account'))
+        if check_password_hash(user.password, password):
+            db.session.delete(user)
+            db.session.commit()
+            logout_user()
+            params = {"heading": "Your account and information have been permanently deleted",
+                      "body1": "We're sad to see you leave, but we understand how these things go. "
+                               "You can always make a new account with us if you change your mind",
+                      "body2": None,
+                      "body3": None,
+                      "button_text": "Go to Main Page",
+                      "url_for": 'landing_page'}
+            return redirect(
+                url_for('action_successful_redirect', params=params, page_title="Account Deleted!",
+                        action="delete_account_success"))
+
+        else:
+            flash("Sorry, the password you entered was incorrect")
+            return redirect(url_for('delete_account'))
+
+    return render_template("delete_account.html", form=form, page_title=page_title)
+
+
+@app.route('/')
+def landing_page():
+    return render_template("index.html", page_title="")
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('user_home'))
+    page_title = "Login"
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash(f"Sorry, there is no account for '{email}' in our database.")
+            return redirect(url_for('login'))
+        if not user.confirmed:
+            params = {"heading": "Please check your email to confirm your account",
+                      "body1": "If you don't see an email from us in your inbox, check your spam folder.",
+                      "body2": "If it unfortunately landed in the spam folder, make sure to mark it as 'Not Spam' "
+                               "so that our other emails (and your deals!) don't get sent there as well.",
+                      "body3": None,
+                      "button_text": None,
+                      "url_for": None}
+
+            return redirect(url_for('action_successful_redirect', params=params, page_title="Almost there...",
+                                    action="confirmation_email_sent"))
+        if check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('user_home'))
+
+        flash("Sorry, the password is incorrect. Please try again.")
+        return redirect(url_for('login'))
+    return render_template("login.html", form=form, page_title=page_title)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    user = User.query.filter_by(id=current_user.id).first()
+    user_dest_object = Destinations.query.filter_by(user_dest_id=user.destinations[0].user_dest_id).first()
+    if user_dest_object.city1 is None:
+        page_title = "Takeoff Delayed"
+        return render_template("no_destinations_logout.html", page_title=page_title)
+
+    logout_user()
+    session.clear()
+    return render_template('logout.html')
+
+
+@app.route('/logout-anyway')
+@login_required
+def logout_anyway():
+    logout_user()
+    session.clear()
+    return render_template('logout.html')
+
+
+@app.route('/my_account')
+@login_required
+def my_account():
+    page_title = "My Account"
+    return render_template("my_account.html", page_title=page_title)
+
+
+@app.route('/my_deals')
+@login_required
+def my_deals():
+    page_title = "My Flight Deals"
+    user_deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first().__dict__
+
+    if not user_deals["flight_search_date"]:
+        user_deals["flight_search_date"] = date.today().strftime('%a, %B %-d, %Y')
+
+    return render_template("my_deals.html", page_title=page_title, user_deals=user_deals)
+
+
+@app.route('/my_destinations')
+@login_required
+def my_destinations():
+    page_title = "My Destinations"
+    city_options = all_cities_international
+    des = Destinations.query.filter_by(user_dest_id=current_user.id).first().__dict__
+    month = date.today().strftime("%B").lower()
+    if not des["currency"]:
+        des["currency"] = ""
+
+    return render_template("my_destinations.html", page_title=page_title, des=des,
+                           city_options=city_options, current_month=month)
+
+
+@app.route('/my_preferences')
+@login_required
+def my_preferences():
+    page_title = "My Preferences"
+    prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
+
+    email_freq_dict = {1: "Once a week", 2: "Once every two weeks", 3: "Once every two weeks",
+                       4: "Once a month", 5: "Once a month", 6: "Once a month", 7: "Once a month"}
+    email_day_dict = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
+    cabin_class_dict = {'M': 'Economy', 'W': 'Premium Economy', 'C': 'Business', 'F': 'First Class'}
+    exclude_airlines_dict = {'true': 'Exclude Bad Airlines', 'false': 'Include All Airlines'}
+    ret_to_diff_airport_dict = {0: 'Don\'t Include', 1: 'Include'}
+    lead_time_dict = {1: 'One day', 7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
+                      60: 'Two months', 90: 'Three months', 0: 'Using Specific Date'}
+    search_length_dict = {7: 'One week', 14: 'Two weeks', 21: 'Three weeks', 30: 'One month',
+                          60: 'Two months', 90: 'Three months', 120: 'Four months', 150: 'Five months',
+                          180: 'Six months', 0: 'Using Specific Date'}
+    start_specific = None
+    end_specific = None
+    if prefs.specific_search_start_date:
+        start_specific = prefs.specific_search_start_date.strftime('%a, %B %-d, %Y')
+    if prefs.specific_search_end_date:
+        end_specific = prefs.specific_search_end_date.strftime('%a, %B %-d, %Y')
+
+    preferences_dictionary = {"email_freq": email_freq_dict, "email_day": email_day_dict,
+                              "cabin_class": cabin_class_dict, "exclude_airlines": exclude_airlines_dict,
+                              "ret_to_diff_airport": ret_to_diff_airport_dict,
+                              "lead_time_start": lead_time_dict, "search_length": search_length_dict,
+                              "start_specific": start_specific, "end_specific": end_specific}
+
+    return render_template("my_preferences.html", page_title=page_title, prefs=prefs, pref_dict=preferences_dictionary)
+
+
+@app.errorhandler(404)
+def not_found(error):
+    page_title = "Flight GPS not working?"
+    params = {"heading": "404 - Page Not Found",
+              "body1": "Oh no! Something's not right with the url. We couldn't find a page for you, sorry about that.",
+              "body2": "Click the button below to return to the main page.",
+              "body3": None,
+              "button_text": "Return to Main Page",
+              "url_for": "landing_page"}
+    return redirect(url_for('action_successful_redirect', params=params, page_title=page_title,
+                            action="page_not_found"))
+
+
+@app.route('/report_issue', methods=["GET", "POST"])
+def report_issue():
+    if not current_user.is_authenticated:
+        flash("You need to login before you can report an issue.")
+        return redirect(url_for('login'))
+    page_title = "Have A Concern?"
+    form = SubmitTicketForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(id=current_user.id).first()
+
+        # sends email to user as a copy of their reported issue
+        email_params1 = {"issue_subject": form.issue_subject.data,
+                         "issue_description": form.issue_description.data,
+                         "header_link": MAIN_URL}
+
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=user.name, user_email=user.email,
+                   subject="Details of Reported Issue", params=email_params1,
+                   template_id=6, api_key=api_key)
+
+        # send email to FlightClub to notify of a reported issue
+        email_params2 = {"issue_subject": form.issue_subject.data,
+                         "issue_description": form.issue_description.data,
+                         "email": user.email,
+                         "name": user.name,
+                         "header_link": MAIN_URL}
+
+        send_email(company_email=company_email, company_name=company_name,
+                   user_name=company_name, user_email=company_email,
+                   subject=f"Issue Reported by {user.name}", params=email_params2,
+                   template_id=7, api_key=api_key)
+
+        params = {"heading": "Your issue has been successfully reported",
+                  "body1": "An email has been sent to Flight Club about your concern. "
+                           "You have also been sent an email with the details of your report.",
+                  "body2": "Flight Club will try to respond to this issue in a timely manner. ",
+                  "body3": "Thank you for your patience.",
+                  "button_text": "Return to Home",
+                  "url_for": 'user_home'}
+        return redirect(url_for('action_successful_redirect', params=params, page_title="Report Submitted!",
+                                action="report_submitted"))
+    return render_template('report_issue.html', form=form, page_title=page_title)
+
+
+@app.route('/reset_your_password', methods=["GET", "POST"])
+def reset_your_password():
+    form = SendResetEmail()
+    page_title = "Reset Your Password"
+    if form.validate_on_submit():
+        timestamp = datetime.today()
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash(f"Sorry, there is no account for '{email}' in our database.")
+            return redirect(url_for('reset_your_password'))
+        reset_string = create_random_string()
+        user.reset_token = reset_string
+        user.reset_timestamp = timestamp
+        db.session.commit()
+
+        # send email to user with a link with string at end
+        email_params = {"reset_token": f"{MAIN_URL}itsokfriendweforgiveyou/{reset_string}",
+                        "notify": f"{MAIN_URL}report_issue", "header_link": MAIN_URL}
+
+        send_email(company_email=company_email, company_name=company_name, user_name=user.name, user_email=user.email,
+                   subject="Password Reset Request", params=email_params, template_id=4, api_key=api_key)
+
+        params = {"heading": "An email has been sent to help you reset your password.",
+                  "body1": "Please check your email and follow the instructions provided.",
+                  "body2": None,
+                  "body3": None,
+                  "button_text": None,
+                  "url_for": None}
+        return redirect(url_for('action_successful_redirect', params=params, page_title="Reset Email Sent!",
+                                action="reset_email_sent"))
+    return render_template("send_reset_email.html", page_title=page_title, form=form)
+
+
 @app.route('/secret')
 @admin_only
 def secret():
     # Placeholder location for now
     # Will add admin features according to the needs of the projects (once users become active and problems arise)
     return render_template('secret.html')
+
+
+# Takes flight search deal information, sends nicely formatted email to user
+def send_email(company_email, company_name, user_name, user_email, subject, params: dict, template_id, api_key):
+    # Configure request params and data
+    url = "https://api.sendinblue.com/v3/smtp/email"
+    payload = {
+        "sender": {
+            "email": company_email,
+            "name": company_name
+        },
+        "to": [{
+            "email": user_email,
+            "name": user_name
+        }],
+        "subject": subject,
+        "params": params,
+        "templateId": template_id
+    }
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": api_key
+    }
+    # Send email to user
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+    return response.text
 
 
 @app.route('/serious_report')
@@ -907,26 +805,135 @@ def serious_report():
     return redirect("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 
-@app.route('/logout')
+# Returns a string with a comma separated list of 1 to 77, (eliminates repeats for random travel quotes on user's home)
+# Value is stored in database for user, hence the use of a string rather than an array
+def travel_quote_string():
+    string = ""
+    for x in range(1, 78):
+        if x == 77:
+            string += str(x)
+        else:
+            string += f"{x},"
+    return string
+
+
+@app.route('/update_destinations', methods=['GET', 'POST'])
 @login_required
-def logout():
+def update_destinations():
+    page_title = "Update Destinations"
+    city_options = all_cities_international
+    # Grabs the current user object which contains their data
+    user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
+    # Form obj below doesn't populate fields contained within the FieldList/FormField.
+    # instead, need to manually add the data from the user object and pass it as a list of dictionaries
+    # to the SQL table variable that matches the name of the FieldList variable in the form (ex: 'destinations)
+    user_data_dict = user_des.__dict__
+    list_of_dicts = []
+    for x in range(1, 11):
+        if user_data_dict[f'city{x}'] is None:
+            pass
+        else:
+            dict_to_add = {"city": city_options[user_data_dict[f'city{x}']],
+                           "price_ceiling": user_data_dict[f'price{x}']}
+            list_of_dicts.append(dict_to_add)
+    user_des.destinations = list_of_dicts
+    if user_des.home_airport is None:
+        pass
+    else:
+        user_des.home_airport = city_options[user_data_dict["home_airport"]]
+    # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
+    form = DestinationForm(obj=user_des)
+
+    if form.validate_on_submit():
+
+        home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
+        destinations_update_dict = {"home_airport": home_airport, "currency": form.currency.data}
+        for x in range(1, 11):
+            destinations_update_dict[f"city{x}"] = None
+            destinations_update_dict[f"price{x}"] = None
+
+        destinations = form.destinations.entries
+
+        for x in range(0, len(destinations)):
+            dest_dict = destinations[x].data
+            destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
+                                                        if city_name == dest_dict['city']][0]
+            destinations_update_dict[f"price{x + 1}"] = dest_dict['price_ceiling']
+
+        Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
+
+        db.session.commit()
+
+        flash("Your destinations have been successfully updated.")
+        return redirect(url_for('my_destinations'))
+    return render_template("update_destinations.html", form=form, page_title=page_title, city_options=city_options)
+
+
+@app.route('/update_preferences', methods=['GET', 'POST'])
+@login_required
+def update_preferences():
+    page_title = "Update Preferences"
+    # Grabs the user's current preferences
+    prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
+    # Pass prefs as obj into form: populates the form with the current user's preferences
+    original_freq = prefs.email_frequency
+    print(f"\n\nOriginal: {original_freq}")
+    # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
+    if prefs.email_frequency == 3:
+        prefs.email_frequency = 2
+    if prefs.email_frequency in (5, 6, 7):
+        prefs.email_frequency = 4
+    form = PreferenceForm(obj=prefs)
+    if form.validate_on_submit():
+        updated_freq = form.email_frequency.data
+        # If user doesn't change email_freq pref (default input), need to change back to original user value
+        if original_freq == 3:
+            if updated_freq == "2":
+                updated_freq = original_freq
+        if original_freq in (5, 6, 7):
+            if updated_freq == "4":
+                updated_freq = original_freq
+
+        updated_preferences = {
+            "email_frequency": updated_freq, "email_day": form.email_day.data,
+            "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
+            "cabin_class": form.cabin_class.data, "exclude_airlines": form.exclude_airlines.data,
+            "max_stops": form.max_stops.data, "max_flight_time": form.max_flight_time.data,
+            "ret_to_diff_airport": form.ret_to_diff_airport.data,
+            "num_adults": form.num_adults.data, "num_children": form.num_children.data,
+            "num_infants": form.num_infants.data, "search_start_date": form.search_start_date.data,
+            "specific_search_start_date": form.specific_search_start_date.data,
+            "search_length": form.search_length.data, "specific_search_end_date": form.specific_search_end_date.data
+        }
+
+        Preferences.query.filter_by(user_pref_id=current_user.id).update(updated_preferences)
+
+        db.session.commit()
+
+        flash("Your preferences have been successfully updated.")
+
+        return redirect(url_for('my_preferences'))
+    return render_template("update_preferences.html", form=form, page_title=page_title)
+
+
+@app.route('/home')
+@login_required
+def user_home():
+    user_name = current_user.name
+    page_title = f"Welcome Aboard, {user_name}"
     user = User.query.filter_by(id=current_user.id).first()
-    user_dest_object = Destinations.query.filter_by(user_dest_id=user.destinations[0].user_dest_id).first()
-    if user_dest_object.city1 is None:
-        page_title = "Takeoff Delayed"
-        return render_template("no_destinations_logout.html", page_title=page_title)
+    quote_list = user.quote_string.split(",")
+    random_num = random.choice(quote_list)
+    quote_list.remove(random_num)
+    if len(quote_list) == 0:
+        new_quote_string = travel_quote_string()
+    else:
+        new_quote_string = ",".join(quote_list)
+    user.quote_string = new_quote_string
+    db.session.commit()
 
-    logout_user()
-    session.clear()
-    return render_template('logout.html')
-
-
-@app.route('/logout-anyway')
-@login_required
-def logout_anyway():
-    logout_user()
-    session.clear()
-    return render_template('logout.html')
+    quote = quote_dictionary[random_num]
+    return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
 
 login_manager.login_message = ''
