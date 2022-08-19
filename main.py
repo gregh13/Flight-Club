@@ -224,6 +224,8 @@ def admin_only(function):
 def authenticate_reset_password(user_recovery_string):
     form = ResetPassword()
     page_title = "Reset Your Password"
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         current_timestamp = datetime.today()
         email = form.email.data
@@ -295,6 +297,8 @@ def authenticate_reset_password(user_recovery_string):
 def change_email():
     page_title = "Change Your Email"
     form = ChangeEmailForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
         current_password = form.password.data
@@ -356,6 +360,8 @@ def change_email():
 def change_name():
     page_title = "Change Your Name"
     form = ChangeNameForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
         user.name = form.name.data
@@ -383,6 +389,8 @@ def change_name():
 def change_password():
     page_title = "Change Your Password"
     form = ChangePasswordForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
         current_password = form.password.data
@@ -487,6 +495,8 @@ def create_account(join_type):
         return redirect(url_for('user_home'))
     page_title = "Create an Account"
     form = RegisterForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         email = form.email.data
         # Check if email is already in use
@@ -582,6 +592,8 @@ def create_account(join_type):
 def delete_account():
     page_title = "Delete Your Account"
     form = DeleteAccountForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
@@ -652,11 +664,13 @@ def load_user(user_id):
 # Allows users to login to their account
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    # Check is user is already logged in
+    # Check if user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('user_home'))
     page_title = "Login"
     form = LoginForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
@@ -831,6 +845,8 @@ def report_issue():
 
     page_title = "Have A Concern?"
     form = SubmitTicketForm()
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
 
@@ -873,6 +889,8 @@ def report_issue():
 def reset_password():
     form = SendResetEmail()
     page_title = "Reset Your Password"
+
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         # Captures time of password reset request
         timestamp = datetime.today()
@@ -1021,6 +1039,7 @@ def update_destinations():
     # Pass in now updated SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
 
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
 
         # Changes name of home airport into airport code for db storage
@@ -1078,6 +1097,7 @@ def update_preferences():
     # Pass prefs as obj into form which helps populate the form with the current user's preferences
     form = PreferenceForm(obj=prefs)
 
+    # Checks if user has successfully submitted the form
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
         # If user didn't change their email_freq pref (pre-populated input), need to change back to original user value
@@ -1143,6 +1163,9 @@ def user_home():
     quote = quote_dictionary[random_num]
     return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
+# ------------------------------------------------------------------------------------------- #
+
+# Run app
 
 if __name__ == '__main__':
     app.run()
