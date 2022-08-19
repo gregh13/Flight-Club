@@ -987,51 +987,67 @@ def travel_quote_string():
     return string
 
 
+# Allows users to update their destinations and price ceiling. Preloads their previous info into form for easier changes
 @app.route('/update_destinations', methods=['GET', 'POST'])
 @login_required
 def update_destinations():
     page_title = "Update Destinations"
     city_options = all_cities_international
+
     # Grabs the current user object which contains their data
     user_des = Destinations.query.filter_by(user_dest_id=current_user.id).first()
-    # Form obj below doesn't populate fields contained within the FieldList/FormField.
-    # instead, need to manually add the data from the user object and pass it as a list of dictionaries
-    # to the SQL table variable that matches the name of the FieldList variable in the form (ex: 'destinations)
+
+    # Form obj below doesn't populate fields contained within the FieldList/FormField (see forms.py for reference).
+    # Instead, need to manually add the data from the user object and pass it as a list of dictionaries to
+    # the database table variable that matches the name of the FieldList variable in the form (e.g. 'destinations')
+    # This problem is caused by the use of a FieldList for the destinations (which allows dynamic number of submissions)
     user_data_dict = user_des.__dict__
     list_of_dicts = []
     for x in range(1, 11):
         if user_data_dict[f'city{x}'] is None:
+            # Skips blank cells since db stores 10 destinations
             pass
         else:
             dict_to_add = {"city": city_options[user_data_dict[f'city{x}']],
                            "price_ceiling": user_data_dict[f'price{x}']}
             list_of_dicts.append(dict_to_add)
+    # Now that user data from db has been retrieve and reformatted, can save it to .destinations for the user object
     user_des.destinations = list_of_dicts
     if user_des.home_airport is None:
         pass
     else:
         user_des.home_airport = city_options[user_data_dict["home_airport"]]
-    # Pass in SQLAlchemy Query object to help pre-populate the form with the user's current data
+
+    # Pass in now updated SQLAlchemy Query object to help pre-populate the form with the user's current data
     form = DestinationForm(obj=user_des)
 
     if form.validate_on_submit():
 
+        # Changes name of home airport into airport code for db storage
         home_airport = [iata_code for iata_code, home in city_options.items() if home == form.home_airport.data][0]
+
+        # Initialize dictionary for user's updates
         destinations_update_dict = {"home_airport": home_airport, "currency": form.currency.data}
         for x in range(1, 11):
             destinations_update_dict[f"city{x}"] = None
             destinations_update_dict[f"price{x}"] = None
 
+        # Get list of destinations user submitted
         destinations = form.destinations.entries
 
+        # Go through submitted destinations and add info to the update dictionary
         for x in range(0, len(destinations)):
             dest_dict = destinations[x].data
+
+            # Changes name of city into airport code for db storage and adds to update dictionary
             destinations_update_dict[f"city{x + 1}"] = [iata_code for iata_code, city_name in city_options.items()
                                                         if city_name == dest_dict['city']][0]
+
+            # Adds destination price ceiling to update dictionary
             destinations_update_dict[f"price{x + 1}"] = dest_dict['price_ceiling']
 
+        # Batch updates all of the user's submitted destinations to db
         Destinations.query.filter_by(user_dest_id=current_user.id).update(destinations_update_dict)
-
         db.session.commit()
 
         flash("Your destinations have been successfully updated.")
