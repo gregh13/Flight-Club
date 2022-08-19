@@ -1059,20 +1059,28 @@ def update_destinations():
 @login_required
 def update_preferences():
     page_title = "Update Preferences"
+
     # Grabs the user's current preferences
     prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
-    # Pass prefs as obj into form: populates the form with the current user's preferences
+
+    # Saves user's current email frequency value in db
     original_freq = prefs.email_frequency
-    print(f"\n\nOriginal: {original_freq}")
-    # helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
+
+    # Helps solve gap in user choices and back-end functionality method (flight_search.py changes their db value)
+    # 1 = every week, 2 and 3 are for biweekly, and 4, 5, 6, 7 are for monthly.
+
+    # key values for displaying user choice is coded to just 1, 2, and 4, so off-weeks (3 & 5,6,7) need to be changed
     if prefs.email_frequency == 3:
         prefs.email_frequency = 2
     if prefs.email_frequency in (5, 6, 7):
         prefs.email_frequency = 4
+
+    # Pass prefs as obj into form which helps populate the form with the current user's preferences
     form = PreferenceForm(obj=prefs)
+
     if form.validate_on_submit():
         updated_freq = form.email_frequency.data
-        # If user doesn't change email_freq pref (default input), need to change back to original user value
+        # If user didn't change their email_freq pref (pre-populated input), need to change back to original user value
         if original_freq == 3:
             if updated_freq == "2":
                 updated_freq = original_freq
@@ -1080,6 +1088,7 @@ def update_preferences():
             if updated_freq == "4":
                 updated_freq = original_freq
 
+        # Create preference update dictionary
         updated_preferences = {
             "email_frequency": updated_freq, "email_day": form.email_day.data,
             "min_nights": form.min_nights.data, "max_nights": form.max_nights.data,
@@ -1092,8 +1101,8 @@ def update_preferences():
             "search_length": form.search_length.data, "specific_search_end_date": form.specific_search_end_date.data
         }
 
+        # Batch updates all of the user's submitted preferences to db
         Preferences.query.filter_by(user_pref_id=current_user.id).update(updated_preferences)
-
         db.session.commit()
 
         flash("Your preferences have been successfully updated.")
@@ -1102,22 +1111,35 @@ def update_preferences():
     return render_template("update_preferences.html", form=form, page_title=page_title)
 
 
+# Shows the user their homepage (or dashboard), and displays a random travel quote each time the page loads
 @app.route('/home')
 @login_required
 def user_home():
     user_name = current_user.name
     page_title = f"Welcome Aboard, {user_name}"
+
+    # Grab user's current quote list to ensure no repeats occur for the quotes
     user = User.query.filter_by(id=current_user.id).first()
+
+    # Change from db string to list for better randomization handling
     quote_list = user.quote_string.split(",")
     random_num = random.choice(quote_list)
+
+    # Delete quote number key after it's been used
     quote_list.remove(random_num)
+
+    # Once all the quotes have been shown, start over with a full list of all possible 77
     if len(quote_list) == 0:
         new_quote_string = travel_quote_string()
     else:
+        # User quote list hasn't finished yet, so turn list back into a string for db storage
         new_quote_string = ",".join(quote_list)
+
+    # Save quote list to db for user
     user.quote_string = new_quote_string
     db.session.commit()
 
+    # Get actual quote by passing in the random number generated above
     quote = quote_dictionary[random_num]
     return render_template("user_home.html", page_title=page_title, travel_quote=quote)
 
