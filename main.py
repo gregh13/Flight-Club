@@ -483,15 +483,18 @@ def confirm_account(confirm_string):
 @app.route('/create_account/<join_type>', methods=['GET', 'POST'])
 def create_account(join_type):
     if current_user.is_authenticated:
+        # Send users to their homepage if logged in
         return redirect(url_for('user_home'))
     page_title = "Create an Account"
     form = RegisterForm()
     if form.validate_on_submit():
         email = form.email.data
+        # Check if email is already in use
         if User.query.filter_by(email=email).first():
             flash(f"An account for '{email}' already exists. Please sign in.")
             return redirect(url_for('login'))
         password = form.password.data
+        # Salt and hash user's password
         salted_hashbrowns = generate_password_hash(
             password=password,
             method='pbkdf2:sha256',
@@ -499,12 +502,16 @@ def create_account(join_type):
         )
         all_users = User.query.all()
         confirmation_string = get_random_string()
-        # check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
+
+        # Check existing tokens, makes sure no one has the same token (even though the odds are insanely small)
         all_confirmations_tokens = [user.confirmation_token for user in all_users]
         while confirmation_string in all_confirmations_tokens:
             confirmation_string = get_random_string()
 
+        # Quote string helps prevent repeats in random quote that appears on user's homepage
         starting_string = travel_quote_string()
+
+        # Add new user to db
         user = User(name=form.name.data,
                     email=email,
                     password=salted_hashbrowns,
@@ -516,6 +523,7 @@ def create_account(join_type):
         db.session.add(user)
         db.session.commit()
 
+        # Send confirmation email to user
         params = {"confirmation_token": f"{MAIN_URL}confirm_account/{confirmation_string}",
                   "name": user.name,
                   "header_link": MAIN_URL}
@@ -524,6 +532,7 @@ def create_account(join_type):
                    subject="Account Confirmation", params=params,
                    template_id=5, api_key=api_key)
 
+        # Initialize user's preferences to default values and save to db
         preferences = Preferences(
             user_pref=user,
             email_frequency=1,
@@ -543,6 +552,7 @@ def create_account(join_type):
         db.session.add(preferences)
         db.session.commit()
 
+        # Initialize user's destination and flightdeal tables, currently empty
         destinations = Destinations(user_dest=user)
         db.session.add(destinations)
         db.session.commit()
@@ -551,6 +561,7 @@ def create_account(join_type):
         db.session.add(flight_deals)
         db.session.commit()
 
+        # Set params for the action_success page shown to user next
         params = {"heading": "Please check your email to confirm your account",
                   "body1": "If you don't see an email from us in your inbox, check your spam folder.",
                   "body2": "If it did end up in the spam folder, make sure to mark it as 'Not Spam' "
@@ -565,6 +576,7 @@ def create_account(join_type):
     return render_template('register.html', form=form, page_title=page_title)
 
 
+# Allows user to permanently delete their account in db
 @app.route('/delete_account', methods=["GET", "POST"])
 @login_required
 def delete_account():
@@ -577,10 +589,26 @@ def delete_account():
         if user.email != email:
             flash("Sorry, the email address you entered is not this account's email address.")
             return redirect(url_for('delete_account'))
+
+        # Checks if user entered password matches password in db
         if check_password_hash(user.password, password):
+
+            # Get user info from other tables
+            prefs = Preferences.query.filter_by(user_pref_id=current_user.id).first()
+            dest = Destinations.query.filter_by(user_dest_id=current_user.id).first()
+            deals = FlightDeals.query.filter_by(user_deals_id=current_user.id).first()
+
+            # Delete user's account and all information
+            db.session.delete(prefs)
+            db.session.delete(dest)
+            db.session.delete(deals)
             db.session.delete(user)
             db.session.commit()
+
+            # Logout user
             logout_user()
+
+            # Set params for the action_success page shown to user next
             params = {"heading": "Your account and information have been permanently deleted",
                       "body1": "We're sad to see you leave, but we understand how these things go. "
                                "You can always make a new account with us if you change your mind",
@@ -609,18 +637,22 @@ def get_random_string():
     return random_string
 
 
+# Main page of website
 @app.route('/')
 def landing_page():
     return render_template("index.html", page_title="")
 
 
+# Assists in logging in users
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
 
+# Allows users to login to their account
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    # Check is user is already logged in
     if current_user.is_authenticated:
         return redirect(url_for('user_home'))
     page_title = "Login"
@@ -632,6 +664,8 @@ def login():
         if user is None:
             flash(f"Sorry, there is no account for '{email}' in our database.")
             return redirect(url_for('login'))
+
+        # Checks if user has confirmed their account
         if not user.confirmed:
             params = {"heading": "Please check your email to confirm your account",
                       "body1": "If you don't see an email from us in your inbox, check your spam folder.",
@@ -643,29 +677,36 @@ def login():
             session['params'] = params
             session['page_title'] = "Almost there..."
             return redirect(url_for('action_success', action="confirmation_email_sent"))
+
+        # Checks if user entered password matches password in db
         if check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('user_home'))
 
+        # Passwords don't match
         flash("Sorry, the password is incorrect. Please try again.")
         return redirect(url_for('login'))
     return render_template("login.html", form=form, page_title=page_title)
 
 
+# Logs out the user
 @app.route('/logout')
 @login_required
 def logout():
     user = User.query.filter_by(id=current_user.id).first()
+
+    # Checks to see if they have any destinations saved, reminds them to go update destinations if empty (e.g. new user)
     user_dest_object = Destinations.query.filter_by(user_dest_id=user.destinations[0].user_dest_id).first()
     if user_dest_object.city1 is None:
         page_title = "Takeoff Delayed"
         return render_template("no_destinations_logout.html", page_title=page_title)
 
+    # User has updated destinations, so logout user and clear session
     logout_user()
     session.clear()
     return render_template('logout.html')
 
-
+# Allows users who have not added any destinations still logout of their account
 @app.route('/logout-anyway')
 @login_required
 def logout_anyway():
@@ -674,11 +715,13 @@ def logout_anyway():
     return render_template('logout.html')
 
 
+# Displays a page where users can change their email, name, & password or delete their account
 @app.route('/my_account')
 @login_required
 def my_account():
     page_title = "My Account"
     return render_template("my_account.html", page_title=page_title)
+
 
 
 @app.route('/my_deals')
