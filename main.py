@@ -196,10 +196,9 @@ db.create_all()
 # ------------------------------------------------------------------------------------------- #
 # Functions and Routes
 
-# Gives feedback to user after completing some action/step
+# Gives feedback to user after completing some action/step ('action' variable only used for end of url formatting)
 @app.route('/<action>')
 def action_success(action):
-    # Action variable is only used to give better feedback to user via the url link ending
     # Get page details from session variables
     params = session.get('params', None)
     page_title = session.get('page_title', None)
