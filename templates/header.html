@@ -42,7 +42,7 @@
                 <ul class="navbar-nav ml-auto">
                     {% if not current_user.is_authenticated: %}
                     <li class="nav-item active">
-                        <a id="signUp" class="nav-link logged-out" href="{{ url_for('create_an_account', join_type='normal') }}">Join</a>
+                        <a id="signUp" class="nav-link logged-out" href="{{ url_for('create_account', join_type='normal') }}">Join</a>
                     </li>
                     <li class="nav-item active logged-out">
                         <a class="nav-link btn btn-sm btn-custom" href="{{ url_for('login') }}">Login</a>
