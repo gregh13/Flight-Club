@@ -1,5 +1,5 @@
 # Flight Club
-#### Video Demo:  ////url-here///
+#### Video Demo:  https://youtu.be/B1WGwaM6QEk
 #### Description:
 TDLR; A Heroku hosted website that lets users create an account to choose destinations, 
 price ceilings, and specific travel preferences. Flight Club then uses these to 
