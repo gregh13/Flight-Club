@@ -9,7 +9,7 @@ search (via Tequila Kiwi API) for weekly flight deals that meet the user's crite
 
 Full Description:
 
-Flight Club is essentially a flight deal finder. Users create an account, save their travel preferences, desired destinations, and the highest amount they would consider a 'deal' (price ceiling) for a flight to that destination, and Flight CLub takes care of the rest.
+Flight Club is essentially a flight deal finder. Users create an account, save their travel preferences, desired destinations, and the highest amount they would consider a 'deal' (price ceiling) for a flight to that destination, and Flight Club takes care of the rest.
 An extensive list (1400+) of possible airports around the world is available via autocomplete for the user to type and select in the destinations input fields. This simultaneously provides a better experience for the user, while also controlling user input to ensure that the destination is a valid and recognizable airport. 
 Users can dynamically add or delete destinations if they so choose (however there is minimum of 3 and maximum of 10 destinations). The user's current data is prepopulated into the form when editing their preferences/destinations/price ceilings for a better UX.
 
